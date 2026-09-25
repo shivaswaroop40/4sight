@@ -2,15 +2,15 @@
 
 ## Branches
 
-```text
-main               deployable at all times. Every push deploys to GitHub Pages.
-develop            integration branch. Feature branches merge here.
-feature/core-engine   core, renderer, ui, app shell
-feature/iphone        iPhone experience, interaction
-feature/cosmos        galaxy, universe, filters
+This is a one-hour hackathon. Everyone pushes to `main`. Folder ownership, not branching, prevents conflicts.
+
+```bash
+git pull --rebase && npm run build && git push
 ```
 
-Merge to `develop` early and often. Merge `develop` to `main` at milestones only (end of Phase 1, end of Phase 3, end of Phase 4, final). A broken `main` means a broken demo URL.
+Run that before every push. If `main` goes red, Core reverts the commit immediately and the author fixes it locally.
+
+The branches `develop`, `feature/core-engine`, `feature/iphone`, and `feature/cosmos` exist on the remote from the original 24-hour plan. Ignore them unless the hackathon length changes.
 
 ## Ownership
 
@@ -28,13 +28,13 @@ The registry file is the only shared write point. Each lane adds exactly one lin
 
 ## Staying unblocked
 
-- The core lane ships the mock experience and the contract first. Both experience lanes build against the mock's `SceneContext` and a `TimeController` stub that just calls `setTime` from a slider.
-- Each experience folder has its own `dev.tsx` harness that mounts only that experience with a bare slider. You never need the full app to work on your lane.
-- Rebase your feature branch on `develop` at least every two hours. Small merges resolve in seconds. A twelve-hour merge costs the demo.
+- The core lane ships the mock experience and the contract in the first ten minutes. Both experience lanes write their JSON data during that window, then build against the mock's `SceneContext`.
+- Each lane registers its experience with one line in `src/experiences/index.ts` and can see it in the real app immediately. No separate harness.
+- Pull before every push. Ten minutes without pulling is too long.
 
 ## Commits
 
-Small commits, present tense, one change each. Nothing else matters at a hackathon.
+Small commits, present tense, one change each. Push every time something works.
 
 ## Local commands
 

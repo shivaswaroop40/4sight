@@ -14,7 +14,7 @@ Live site (after the first deploy): https://shivaswaroop40.github.io/4sight/
 
 ## Status
 
-Planning complete. No application code yet. Start with [docs/PLAN.md](docs/PLAN.md).
+Planning complete for a 60-minute hackathon. No application code yet. Start with [docs/PLAN.md](docs/PLAN.md).
 
 ## Documents
 
@@ -30,8 +30,10 @@ React, TypeScript, Vite, Three.js. Fully client-side. Deployed to GitHub Pages b
 
 Three developers, three lanes, one contract.
 
-| Lane | Owns | Branch |
+| Lane | Owns | Who |
 | --- | --- | --- |
-| Core engine and renderer | `src/core/`, `src/renderer/`, `src/ui/` | `feature/core-engine` |
-| iPhone and interaction | `src/experiences/iphone/`, `src/interaction/` | `feature/iphone` |
-| Galaxy, universe, filters | `src/experiences/galaxy/`, `src/experiences/universe/`, `src/filters/` | `feature/cosmos` |
+| Core engine, renderer, UI | `src/core/`, `src/renderer/`, `src/ui/`, `src/app/` | the repo owner |
+| iPhone and interaction | `src/experiences/iphone/`, `src/interaction/` | whoever is left |
+| Galaxy and universe | `src/experiences/galaxy/`, `src/experiences/universe/`, `src/experiences/shared/` | whoever knows Three.js |
+
+Everyone pushes to `main`. See [docs/WORKFLOW.md](docs/WORKFLOW.md).
