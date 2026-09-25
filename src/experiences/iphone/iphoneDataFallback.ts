@@ -1,4 +1,7 @@
-{
+// Generated from public/data/iphone.json. Keep the two identical.
+import type { IPhoneData } from "./iphoneData";
+
+export const IPHONE_DATA_FALLBACK: IPhoneData = {
   "components": [
     {
       "id": "frame",
@@ -466,4 +469,4 @@
       ]
     }
   ]
-}
+};
