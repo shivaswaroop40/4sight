@@ -25,7 +25,21 @@ const MAPPING_TICKS = [
   { u: 1, label: "Assembled" },
 ];
 
-const CAMERA_PRESETS: CameraPreset[] = [{ id: "front", name: "Front", position: [0, 3, 14], target: [0, 0, 0] }];
+const CAMERA_PRESETS: CameraPreset[] = [{ id: "front", name: "Front", position: [0, 0.9, 6.6], target: [0, 0, 0] }];
+
+// Per-component material tuning (metalness/roughness) keyed by component id.
+// Colours themselves live in the JSON/fallback data; this only controls how
+// each material reacts to light so materials that would otherwise look like
+// flat plastic instead read as aluminium, glass, PCB, etc.
+const MATERIAL_PARAMS: Record<string, { metalness: number; roughness: number }> = {
+  frame: { metalness: 0.7, roughness: 0.35 },
+  battery: { metalness: 0.25, roughness: 0.6 },
+  "logic-board": { metalness: 0.2, roughness: 0.5 },
+  "main-camera": { metalness: 0.5, roughness: 0.3 },
+  speaker: { metalness: 0.4, roughness: 0.5 },
+  display: { metalness: 0.35, roughness: 0.2 },
+};
+const DEFAULT_MATERIAL_PARAMS = { metalness: 0.3, roughness: 0.5 };
 
 class IPhoneExperienceImpl implements FourDExperience {
   id = "iphone" as const;
@@ -55,10 +69,11 @@ class IPhoneExperienceImpl implements FourDExperience {
       const [w, h, d] = component.assembled.size;
       const radius = Math.min(w, h, d) * 0.3;
       const geometry = new RoundedBoxGeometry(w, h, d, 3, radius);
+      const params = MATERIAL_PARAMS[component.id] ?? DEFAULT_MATERIAL_PARAMS;
       const material = new THREE.MeshStandardMaterial({
         color: new THREE.Color(component.assembled.color),
-        metalness: 0.3,
-        roughness: 0.5,
+        metalness: params.metalness,
+        roughness: params.roughness,
       });
       const mesh = new THREE.Mesh(geometry, material);
       mesh.userData.id = component.id;
@@ -68,12 +83,17 @@ class IPhoneExperienceImpl implements FourDExperience {
       context.registerHoverable(mesh, component.id);
     }
 
-    const directional = new THREE.DirectionalLight(0xffffff, 2);
-    directional.position.set(5, 8, 6);
+    const directional = new THREE.DirectionalLight(0xffffff, 2.5);
+    directional.position.set(4, 6, 6);
     context.scene.add(directional);
     this.lights.push(directional);
 
-    const hemisphere = new THREE.HemisphereLight(0x8899bb, 0x202020, 0.8);
+    const fill = new THREE.DirectionalLight(0xffffff, 0.8);
+    fill.position.set(-5, 2, -4);
+    context.scene.add(fill);
+    this.lights.push(fill);
+
+    const hemisphere = new THREE.HemisphereLight(0x9fb4d8, 0x2a2a30, 1.2);
     context.scene.add(hemisphere);
     this.lights.push(hemisphere);
 
