@@ -16,7 +16,7 @@ npm install
 Substitute your values:
 - Shiv: `../4sight-core` and `feature/core-engine`
 - Arjun: `../4sight-iphone` and `feature/iphone`
-- Junaid: `../4sight-cosmos` and `feature/cosmos`
+- Junaid: `../4sight-cosmos` and `feature/cosmos` (Solar System lane)
 
 When you open Claude Code in your worktree folder, `npm run dev` and `npm run build` will work against your feature branch without touching `main`.
 
@@ -82,32 +82,24 @@ Paste the JSON into `public/data/iphone.json` in your main clone (not the worktr
 
 ## The job: Junaid, 0:05 to 0:10 (in parallel)
 
-While Shiv scaffolds, write your two data files. You don't need code yet, just JSON.
-
-Open Claude Code in `~/Desktop/code/4sight` (the main clone). Create two files: `public/data/universe.json` and `public/data/galaxy.json`. Copy the prompt below.
+While Shiv scaffolds, write your data file. No code yet.
 
 ```
-I'm the Cosmos lane in a 60-minute hackathon. Read docs/PLAN.md, the
-Cosmos subsection under "Phase 2. Parallel lanes" (the P0 bullet lists
-for both galaxy and universe).
+I'm the Cosmos lane in a 60-minute hackathon. My experience is Solar
+System formation: a molecular cloud collapses into today's Sun and eight
+planets. Read docs/PLAN.md, the "Cosmos (Junaid)" section and the
+"Solar System timeline reference".
 
-Create two JSON files:
+Create public/data/solar-system.json with:
+- events: each with id, time (years since collapse), title, when
+  (string), description, keyPoints (array). Use the reference table.
+- planets: the eight planets, each with id, name, description,
+  orbitAU, radius (display units), color, formation {start, end} in
+  years, and properties (a few facts).
+- sun: id, name, description, properties.
 
-1. public/data/universe.json
-Fifteen timeline events from the Big Bang to Today. Each event:
-  id, time (years), title, when (string), description, keyPoints (array)
-Use the reference table in docs/PLAN.md (Cosmic timeline reference).
-
-2. public/data/galaxy.json
-Six events: gas cloud, gravitational collapse, star formation, structure
-emerges, spiral arms, mature galaxy. Each event:
-  id, time (years from 0 to 1e9), title, description, keyPoints
-
-Don't write code. Just the two JSON data files. Output both as final
-artifacts, or one artifact with both files if the tool allows.
+Don't write code. Just the JSON file.
 ```
-
-Paste both JSONs into `public/data/universe.json` and `public/data/galaxy.json` in your main clone. Don't commit yet.
 
 ## Sync: 0:10 to 0:15
 
@@ -189,72 +181,38 @@ gh pr merge --squash --delete-branch=false
 
 ## The job: Junaid, 0:15 to 0:40
 
-Open Claude Code in `~/Desktop/code/4sight-cosmos`. Copy the prompt below.
+Open Claude Code in `~/Desktop/code/4sight-cosmos`, rebased on `main`. Copy the prompt below.
 
 ```
-I'm the Cosmos lane in a 60-minute hackathon. My team has scaffolded
-React + TypeScript + Vite + Three.js. I have JSON event data.
+I'm the Cosmos lane in a 60-minute hackathon. The team has scaffolded
+React + TypeScript + Vite + Three.js on main. My experience is Solar
+System formation, from a molecular cloud to today's solar system.
 
-Read docs/CONTRACT.md (the FourDExperience interface and types).
-Read docs/PLAN.md, the Cosmos section under "Phase 2. Parallel lanes",
-the P0 bullet lists for both galaxy and universe.
+Read docs/CONTRACT.md, then docs/PLAN.md: the "Cosmos (Junaid)" section
+and the "Solar System timeline reference". Read src/core/ and
+src/experiences/index.ts to see the real helper names.
 
-Both experiences use one shared particle system. Build:
+Build src/experiences/solar-system/ exactly as the Cosmos section lists:
+SolarSystemState.ts (pure functions of t), a particle disk in a
+ShaderMaterial, the Sun, eight planets on orbits, fading orbit rings,
+piecewiseLogMapping on the knots in the plan, events and planet data
+loaded with assetUrl("data/solar-system.json"). Register it with one
+import and one array entry in src/experiences/index.ts as
+solarSystemExperience, id "solarSystem".
 
-1. src/experiences/shared/ParticleField.ts
-   - THREE.Points with ShaderMaterial
-   - Attributes: aStart (vec3), aEnd (vec3), aBirth (float), aHue (float)
-   - Uniforms: uT, uSpin, uScale, uRampA, uRampB (all vectors or floats)
-   - Vertex shader:
-     * p = mix(aStart, aEnd, smoothstep(0.0, 1.0, uT))
-     * Rotate about y: angle = uSpin * uT / (1.0 + length(p.xz))
-     * gl_PointSize from distance
-     * Alpha: smoothstep(aBirth, aBirth + 0.1, uT)
-   - Fragment shader:
-     * Soft disc sprite (like a star)
-     * Color: mix(uRampA, uRampB, aHue)
-     * Additive blending
+setTime(t) must be pure: same t, same scene, in both directions.
+Only touch src/experiences/solar-system/, public/data/solar-system.json,
+and the one registry line.
 
-2. src/experiences/galaxy/GalaxyExperience.ts
-   - Implements FourDExperience
-   - 40k particles: aStart random sphere, aEnd on log spiral with scatter
-   - linearMapping from 0 to 1e9 years
-   - baseDurationSeconds: 20
-   - uSpin nonzero
-   - In mount(): create ParticleField, add to scene
-   - In setTime(t): update uniforms from mapping
-   - Events: load from public/data/galaxy.json
-   - Hoverables: two invisible proxy spheres with metadata
-
-3. src/experiences/universe/UniverseExperience.ts
-   - Implements FourDExperience
-   - 40k particles: aStart tiny sphere, aEnd in 3-4 gaussian blobs
-   - piecewiseLogMapping (knots in PLAN.md Cosmic timeline reference)
-   - baseDurationSeconds: 40
-   - Color ramp: white to orange to blue-white
-   - In mount(): create ParticleField
-   - In setTime(t): update uScale from scale factor (three regimes: radiation,
-     matter, dark energy), update other uniforms
-   - Events: load from public/data/universe.json
-   - Hoverables: two invisible proxy spheres
-
-4. Update src/experiences/index.ts
-   - Import and register both experiences
-
-That's it. No filters, no bloom, no instanced galaxies, no separate
-shaders.
-
-Don't ask. Build it. When done, commit and open a PR.
+Don't ask. Build it. Run npm run build, then commit and open a PR.
 ```
 
-Exit checks from PLAN.md: galaxy opens as cloud and becomes spiral, universe has all 15 events, both play/reverse/warp.
-
-Commit and open a PR:
+Exit checks: opens as a cloud, collapses to a disk, the Sun ignites, eight planets form and orbit, scrubbing back reverses it, events update the panel, hovering a planet shows its facts.
 
 ```bash
 npm run build
 git add -A
-git commit -m "Add galaxy and universe experiences"
+git commit -m "Add solar system formation experience"
 git push
 gh pr create --base main --fill
 gh pr merge --squash --delete-branch=false
@@ -265,8 +223,7 @@ gh pr merge --squash --delete-branch=false
 Rebase everyone on `main`. Walk the definition of done:
 
 - iPhone: disassembled, hover tooltip, scrub assembles/disassembles, play/pause/reverse/warp work.
-- Galaxy: cloud → spiral, play/reverse/warp work, events update panel.
-- Big Bang: Big Bang → Today on log slider, 15 events, play/reverse/warp work.
+- Solar System: cloud to disk to Sun and eight planets on the log slider, events update the panel, play/reverse/warp work.
 - No memory leaks or console errors when switching.
 
 Fix only what blocks the demo.

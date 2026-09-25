@@ -43,10 +43,10 @@ The only workflow in `.github/workflows/` is `deploy.yml`. It publishes `main` t
 | `src/core/types.ts` | everyone in the first ten minutes, frozen after | propose changes in chat |
 | `src/core/`, `src/renderer/`, `src/ui/`, `src/app/` | Shiv | message first |
 | `src/experiences/iphone/`, `src/interaction/` | Arjun | read |
-| `src/experiences/galaxy/`, `src/experiences/universe/`, `src/experiences/shared/` | Junaid | read |
+| `src/experiences/solar-system/` | Junaid | read |
 | `src/experiences/index.ts` (the registry) | Shiv | add one import line for your experience |
 | `public/data/iphone.json` | Arjun | read |
-| `public/data/galaxy.json`, `public/data/universe.json` | Junaid | read |
+| `public/data/solar-system.json` | Junaid | read |
 | `vite.config.ts`, `.github/workflows/` | Shiv | read |
 
 The registry file is the only shared write point. Each lane adds exactly one line to it during Phase 3. Everything else an experience needs lives inside its own folder.

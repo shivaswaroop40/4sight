@@ -10,9 +10,9 @@ The rule that makes everything else work:
 
 Two clocks exist and the contract names both.
 
-**Experience time** is what the user reads. Seconds of assembly for the iPhone, years for the galaxy and the universe. Each experience declares `minTime` and `maxTime` in its own units.
+**Experience time** is what the user reads. Seconds of assembly for the iPhone, years for the solar system. Each experience declares `minTime` and `maxTime` in its own units.
 
-**Timeline parameter** `u` is a number in `[0, 1]`. The slider, the playback loop, and the time warp all live here. Each experience supplies a `TimeMapping` that converts between `u` and experience time. The iPhone and galaxy use a linear mapping. The universe uses a piecewise logarithmic mapping so that the first second and the last billion years each get readable slider width.
+**Timeline parameter** `u` is a number in `[0, 1]`. The slider, the playback loop, and the time warp all live here. Each experience supplies a `TimeMapping` that converts between `u` and experience time. The iPhone uses a linear mapping. The solar system uses a piecewise logarithmic mapping so that the first hundred thousand years and the last four billion years each get readable slider width.
 
 Playback advances `u`, not experience time:
 
@@ -20,14 +20,14 @@ Playback advances `u`, not experience time:
 du/dt_real = direction * playbackSpeed / baseDurationSeconds
 ```
 
-`baseDurationSeconds` is the real time one full pass takes at 1x. This keeps the TimeController ignorant of what it drives, keeps the universe playing at a perceptually even pace across 50 orders of magnitude, and makes 10,000x safe (the loop clamps `u` to `[0, 1]` and pauses at the boundary). The HUD shows the effective rate in experience units at the current position, for example "1x = 230 million years per second here", by reading the mapping's derivative.
+`baseDurationSeconds` is the real time one full pass takes at 1x. This keeps the TimeController ignorant of what it drives, keeps the solar system playing at a perceptually even pace across many orders of magnitude, and makes 10,000x safe (the loop clamps `u` to `[0, 1]` and pauses at the boundary). The HUD shows the effective rate in experience units at the current position, for example "1x = 230 million years per second here", by reading the mapping's derivative.
 
 ## Types
 
 ```ts
 // src/core/types.ts
 
-export type ExperienceId = "iphone" | "galaxy" | "universe" | "mock";
+export type ExperienceId = "iphone" | "solarSystem" | "galaxy" | "universe" | "mock";
 
 /** Normalized slider and playback parameter in [0, 1]. */
 export type TimeParam = number;
@@ -85,7 +85,7 @@ export interface TimelineEvent {
   /** Experience time at which this event starts. Events are sorted by time. */
   time: number;
   title: string;
-  /** Short phrase shown under the title, e.g. "~200 million years after the Big Bang". */
+  /** Short phrase shown under the title, e.g. "~3 million years after collapse". */
   when: string;
   description: string;
   keyPoints: string[];
@@ -143,7 +143,7 @@ export interface FourDExperience {
   minTime: number;
   maxTime: number;
   mapping: TimeMapping;
-  /** Real seconds for one full pass at 1x. iPhone 10, galaxy 30, universe 60. */
+  /** Real seconds for one full pass at 1x. iPhone 10, solar system 40. */
   baseDurationSeconds: number;
   /** Time warp values offered in the UI for this experience. */
   warpPresets: number[];
