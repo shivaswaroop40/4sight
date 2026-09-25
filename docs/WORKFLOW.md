@@ -1,40 +1,65 @@
 # Workflow
 
-## Branches
+## Branches, worktrees, and PRs
 
-This is a one-hour hackathon. Everyone pushes to `main`. Folder ownership, not branching, prevents conflicts.
+Everything reaches `main` through a pull request. No CI checks, no required reviewers. You open the PR, you confirm `npm run build` passed locally, you merge it yourself. The PR is for visibility and a clean revert point, not for gating.
+
+Each developer works in a git worktree on their own branch so `main` stays checked out and clean for pulling.
+
+| Who | Branch | Worktree |
+| --- | --- | --- |
+| Shiv | `feature/core-engine` | `../4sight-core` |
+| Arjun | `feature/iphone` | `../4sight-iphone` |
+| Junaid | `feature/cosmos` | `../4sight-cosmos` |
+
+Set up once, from inside the clone:
 
 ```bash
-git pull --rebase && npm run build && git push
+git fetch origin
+git worktree add ../4sight-iphone feature/iphone   # use your own branch and path
+cd ../4sight-iphone && npm install
 ```
 
-Run that before every push. If `main` goes red, Core reverts the commit immediately and the author fixes it locally.
+Ship a change:
 
-The branches `develop`, `feature/core-engine`, `feature/iphone`, and `feature/cosmos` exist on the remote from the original 24-hour plan. Ignore them unless the hackathon length changes.
+```bash
+git fetch origin && git rebase origin/main
+npm run build
+git push -u origin feature/iphone
+gh pr create --base main --fill
+gh pr merge --squash --delete-branch=false
+```
+
+Merge your own PR the moment the build is green locally. Then everyone else rebases. Small PRs, many of them. A PR that sits for ten minutes is stale.
+
+The `develop` branch exists from the 24-hour plan. Ignore it.
+
+The only workflow in `.github/workflows/` is `deploy.yml`. It publishes `main` to GitHub Pages. It is a deploy step, not a check. Nothing blocks a merge.
 
 ## Ownership
 
 | Path | Owner | Others may |
 | --- | --- | --- |
-| `src/core/types.ts` | everyone in Phase 1, frozen after | propose changes in chat |
-| `src/core/`, `src/renderer/`, `src/ui/`, `src/app/` | core lane | open a PR with a one-line reason |
-| `src/experiences/iphone/`, `src/interaction/` | iPhone lane | read |
-| `src/experiences/galaxy/`, `src/experiences/universe/`, `src/filters/` | cosmos lane | read |
-| `src/experiences/index.ts` (the registry) | core lane | add one import line for your experience |
-| `public/data/<experience>.json` | the experience's lane | read |
-| `vite.config.ts`, `.github/workflows/` | core lane | read |
+| `src/core/types.ts` | everyone in the first ten minutes, frozen after | propose changes in chat |
+| `src/core/`, `src/renderer/`, `src/ui/`, `src/app/` | Shiv | message first |
+| `src/experiences/iphone/`, `src/interaction/` | Arjun | read |
+| `src/experiences/galaxy/`, `src/experiences/universe/`, `src/experiences/shared/` | Junaid | read |
+| `src/experiences/index.ts` (the registry) | Shiv | add one import line for your experience |
+| `public/data/iphone.json` | Arjun | read |
+| `public/data/galaxy.json`, `public/data/universe.json` | Junaid | read |
+| `vite.config.ts`, `.github/workflows/` | Shiv | read |
 
 The registry file is the only shared write point. Each lane adds exactly one line to it during Phase 3. Everything else an experience needs lives inside its own folder.
 
 ## Staying unblocked
 
-- The core lane ships the mock experience and the contract in the first ten minutes. Both experience lanes write their JSON data during that window, then build against the mock's `SceneContext`.
+- Shiv ships the mock experience and the contract in the first ten minutes. Arjun and Junaid write their JSON data during that window, then build against the mock's `SceneContext`.
 - Each lane registers its experience with one line in `src/experiences/index.ts` and can see it in the real app immediately. No separate harness.
-- Pull before every push. Ten minutes without pulling is too long.
+- Rebase on `origin/main` before every PR. Ten minutes without rebasing is too long.
 
 ## Commits
 
-Small commits, present tense, one change each. Push every time something works.
+Small commits, present tense, one change each. Open a PR every time something works.
 
 ## Local commands
 
@@ -48,6 +73,6 @@ npm run typecheck  # tsc --noEmit, run before every push
 
 ## Deployment
 
-Push to `main` runs `.github/workflows/deploy.yml`, which builds and publishes `dist/` to GitHub Pages. The public URL is https://shivaswaroop40.github.io/4sight/. GitHub Pages is configured to deploy from GitHub Actions, so no `gh-pages` branch exists.
+Every merge to `main` runs `.github/workflows/deploy.yml`, which builds and publishes `dist/` to GitHub Pages. This is the only automation in the repo. The public URL is https://shivaswaroop40.github.io/4sight/. GitHub Pages is configured to deploy from GitHub Actions, so no `gh-pages` branch exists.
 
 The Vite base path is `/4sight/`. Every asset URL is built from `import.meta.env.BASE_URL`, never from a leading slash. If the repository is renamed, change `base` in `vite.config.ts` and nothing else.

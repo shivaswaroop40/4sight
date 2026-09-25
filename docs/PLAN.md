@@ -22,11 +22,11 @@ Filters are cut. If Cosmos finishes early, the first thing back in is a Stars/Ga
 
 ## Who is who
 
-Decide in the first minute.
+- **Core. Shiv (@shivaswaroop40).** Scaffold, `TimeController`, UI shell, registry, merges, deploy. Reverts a red `main`.
+- **Cosmos. Junaid (@JunaidMohsin).** Galaxy and universe on one shared particle shader, universe and galaxy JSON, log slider knots.
+- **iPhone. Arjun (@arjun-kodaganur).** Six components, pose interpolation, hover metadata, iPhone JSON.
 
-- **Core.** The repo owner. Owns scaffold, `TimeController`, UI shell, merges, deploy. You.
-- **Cosmos.** Whoever has written Three.js or GLSL before. If nobody, the strongest generalist, using the shader recipe below verbatim.
-- **iPhone.** Whoever is left. Pure interpolation over JSON. The most forgiving lane.
+Each lane's folders are listed in WORKFLOW.md. Nobody edits another lane's folder without a message first.
 
 ## Use the agents
 
@@ -36,7 +36,7 @@ Each developer runs Claude Code inside their own folder with `docs/CONTRACT.md` 
 
 ### 0:00 to 0:10. Scaffold (Core drives, others write data)
 
-Core, on `main`:
+Shiv, in the `feature/core-engine` worktree, one PR at the end of the ten minutes:
 
 - [ ] `npm create vite@latest . -- --template react-ts`, `npm i three @types/three`.
 - [ ] `vite.config.ts` with `base: "/4sight/"`.
@@ -44,20 +44,20 @@ Core, on `main`:
 - [ ] `TimeController.ts`, `mappings.ts`, `interpolate.ts`, `Timeline.ts` helpers.
 - [ ] `SceneManager.ts` with one `requestAnimationFrame` loop: `tick`, `setTime`, `render`.
 - [ ] Mock cube experience wired to a range input. Cube at A, B, C at 0, 0.5, 1.
-- [ ] `.github/workflows/deploy.yml`. Push. Confirm https://shivaswaroop40.github.io/4sight/ shows the cube.
+- [ ] `.github/workflows/deploy.yml` (deploy only, not a check). Merge the PR. Confirm https://shivaswaroop40.github.io/4sight/ shows the cube.
 
-iPhone and Cosmos, in parallel, no code yet:
+Arjun and Junaid, in parallel, no code yet:
 
-- [ ] iPhone writes `public/data/iphone.json`: six components (frame, battery, logic board, main camera, speaker, display) with `id`, `name`, `description`, `assembled {position, rotation, size, color}`, `exploded {position, rotation}`, `stage {start, end}`.
-- [ ] Cosmos writes `public/data/universe.json` from the reference table below and `public/data/galaxy.json` with six events from gas cloud to mature galaxy.
+- [ ] Arjun writes `public/data/iphone.json`: six components (frame, battery, logic board, main camera, speaker, display) with `id`, `name`, `description`, `assembled {position, rotation, size, color}`, `exploded {position, rotation}`, `stage {start, end}`.
+- [ ] Junaid writes `public/data/universe.json` from the reference table below and `public/data/galaxy.json` with six events from gas cloud to mature galaxy.
 
-Exit check at 0:10: everyone pulls `main`, `npm install`, `npm run dev`, drags the slider, sees the cube move. Do not split before this works.
+Exit check at 0:10: everyone rebases their worktree on `origin/main`, `npm install`, `npm run dev`, drags the slider, sees the cube move. Do not split before this works.
 
 ### 0:10 to 0:40. Lanes
 
-Everyone pushes to `main`. Folder ownership prevents conflicts. Pull before every push. A push that breaks the build gets reverted by Core, no discussion.
+Everyone works in their own worktree on their own branch and merges their own PRs to `main`. No CI, no reviews, just build locally, PR, merge. See WORKFLOW.md. Folder ownership prevents conflicts. A merge that breaks the build gets reverted by Shiv, no discussion.
 
-**Core**
+**Core (Shiv)**
 
 - [ ] `OrbitControls` camera. One preset per experience, applied on switch.
 - [ ] `Timeline.tsx` bound to `u`, tick labels from `mapping.ticks()`, end labels from `experience.labels`, event markers you can click.
@@ -68,7 +68,7 @@ Everyone pushes to `main`. Folder ownership prevents conflicts. Pull before ever
 - [ ] Layout: header with nav, viewport, right panel, bottom transport bar. Dark background, one glass style, done.
 - [ ] `useTimeState` hook that subscribes to the controller. No React state in the render loop.
 
-**iPhone**
+**iPhone (Arjun)**
 
 - [ ] `IPhoneState.ts`: `componentPose(c, t)`. `s = easeInOutCubic(window(t, c.stage.start, c.stage.end))`. Position `lerp(exploded, assembled, s)`. Rotation slerp. Pure.
 - [ ] Stages: frame 0.0 to 0.2, logic board 0.15 to 0.4, battery 0.3 to 0.55, camera 0.45 to 0.65, speaker 0.55 to 0.75, display 0.7 to 1.0.
@@ -76,7 +76,7 @@ Everyone pushes to `main`. Folder ownership prevents conflicts. Pull before ever
 - [ ] `getHoveredObject(id)` returns the JSON entry.
 - [ ] If time remains: emissive lift on hover, then `RoundedBoxGeometry` from `three/examples/jsm/geometries`.
 
-**Cosmos**
+**Cosmos (Junaid)**
 
 Both experiences use one `ParticleField` class in `experiences/shared/` with one shader. The two experiences differ only in the attribute generator and the colour ramp.
 
@@ -90,13 +90,13 @@ Both experiences use one `ParticleField` class in `experiences/shared/` with one
 
 ### 0:40 to 0:50. Integrate
 
-- [ ] Each lane confirms their registry line is in and `npm run build` passes locally.
+- [ ] Each lane has merged their final PR, their registry line is in, and `npm run build` passes on `main`.
 - [ ] Together, on one screen, walk the definition of done. Fix only what blocks the demo.
 - [ ] Switch experiences ten times. No console errors.
 
 ### 0:50 to 0:60. Ship and rehearse
 
-- [ ] Push `main`. Watch the Actions run. Open the public URL on a second device.
+- [ ] Merge the last PR. Watch the deploy run. Open the public URL on a second device.
 - [ ] Run the demo script once with a timer. Then stop typing.
 
 ## Demo script (90 seconds)
@@ -148,4 +148,4 @@ Slider knots: 0, 3.2e-8 (1 s), 5.7e-6 (3 min), 3.8e5, 2e8, 1e9, 9.2e9, 1.38e10. 
 | Cosmos shader does not compile | Use the recipe above verbatim. A field of moving coloured points is enough. |
 | Two lanes edit the same file | Only the registry is shared. Everything else lives in your folder. |
 | Someone waits on someone | Nobody waits. Data files first, then code against the mock's `SceneContext`. |
-| Final push breaks the build | Every lane runs `npm run build` before pushing. Core reverts a red `main` immediately. |
+| Final merge breaks the build | Every lane runs `npm run build` before opening a PR. Shiv reverts a red `main` immediately. |

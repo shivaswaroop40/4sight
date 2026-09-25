@@ -24,7 +24,7 @@ Planning complete for a 60-minute hackathon. No application code yet. Start with
 
 ## Stack
 
-React, TypeScript, Vite, Three.js. Fully client-side. Deployed to GitHub Pages by GitHub Actions on every push to `main`.
+React, TypeScript, Vite, Three.js. Fully client-side. Deployed to GitHub Pages on every merge to `main`.
 
 ## Team
 
@@ -32,8 +32,8 @@ Three developers, three lanes, one contract.
 
 | Lane | Owns | Who |
 | --- | --- | --- |
-| Core engine, renderer, UI | `src/core/`, `src/renderer/`, `src/ui/`, `src/app/` | the repo owner |
-| iPhone and interaction | `src/experiences/iphone/`, `src/interaction/` | whoever is left |
-| Galaxy and universe | `src/experiences/galaxy/`, `src/experiences/universe/`, `src/experiences/shared/` | whoever knows Three.js |
+| Core engine, renderer, UI | `src/core/`, `src/renderer/`, `src/ui/`, `src/app/` | Shiv ([@shivaswaroop40](https://github.com/shivaswaroop40)) |
+| iPhone and interaction | `src/experiences/iphone/`, `src/interaction/` | Arjun ([@arjun-kodaganur](https://github.com/arjun-kodaganur)) |
+| Galaxy and universe | `src/experiences/galaxy/`, `src/experiences/universe/`, `src/experiences/shared/` | Junaid ([@JunaidMohsin](https://github.com/JunaidMohsin)) |
 
-Everyone pushes to `main`. See [docs/WORKFLOW.md](docs/WORKFLOW.md).
+Each developer works in a git worktree on their own branch and merges their own PRs to `main`. No CI checks. See [docs/WORKFLOW.md](docs/WORKFLOW.md).

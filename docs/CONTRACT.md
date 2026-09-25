@@ -168,7 +168,7 @@ export interface FourDExperience {
 }
 ```
 
-## Helpers the core lane ships alongside the types
+## Helpers Shiv ships alongside the types
 
 These live in `src/core/` and every experience uses them instead of writing its own.
 
