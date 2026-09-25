@@ -65,14 +65,16 @@ export function defaultWarp(experience: Pick<FourDExperience, "id" | "warpPreset
  * direction so a knot of a piecewise mapping reports the segment ahead.
  */
 export function mappingDerivative(mapping: TimeMapping, u: number, direction: 1 | -1 = 1): number {
+  // Both samples sit strictly inside the segment ahead, so a knot with a
+  // jump (a zero first knot and its logFloor) does not read as a huge rate.
   const h = 1e-5;
   let a: number;
   let b: number;
   if (direction === 1) {
-    a = Math.min(u, 1 - h);
+    a = Math.min(u + h / 2, 1 - h);
     b = a + h;
   } else {
-    b = Math.max(u, h);
+    b = Math.max(u - h / 2, h);
     a = b - h;
   }
   return (mapping.toTime(b) - mapping.toTime(a)) / h;
