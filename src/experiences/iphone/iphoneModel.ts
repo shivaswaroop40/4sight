@@ -249,6 +249,9 @@ function dynamicIsland(): THREE.Group {
   const island = pill(0.5, 0.1, "#141010");
   island.rotation.z = Math.PI / 2;
   island.scale.set(1, 1, 0.3);
+  // Drawn after the lit screen so the pill always sits on top of it.
+  (island.material as THREE.Material).transparent = true;
+  island.renderOrder = 20;
   g.add(island);
   return g;
 }
@@ -324,9 +327,17 @@ export interface Screen {
 export function buildScreen(): Screen {
   const texture = new THREE.CanvasTexture(drawWallpaper());
   texture.colorSpace = THREE.SRGBColorSpace;
-  const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, opacity: 0, depthWrite: false });
+  const material = new THREE.MeshBasicMaterial({
+    map: texture,
+    transparent: true,
+    opacity: 0,
+    depthWrite: false,
+    polygonOffset: true,
+    polygonOffsetFactor: -2,
+    polygonOffsetUnits: -4,
+  });
   const plane = new THREE.Mesh(roundedPlane(SCREEN.width, SCREEN.height, SCREEN.radius), material);
-  plane.position.z = 0.022;
+  plane.position.z = 0.032;
   plane.renderOrder = 1;
   const group = new THREE.Group();
   group.name = "screen";
@@ -348,7 +359,15 @@ export interface Face {
 }
 
 function faceMaterial(color: THREE.ColorRepresentation, materials: THREE.MeshBasicMaterial[]): THREE.MeshBasicMaterial {
-  const m = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0, depthWrite: false });
+  const m = new THREE.MeshBasicMaterial({
+    color,
+    transparent: true,
+    opacity: 0,
+    depthWrite: false,
+    polygonOffset: true,
+    polygonOffsetFactor: -4,
+    polygonOffsetUnits: -8,
+  });
   materials.push(m);
   return m;
 }
@@ -362,7 +381,7 @@ export function buildFace(): Face {
   const cheek = faceMaterial(THEME.terracotta, materials);
   const group = new THREE.Group();
   group.name = "face";
-  group.position.z = 0.026;
+  group.position.z = 0.038;
   const eyes: Eye[] = [];
   const pupils: THREE.Group[] = [];
   let order = 2;
@@ -398,7 +417,7 @@ export function buildFace(): Face {
     blush.position.set(side * 0.9, -0.05, 0);
     group.add(blush);
   }
-  const smile = layer(new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.05, 8, 32, Math.PI), ink), 0);
+  const smile = layer(new THREE.Mesh(new THREE.TorusGeometry(0.34, 0.055, 8, 32, Math.PI), ink), 0);
   smile.rotation.z = Math.PI;
   smile.position.set(0, -0.12, 0);
   group.add(smile);
@@ -436,9 +455,15 @@ export function buildSparkles(): THREE.Group[] {
     const back = new THREE.Mesh(new THREE.ShapeGeometry(starShape(1.25, 0.58)), new THREE.MeshBasicMaterial({ color: THEME.ink }));
     const front = new THREE.Mesh(
       new THREE.ShapeGeometry(starShape(1, 0.42)),
-      new THREE.MeshBasicMaterial({ color: i % 2 === 0 ? THEME.mustard : THEME.cream }),
+      new THREE.MeshBasicMaterial({
+        color: i % 2 === 0 ? THEME.mustard : THEME.cream,
+        polygonOffset: true,
+        polygonOffsetFactor: -2,
+        polygonOffsetUnits: -4,
+      }),
     );
-    front.position.z = 0.01;
+    front.position.z = 0.05;
+    front.renderOrder = 1;
     g.add(back, front);
     g.userData.size = size;
     g.visible = false;

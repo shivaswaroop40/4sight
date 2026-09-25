@@ -26,14 +26,14 @@ export const IPHONE_DATA_FALLBACK: IPhoneData = {
       },
       "exploded": {
         "position": [
+          -1.3,
           0,
-          0.2,
-          -0.4
+          0
         ],
         "rotation": [
-          0.2,
-          -0.45,
-          0.04
+          0.12,
+          0.3,
+          0.03
         ]
       },
       "stage": {
@@ -64,14 +64,14 @@ export const IPHONE_DATA_FALLBACK: IPhoneData = {
       },
       "exploded": {
         "position": [
-          -3.3,
-          2.7,
-          1.3
+          1.7,
+          1.8,
+          0.5
         ],
         "rotation": [
-          -0.15,
-          0.45,
-          0.12
+          -0.12,
+          0.35,
+          0.06
         ]
       },
       "stage": {
@@ -102,14 +102,14 @@ export const IPHONE_DATA_FALLBACK: IPhoneData = {
       },
       "exploded": {
         "position": [
-          -3.6,
-          -1.9,
-          1.1
+          1.8,
+          -1.7,
+          0.5
         ],
         "rotation": [
-          -0.1,
-          0.5,
-          -0.1
+          0.1,
+          0.35,
+          -0.06
         ]
       },
       "stage": {
@@ -140,12 +140,12 @@ export const IPHONE_DATA_FALLBACK: IPhoneData = {
       "exploded": {
         "position": [
           3.3,
-          -3.2,
-          1.3
+          -4,
+          0.8
         ],
         "rotation": [
           0.2,
-          -0.3,
+          0.3,
           0.3
         ]
       },
@@ -176,12 +176,12 @@ export const IPHONE_DATA_FALLBACK: IPhoneData = {
       },
       "exploded": {
         "position": [
-          -0.4,
-          -4.3,
-          1.6
+          0.9,
+          -4.1,
+          0.8
         ],
         "rotation": [
-          -0.3,
+          0.2,
           0.3,
           -0.2
         ]
@@ -214,14 +214,14 @@ export const IPHONE_DATA_FALLBACK: IPhoneData = {
       },
       "exploded": {
         "position": [
-          2.4,
-          4.4,
-          -2.2
+          5.1,
+          3.6,
+          -0.3
         ],
         "rotation": [
-          0.35,
-          0.6,
-          0.2
+          0.15,
+          2.6,
+          0.1
         ]
       },
       "stage": {
@@ -251,14 +251,14 @@ export const IPHONE_DATA_FALLBACK: IPhoneData = {
       },
       "exploded": {
         "position": [
+          -1.3,
           0,
-          0.5,
-          1.6
+          0.1
         ],
         "rotation": [
-          0,
-          0,
-          0
+          0.12,
+          0.3,
+          0.03
         ]
       },
       "stage": {
@@ -288,14 +288,14 @@ export const IPHONE_DATA_FALLBACK: IPhoneData = {
       },
       "exploded": {
         "position": [
-          1.3,
-          0.3,
-          -3.4
+          4.9,
+          0.1,
+          -0.8
         ],
         "rotation": [
-          0.25,
-          0.55,
-          -0.05
+          0.1,
+          2.6,
+          -0.04
         ]
       },
       "stage": {
@@ -326,14 +326,14 @@ export const IPHONE_DATA_FALLBACK: IPhoneData = {
       },
       "exploded": {
         "position": [
-          -0.8,
-          0.3,
-          3.5
+          -5.9,
+          0.2,
+          0.8
         ],
         "rotation": [
-          -0.2,
-          -0.4,
-          0.06
+          -0.08,
+          0.4,
+          0.04
         ]
       },
       "stage": {
@@ -353,7 +353,7 @@ export const IPHONE_DATA_FALLBACK: IPhoneData = {
         "position": [
           0,
           2.6,
-          0.17
+          0.19
         ],
         "rotation": [
           0,
@@ -363,14 +363,14 @@ export const IPHONE_DATA_FALLBACK: IPhoneData = {
       },
       "exploded": {
         "position": [
-          0.6,
-          4.7,
-          2.6
+          -5.6,
+          3.9,
+          1.2
         ],
         "rotation": [
           0,
-          -0.3,
-          0.3
+          0.4,
+          0.25
         ]
       },
       "stage": {
@@ -387,7 +387,7 @@ export const IPHONE_DATA_FALLBACK: IPhoneData = {
       "when": "Step 1 of 8",
       "description": "Every part of the iPhone floats apart, laid out in the order it goes together.",
       "keyPoints": [
-        "Parts are stacked front to back",
+        "Parts are laid out front to back, left to right",
         "Drag the slider to build the phone"
       ]
     },

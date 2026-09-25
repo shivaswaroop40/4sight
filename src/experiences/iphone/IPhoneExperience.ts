@@ -39,10 +39,10 @@ const MAPPING_TICKS = [
 ];
 
 export const CAMERA_PRESETS: CameraPreset[] = [
-  { id: "three-quarter", name: "Three-quarter", position: [7.5, 4.2, 12], target: [0, 0, 0] },
-  { id: "front", name: "Front", position: [0, 0, 15], target: [0, 0, 0] },
-  { id: "back", name: "Back", position: [0, 0, -15], target: [0, 0, 0] },
-  { id: "side", name: "Side", position: [15, 1, 0], target: [0, 0, 0] },
+  { id: "three-quarter", name: "Three-quarter", position: [8, 3.5, 13.5], target: [0, -0.9, 0] },
+  { id: "front", name: "Front", position: [0, -0.9, 15], target: [0, -0.9, 0] },
+  { id: "back", name: "Back", position: [0, -0.9, -15], target: [0, -0.9, 0] },
+  { id: "side", name: "Side", position: [15, 0, 0], target: [0, -0.9, 0] },
 ];
 
 class IPhoneExperienceImpl implements FourDExperience {
@@ -116,7 +116,7 @@ class IPhoneExperienceImpl implements FourDExperience {
       if (component.id === "side-buttons") {
         // Buttons slide in from either side.
         const spread = 1 - componentAssembledFraction(component, t);
-        for (const b of part.children) b.position.x = b.userData.baseX * (1 + spread * 0.9);
+        for (const b of part.children) b.position.x = b.userData.baseX * (1 + spread * 0.7);
       }
     }
 

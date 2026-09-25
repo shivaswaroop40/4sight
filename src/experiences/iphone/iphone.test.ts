@@ -8,9 +8,9 @@ const byId = (id: string) => IPHONE_DATA_FALLBACK.components.find((c) => c.id ==
 describe("iPhone poses", () => {
   it("puts the battery at its exploded pose at t = 0", () => {
     const pose = componentPose(byId("battery"), 0);
-    expect(pose.position[0]).toBeCloseTo(-3.6, 6);
-    expect(pose.position[1]).toBeCloseTo(-1.9, 6);
-    expect(pose.position[2]).toBeCloseTo(1.1, 6);
+    expect(pose.position[0]).toBeCloseTo(1.8, 6);
+    expect(pose.position[1]).toBeCloseTo(-1.7, 6);
+    expect(pose.position[2]).toBeCloseTo(0.5, 6);
     expect(pose.scale).toEqual([1, 1, 1]);
   });
 
