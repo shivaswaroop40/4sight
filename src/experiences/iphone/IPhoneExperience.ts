@@ -1,6 +1,7 @@
 // src/experiences/iphone/IPhoneExperience.ts
 import * as THREE from "three";
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
+import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import { linearMapping } from "../../core/mappings";
 import type {
   CameraPreset,
@@ -27,17 +28,23 @@ const MAPPING_TICKS = [
 
 const CAMERA_PRESETS: CameraPreset[] = [{ id: "front", name: "Front", position: [0, 0.9, 6.6], target: [0, 0, 0] }];
 
-// Per-component material tuning (metalness/roughness) keyed by component id.
-// Colours themselves live in the JSON/fallback data; this only controls how
-// each material reacts to light so materials that would otherwise look like
-// flat plastic instead read as aluminium, glass, PCB, etc.
-const MATERIAL_PARAMS: Record<string, { metalness: number; roughness: number }> = {
-  frame: { metalness: 0.7, roughness: 0.35 },
-  battery: { metalness: 0.25, roughness: 0.6 },
-  "logic-board": { metalness: 0.2, roughness: 0.5 },
-  "main-camera": { metalness: 0.5, roughness: 0.3 },
-  speaker: { metalness: 0.4, roughness: 0.5 },
-  display: { metalness: 0.35, roughness: 0.2 },
+// Per-component material tuning keyed by component id. Colours themselves
+// live in the JSON/fallback data; this controls how each material reacts to
+// light and to the room environment map so materials that would otherwise
+// look like flat plastic instead read as brushed aluminium, glossy glass,
+// matte PCB, etc. clearcoat adds a thin glossy top layer (car-paint /
+// lacquer look) independent of the base roughness -- the cheapest way to
+// make a flat-colour box look like a manufactured object under a reflection.
+const MATERIAL_PARAMS: Record<
+  string,
+  { metalness: number; roughness: number; clearcoat?: number; clearcoatRoughness?: number }
+> = {
+  frame: { metalness: 0.85, roughness: 0.32, clearcoat: 0.4, clearcoatRoughness: 0.3 },
+  battery: { metalness: 0.15, roughness: 0.7 },
+  "logic-board": { metalness: 0.25, roughness: 0.45, clearcoat: 0.2, clearcoatRoughness: 0.4 },
+  "main-camera": { metalness: 0.6, roughness: 0.2, clearcoat: 0.8, clearcoatRoughness: 0.1 },
+  speaker: { metalness: 0.55, roughness: 0.4 },
+  display: { metalness: 0.1, roughness: 0.05, clearcoat: 1, clearcoatRoughness: 0.04 },
 };
 const DEFAULT_MATERIAL_PARAMS = { metalness: 0.3, roughness: 0.5 };
 
@@ -60,24 +67,57 @@ class IPhoneExperienceImpl implements FourDExperience {
   private meshes = new Map<string, THREE.Mesh>();
   private lights: THREE.Light[] = [];
   private context: SceneContext | null = null;
+  private envRenderTarget: THREE.WebGLRenderTarget | null = null;
 
   mount(context: SceneContext): void {
     this.context = context;
     this.data = IPHONE_DATA_FALLBACK;
 
+    // A generated "room" environment map gives every metal/glass material
+    // something to reflect. Without it, MeshPhysicalMaterial's clearcoat and
+    // metalness read as flat grey no matter how the direct lights are aimed.
+    const pmrem = new THREE.PMREMGenerator(context.renderer);
+    this.envRenderTarget = pmrem.fromScene(new RoomEnvironment(), 0.04);
+    context.scene.environment = this.envRenderTarget.texture;
+    pmrem.dispose();
+
     for (const component of this.data.components) {
       const [w, h, d] = component.assembled.size;
       const radius = Math.min(w, h, d) * 0.3;
-      const geometry = new RoundedBoxGeometry(w, h, d, 3, radius);
+      const geometry = new RoundedBoxGeometry(w, h, d, 4, radius);
       const params = MATERIAL_PARAMS[component.id] ?? DEFAULT_MATERIAL_PARAMS;
-      const material = new THREE.MeshStandardMaterial({
+      const material = new THREE.MeshPhysicalMaterial({
         color: new THREE.Color(component.assembled.color),
         metalness: params.metalness,
         roughness: params.roughness,
+        clearcoat: params.clearcoat ?? 0,
+        clearcoatRoughness: params.clearcoatRoughness ?? 0,
+        envMapIntensity: 1.1,
       });
       const mesh = new THREE.Mesh(geometry, material);
       mesh.userData.id = component.id;
       mesh.name = component.id;
+
+      // A glossy black lens ring is the single detail that reads "camera"
+      // at a glance instead of "green-ish grey box".
+      if (component.id === "main-camera") {
+        const lensRadius = Math.min(w, h) * 0.42;
+        const lens = new THREE.Mesh(
+          new THREE.CylinderGeometry(lensRadius, lensRadius, d * 0.3, 24),
+          new THREE.MeshPhysicalMaterial({
+            color: 0x05070a,
+            metalness: 0.3,
+            roughness: 0.05,
+            clearcoat: 1,
+            clearcoatRoughness: 0.02,
+            envMapIntensity: 1.4,
+          }),
+        );
+        lens.rotation.x = Math.PI / 2;
+        lens.position.z = d * 0.45;
+        mesh.add(lens);
+      }
+
       this.meshes.set(component.id, mesh);
       context.scene.add(mesh);
       context.registerHoverable(mesh, component.id);
@@ -156,11 +196,22 @@ class IPhoneExperienceImpl implements FourDExperience {
         this.context.scene.remove(mesh);
         mesh.geometry.dispose();
         (mesh.material as THREE.Material).dispose();
+        for (const child of mesh.children) {
+          if (child instanceof THREE.Mesh) {
+            child.geometry.dispose();
+            (child.material as THREE.Material).dispose();
+          }
+        }
       }
       for (const light of this.lights) {
         this.context.scene.remove(light);
       }
+      if (this.context.scene.environment === this.envRenderTarget?.texture) {
+        this.context.scene.environment = null;
+      }
     }
+    this.envRenderTarget?.dispose();
+    this.envRenderTarget = null;
     this.meshes.clear();
     this.lights = [];
     this.context = null;
