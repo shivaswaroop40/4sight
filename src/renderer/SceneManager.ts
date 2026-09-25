@@ -85,6 +85,7 @@ export class SceneManager {
     experience.mount(this.context);
     this.timeController.attach(experience);
     this.scene.updateMatrixWorld(true);
+    this.warmUp();
     const [first] = experience.getCameraPresets();
     if (first) this.cameras.applyPreset(first, animateCamera);
     else this.cameras.overview(this.scene, animateCamera);
@@ -100,6 +101,29 @@ export class SceneManager {
     this.scene.background = null;
     this.scene.fog = null;
     this.experience = null;
+  }
+
+  /**
+   * Compiles every material now, including objects that are hidden until
+   * later in the timeline, so nothing stalls a frame when it first appears.
+   * renderer.compile only visits visible objects, hence the temporary
+   * reveal, and some GPU backends (ANGLE on Metal) build pipelines only at
+   * the first draw, so it also draws once into a 1 px scissor.
+   */
+  private warmUp(): void {
+    const hidden: THREE.Object3D[] = [];
+    this.scene.traverse((o) => {
+      if (!o.visible) {
+        hidden.push(o);
+        o.visible = true;
+      }
+    });
+    this.renderer.compile(this.scene, this.camera);
+    this.renderer.setScissorTest(true);
+    this.renderer.setScissor(0, 0, 1, 1);
+    this.renderer.render(this.scene, this.camera);
+    this.renderer.setScissorTest(false);
+    for (const o of hidden) o.visible = false;
   }
 
   applyPreset(id: string): void {
