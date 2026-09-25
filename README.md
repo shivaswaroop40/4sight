@@ -14,7 +14,11 @@ Live site (after the first deploy): https://shivaswaroop40.github.io/4sight/
 
 ## Status
 
-Planning complete for a 60-minute hackathon. No application code yet. Start with [docs/PLAN.md](docs/PLAN.md).
+Planning complete for a 60-minute hackathon. No application code yet. 
+
+**Start here:** [GETTING_STARTED.md](GETTING_STARTED.md). It has the exact git setup, per-developer agent prompts, and the timeline. Each dev can copy-paste their prompt into Claude Code and let Opus 5.5 rip.
+
+**Details:** [docs/PLAN.md](docs/PLAN.md) (timeline and task lists), [docs/CONTRACT.md](docs/CONTRACT.md) (the shared types), [docs/WORKFLOW.md](docs/WORKFLOW.md) (worktrees and PRs).
 
 ## Documents
 
