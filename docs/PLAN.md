@@ -1,6 +1,8 @@
 # 4sight build plan (60 minutes)
 
-One time engine drives three worlds. A judge opens the site, sees an exploded iPhone, drags a slider, and watches it assemble. They switch to Galaxy and the same slider collapses a gas cloud into a spiral. They switch to Big Bang and the same slider walks 13.8 billion years. Same controls, same concept, three timescales.
+One time engine drives two worlds. A judge opens the site, sees an exploded iPhone, drags a slider, and watches it assemble. They switch to Solar System and the same slider collapses a cloud of gas and dust into the Sun and eight planets, across 4.6 billion years. Same controls, same concept, two timescales.
+
+Scope change on 2026-09-25: the Cosmos lane builds one Solar System formation experience instead of Galaxy and Big Bang.
 
 The whole build is a bet on one rule: every experience is a pure function `setTime(t)`. Reverse, scrub, jump, warp, and pause are consequences of that rule, not features to build.
 
@@ -14,23 +16,23 @@ This is a one-hour hackathon. Every line below is cut to fit. The longer version
 | "What's happening?" panel from JSON events | Selection cards, filters panel, follow camera |
 | Hover tooltip via raycaster | Screen turn-on, ghost outline, GLB loader |
 | iPhone with 6 components, straight-line arcs | 12 components, bezier arcs, staged overlap tuning |
-| Galaxy and Universe sharing ONE particle shader | Separate shaders, bloom, dark matter halo, instanced galaxies |
-| Log slider for the universe with 8 labels | Effective-rate HUD line |
+| Solar System on one particle shader plus simple planet meshes | Bloom, realistic textures, moons, asteroid belt physics |
+| Log slider for the solar system with 8 labels | Accurate orbital mechanics |
 | Public GitHub Pages URL | Mobile layout, transitions, tags |
 
-Filters are cut. If Cosmos finishes early, the first thing back in is a Stars/Gas toggle because it is two uniforms.
+Filters are cut. If Cosmos finishes early, the first thing back in is a Gas/Dust toggle because it is one uniform.
 
 ## Who is who
 
 - **Core. Shiv (@shivaswaroop40).** Scaffold, `TimeController`, UI shell, registry, merges, deploy. Reverts a red `main`.
-- **Cosmos. Junaid (@JunaidMohsin).** Galaxy and universe on one shared particle shader, universe and galaxy JSON, log slider knots.
+- **Cosmos. Junaid (@JunaidMohsin).** Solar System formation, from molecular cloud to today's Sun and planets. Particle disk, planet meshes, `solar-system.json`, log slider knots.
 - **iPhone. Arjun (@arjun-kodaganur).** Six components, pose interpolation, hover metadata, iPhone JSON.
 
 Each lane's folders are listed in WORKFLOW.md. Nobody edits another lane's folder without a message first.
 
 ## Use the agents
 
-Each developer runs Claude Code inside their own folder with `docs/CONTRACT.md` in context. The contract is the prompt. A lane that hand-types Three.js boilerplate for 40 minutes does not finish. A lane that says "implement `FourDExperience` for a galaxy per CONTRACT.md, particles in a `ShaderMaterial` with `uT`, 40k points" and then tunes the result does.
+Each developer runs Claude Code inside their own folder with `docs/CONTRACT.md` in context. The contract is the prompt. A lane that hand-types Three.js boilerplate for 40 minutes does not finish. A lane that says "implement `FourDExperience` for solar system formation per CONTRACT.md, disk particles in a `ShaderMaterial` with `uT`, 40k points" and then tunes the result does.
 
 ## Timeline
 
@@ -49,7 +51,7 @@ Shiv, in the `feature/core-engine` worktree, one PR at the end of the ten minute
 Arjun and Junaid, in parallel, no code yet:
 
 - [ ] Arjun writes `public/data/iphone.json`: six components (frame, battery, logic board, main camera, speaker, display) with `id`, `name`, `description`, `assembled {position, rotation, size, color}`, `exploded {position, rotation}`, `stage {start, end}`.
-- [ ] Junaid writes `public/data/universe.json` from the reference table below and `public/data/galaxy.json` with six events from gas cloud to mature galaxy.
+- [ ] Junaid writes `public/data/solar-system.json` from the reference table below: events, plus the eight planets with name, description, orbit radius in AU, size, colour, and formation window.
 
 Exit check at 0:10: everyone rebases their worktree on `origin/main`, `npm install`, `npm run dev`, drags the slider, sees the cube move. Do not split before this works.
 
@@ -78,15 +80,16 @@ Everyone works in their own worktree on their own branch and merges their own PR
 
 **Cosmos (Junaid)**
 
-Both experiences use one `ParticleField` class in `experiences/shared/` with one shader. The two experiences differ only in the attribute generator and the colour ramp.
+One experience in `src/experiences/solar-system/`. Register it as `solarSystemExperience` with id `"solarSystem"`.
 
-- [ ] `ParticleField.ts`: `Points` + `ShaderMaterial`. Attributes `aStart` (vec3), `aEnd` (vec3), `aBirth` (float), `aHue` (float). Uniforms `uT`, `uSpin`, `uScale`, `uRampA`, `uRampB`.
-- [ ] Vertex shader: `p = mix(aStart, aEnd, smoothstep(0.0, 1.0, uT))`, rotate about y by `uSpin * uT / (1.0 + length(p.xz))` for differential rotation, scale by `uScale`. `gl_PointSize` from distance. Alpha from `smoothstep(aBirth, aBirth + 0.1, uT)`.
-- [ ] Fragment shader: soft disc, colour `mix(uRampA, uRampB, aHue)`, additive blending.
-- [ ] `GalaxyExperience.ts`: 40k points, `aStart` in a sphere, `aEnd` on a log spiral with scatter, `uSpin` nonzero, linear mapping over 0 to 1e9 years, `baseDurationSeconds` 20.
-- [ ] `UniverseExperience.ts`: 40k points, `aStart` in a tiny sphere, `aEnd` in a large clustered field (three or four gaussian blobs is enough), `uScale` from a three-regime scale factor, colour ramp white to orange to blue-white, `piecewiseLogMapping` on the knots below, `baseDurationSeconds` 40.
-- [ ] Two invisible proxy spheres per experience registered as hoverables with metadata.
-- [ ] If time remains: `Stars/Gas` toggle as one uniform, exposed through `getAvailableFilters()`.
+- [ ] `SolarSystemState.ts`: pure functions of `t`. `collapse(t)` shrinks the cloud radius, `flatten(t)` squashes it into a disk, `sunIgnition(t)` ramps the protosun from a dull red glow to a bright main-sequence Sun, `planetGrowth(planet, t)` grows each planet inside its formation window, `gasCleared(t)` fades the remaining gas.
+- [ ] Particle disk: `Points` + `ShaderMaterial`, 40k points. Attributes `aCloud` (vec3, random in a sphere) and `aDisk` (vec3, on a thin disk, denser inward), `aBirth`, `aHue`. Uniforms `uT`, `uFlatten`, `uGas`. Vertex: mix cloud to disk by `uFlatten`, rotate about y by `uT * k / sqrt(r)` so the inner disk spins faster. Fragment: soft disc, warm colours near the Sun, cool dust outside, additive blending, alpha scaled by `uGas`.
+- [ ] The Sun: a sphere with an emissive material plus a glow sprite. Colour and scale driven by `sunIgnition(t)`.
+- [ ] Planets: eight small spheres from `solar-system.json` on circular orbits at their AU radius (compressed with a sqrt or log scale so all fit). Radius scales with `planetGrowth`. Each orbits at a speed proportional to `r^-1.5`, so the scene keeps moving. Each is a hoverable with its metadata.
+- [ ] Faint orbit rings that fade in as planets finish forming.
+- [ ] `piecewiseLogMapping` on the knots below, `baseDurationSeconds` 40, events from `solar-system.json`.
+- [ ] Hoverables: the Sun, each planet, and one invisible proxy for the protoplanetary disk.
+- [ ] If time remains: Gas/Dust toggle as one uniform, exposed through `getAvailableFilters()`.
 
 ### 0:40 to 0:50. Integrate
 
@@ -101,42 +104,41 @@ Both experiences use one `ParticleField` class in `experiences/shared/` with one
 
 ## Demo script (90 seconds)
 
-1. Open on Big Bang at `u = 0`. "Time is not something we animate. It is the dimension we move through." (10 s)
-2. Play. Point at the log labels as the CMB and First Stars pass. Pause at First Stars, read the panel. (25 s)
-3. Drag to Today, drag back to Dark Ages. "Nothing is pre-rendered. Every frame is `getState(t)`." (15 s)
-4. Switch to Galaxy. Play. Orbit. (15 s)
+1. Open on Solar System at `u = 0`, a dark cloud of gas and dust. "Time is not something we animate. It is the dimension we move through." (10 s)
+2. Play. The cloud collapses, flattens into a disk, and the Sun ignites. Pause at Jupiter forms and read the panel. (25 s)
+3. Drag to Today, then back to the protoplanetary disk. "Nothing is pre-rendered. Every frame is `getState(t)`." (15 s)
+4. Orbit the finished solar system. Hover Earth. (15 s)
 5. Switch to iPhone. Exploded. Hover the battery. Play at 2x. Reverse. (20 s)
 6. "Same slider. Same engine. Seconds, millions of years, billions of years." (5 s)
 
-## Cosmic timeline reference (for `universe.json`)
+## Solar System timeline reference (for `solar-system.json`)
 
-Years after the Big Bang. Approximate. Do not present them as more precise than shown.
+Years since the collapse of the Sun's parent cloud core, about 4.57 billion years ago. Approximate, per the standard nebular model. Do not present them as more precise than shown.
 
 | Event | Time (years) | Label |
 | --- | --- | --- |
-| Big Bang | 0 | Big Bang |
-| Inflation ends | 3e-44 (about 1e-36 s) | Inflation |
-| Particle era | 3e-13 (about 1e-5 s) | Particle Era |
-| Nucleosynthesis | 6e-6 (about 3 min) | Nucleosynthesis |
-| First atoms, CMB released | 3.8e5 | First Atoms / CMB |
-| Dark ages | 1e6 | Dark Ages |
-| First stars | 2e8 | First Stars |
-| First galaxies | 4e8 | First Galaxies |
-| Galaxy formation | 1e9 | Galaxy Formation |
-| Galaxy evolution | 3e9 | Galaxy Evolution |
-| Milky Way disk | 5e9 | Milky Way |
-| Solar System | 9.2e9 | Solar System |
-| Earth | 9.25e9 | Earth |
-| Modern universe | 1.0e10 | Modern Universe |
-| Today | 1.38e10 | Today |
+| Molecular cloud core collapses | 0 | Cloud Collapse |
+| Protosun and spinning disk form | 1e5 | Protosun |
+| First solids condense (CAIs) | 3e5 | First Solids |
+| Dust clumps into planetesimals | 1e6 | Planetesimals |
+| Jupiter's core forms, Jupiter grows | 3e6 | Jupiter Forms |
+| Saturn, Uranus, Neptune form | 5e6 | Giant Planets |
+| Solar wind clears the gas | 1e7 | Gas Cleared |
+| Sun reaches the main sequence | 5e7 | Sun Ignites |
+| Rocky planets finish forming | 1e8 | Rocky Planets |
+| Moon-forming impact on Earth | 1e8 | Moon Forms |
+| Giant planets migrate (Nice model, debated) | 5e8 | Migration |
+| Today | 4.57e9 | Today |
 
-Slider knots: 0, 3.2e-8 (1 s), 5.7e-6 (3 min), 3.8e5, 2e8, 1e9, 9.2e9, 1.38e10. The first segment log-interpolates from 1e-44 years so inflation sits at a visible position.
+Slider knots: 0, 1e5, 1e6, 3e6, 1e7, 1e8, 1e9, 4.57e9. The first segment log-interpolates from 1e3 years so the collapse is visible.
+
+Planet data for `solar-system.json`, orbit radius in AU: Mercury 0.39, Venus 0.72, Earth 1.0, Mars 1.52, Jupiter 5.2, Saturn 9.5, Uranus 19.2, Neptune 30.1. Formation windows: giants 1e6 to 1e7, rocky planets 1e6 to 1e8.
 
 ## Definition of done
 
 - iPhone opens exploded, hover shows a tooltip, scrub assembles and disassembles, play and reverse and warp work.
-- Galaxy opens as a cloud and becomes a spiral as `u` increases, in both directions.
-- Big Bang opens at the Big Bang, the log slider has eight labels, the panel updates at every event, Today is reachable.
+- Solar System opens as a cloud, collapses into a disk with a glowing Sun, and ends with eight planets orbiting, in both directions.
+- The log slider has eight labels, the panel updates at every event, Today is reachable, and hovering a planet shows its metadata.
 - Switching experiences never reloads or errors.
 - The public URL works.
 
@@ -145,7 +147,7 @@ Slider knots: 0, 3.2e-8 (1 s), 5.7e-6 (3 min), 3.8e5, 2e8, 1e9, 9.2e9, 1.38e10. 
 | Risk | Mitigation |
 | --- | --- |
 | Scaffold takes longer than 10 minutes | Core starts it the moment the clock starts. If the deploy is not green by 0:10, split anyway and fix deploy at 0:40. |
-| Cosmos shader does not compile | Use the recipe above verbatim. A field of moving coloured points is enough. |
+| Cosmos shader does not compile | Use the recipe above verbatim. A disk of moving coloured points plus the Sun and planet spheres is enough. |
 | Two lanes edit the same file | Only the registry is shared. Everything else lives in your folder. |
 | Someone waits on someone | Nobody waits. Data files first, then code against the mock's `SceneContext`. |
 | Final merge breaks the build | Every lane runs `npm run build` before opening a PR. Shiv reverts a red `main` immediately. |
