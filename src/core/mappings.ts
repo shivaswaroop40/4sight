@@ -48,16 +48,23 @@ export function linearMapping(
  * start (log(0) is undefined) by treating knot 0 as a tiny positive epsilon
  * internally, without ever reporting a time other than the exact knot value
  * at the knot boundaries.
+ *
+ * options.logFloor (optional, default 1e-45) is the stand-in for a zero
+ * first knot inside log interpolation. The default suits the universe
+ * (inflation sits at a visible position). A timeline whose earliest
+ * interesting time is, say, 1,000 years should pass logFloor: 1e3 so the
+ * first segment is not spent crossing 50 empty orders of magnitude.
  */
 export function piecewiseLogMapping(
   knots: { time: number; label: string }[],
   format: (t: number) => string,
+  options: { logFloor?: number } = {},
 ): TimeMapping {
   if (knots.length < 2) {
     throw new Error("piecewiseLogMapping needs at least two knots");
   }
   const n = knots.length - 1;
-  const EPS = 1e-45;
+  const EPS = options.logFloor ?? 1e-45;
 
   // Log-space value used for interpolation only. Never returned directly.
   const logAt = (time: number): number => Math.log(Math.max(time, EPS));

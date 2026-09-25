@@ -11,7 +11,7 @@
 //   accumulates, never plays an animation. Scrubbing, reverse, jumping, and
 //   warping all fall out of this one rule for free.
 
-export type ExperienceId = "iphone" | "galaxy" | "universe" | "mock";
+export type ExperienceId = "iphone" | "solarSystem" | "galaxy" | "universe" | "mock" | "mockLog";
 
 /** Normalized slider and playback parameter in [0, 1]. */
 export type TimeParam = number;
@@ -129,7 +129,11 @@ export interface FourDExperience {
   mapping: TimeMapping;
   /** Real seconds for one full pass at 1x. iPhone 10, galaxy 30, universe 60. */
   baseDurationSeconds: number;
-  /** Time warp values offered in the UI for this experience. */
+  /**
+   * Time warp values offered in the UI for this experience. Each is a
+   * multiplier on the 1x rate: a full pass takes baseDurationSeconds / w real
+   * seconds. Presets faster than a 1 s pass are hidden (see core/warp.ts).
+   */
   warpPresets: number[];
   /** Labels at the two ends of the slider. */
   labels: { start: string; end: string };
