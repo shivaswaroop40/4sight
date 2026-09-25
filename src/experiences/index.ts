@@ -6,10 +6,11 @@
 
 import type { ExperienceId, FourDExperience } from "../core/types";
 import { mockExperience } from "./mock/mockExperience";
+import { iphoneExperience } from "./iphone/IPhoneExperience";
 
 export const experiences: FourDExperience[] = [
   mockExperience,
-  // iPhoneExperience,   // added by the iPhone lane
+  iphoneExperience,
   // galaxyExperience,   // added by the Cosmos lane
   // universeExperience, // added by the Cosmos lane
 ];
