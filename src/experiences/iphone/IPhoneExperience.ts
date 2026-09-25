@@ -83,7 +83,7 @@ class IPhoneExperienceImpl implements FourDExperience {
 
     for (const component of this.data.components) {
       const [w, h, d] = component.assembled.size;
-      const radius = Math.min(w, h, d) * 0.3;
+      const radius = Math.min(w, h, d) * 0.4;
       const geometry = new RoundedBoxGeometry(w, h, d, 4, radius);
       const params = MATERIAL_PARAMS[component.id] ?? DEFAULT_MATERIAL_PARAMS;
       const material = new THREE.MeshPhysicalMaterial({

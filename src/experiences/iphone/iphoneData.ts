@@ -52,9 +52,9 @@ export const IPHONE_DATA_FALLBACK: IPhoneData = {
         weight: "42 g",
       },
       assembled: {
-        position: [0, 0, -0.066],
+        position: [0, 0, -0.08],
         rotation: [0, 0, 0],
-        size: [1.65, 3.3, 0.0825],
+        size: [1.65, 3.3, 0.28],
         color: "#9aa0a8",
       },
       exploded: {
@@ -115,9 +115,9 @@ export const IPHONE_DATA_FALLBACK: IPhoneData = {
         aperture: "f/1.6",
       },
       assembled: {
-        position: [-0.495, 1.32, -0.0825],
+        position: [-0.45, 1.25, -0.21],
         rotation: [0, 0, 0],
-        size: [0.385, 0.385, 0.1375],
+        size: [0.4, 0.4, 0.12],
         color: "#2b3a5c",
       },
       exploded: {
@@ -159,7 +159,7 @@ export const IPHONE_DATA_FALLBACK: IPhoneData = {
       assembled: {
         position: [0, 0, 0.066],
         rotation: [0, 0, 0],
-        size: [1.595, 3.245, 0.033],
+        size: [1.5, 3.15, 0.033],
         color: "#101a2e",
       },
       exploded: {
