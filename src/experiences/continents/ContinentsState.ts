@@ -50,13 +50,13 @@ export function profileAt(profile: Profile, ma: number): number {
   return profile[profile.length - 1][1];
 }
 
-export function rotationAt(id: BlockId, ma: number): THREE.Quaternion {
+export function rotationAt(id: BlockId, ma: number, out = new THREE.Quaternion()): THREE.Quaternion {
   const keys = ROTATIONS[id];
   const m = Math.min(OLDEST_MA, Math.max(0, ma));
   let i = 0;
   while (i < AGES.length - 2 && m < AGES[i + 1]) i++;
   const s = (AGES[i] - m) / (AGES[i] - AGES[i + 1]);
-  return new THREE.Quaternion().slerpQuaternions(keys[i], keys[i + 1], s);
+  return out.slerpQuaternions(keys[i], keys[i + 1], s);
 }
 
 function anchorAt(id: BlockId, ma: number): THREE.Vector3 {
@@ -72,14 +72,15 @@ function speedAt(id: BlockId, ma: number): number {
   return (km / (older - younger)) * 0.1;
 }
 
-function labelPosition(anchor: LabelAnchor, ma: number): THREE.Vector3 {
-  if (anchor.kind === "fixed") return toVec(anchor.at);
+const scratchQ = new THREE.Quaternion();
+const scratchV = new THREE.Vector3();
+
+export function labelPosition(anchor: LabelAnchor, ma: number, out = new THREE.Vector3()): THREE.Vector3 {
+  if (anchor.kind === "fixed") return toVec(anchor.at, out);
   const [idA, a] = anchor.a;
   const [idB, b] = anchor.b;
-  return toVec(a)
-    .applyQuaternion(rotationAt(idA, ma))
-    .add(toVec(b).applyQuaternion(rotationAt(idB, ma)))
-    .normalize();
+  toVec(a, out).applyQuaternion(rotationAt(idA, ma, scratchQ));
+  return out.add(toVec(b, scratchV).applyQuaternion(rotationAt(idB, ma, scratchQ))).normalize();
 }
 
 export function continentsStateAt(time: number): ContinentsState {

@@ -52,7 +52,7 @@ export const BLOCKS: BlockDef[] = [
     story: [
       [250, "The northern half of Pangaea. Much of eastern Asia was still a scatter of smaller blocks."],
       [175, "Part of Laurasia, the northern supercontinent, with the Tethys Ocean on its southern shore."],
-      [55, "India rams into its southern edge and starts to lift the Himalaya and Tibet."],
+      [50, "India rams into its southern edge and starts to lift the Himalaya and Tibet."],
       [30, "Africa and Arabia push in from the south, raising the Alps and the Zagros."],
       [5, "Still squeezed by India, Arabia and Africa. Mountain building has not stopped."],
     ],
@@ -155,7 +155,7 @@ export const BLOCKS: BlockDef[] = [
       [250, "At the southern end of Gondwana, but green and forested, with no ice."],
       [180, "Gondwana starts to break apart around it."],
       [85, "Settles over the South Pole while Australia slowly rifts away."],
-      [34, "Australia and South America let go. A cold current circles it and it freezes over."],
+      [34, "As carbon dioxide falls and a cold current starts to circle it, it freezes over."],
     ],
   },
   {
@@ -203,7 +203,7 @@ export const RANGES: RangeDef[] = [
     block: "eurasia",
     path: [[74.5, 35.6], [77, 34.2], [79.5, 32], [81.5, 30.4], [84, 29], [86.9, 28.4], [89.5, 28.2], [92, 28.3], [94.5, 29]],
     height: 0.075,
-    growth: [[52, 0], [40, 0.35], [20, 0.75], [0, 1]],
+    growth: [[50, 0], [40, 0.35], [20, 0.75], [0, 1]],
   },
   {
     id: "tibet",
@@ -366,7 +366,7 @@ export const EVENTS: TimelineEvent[] = [
     "The new seaway links up with the Tethys Ocean, cutting Pangaea into Laurasia in the north and Gondwana in the south.",
     [
       "Laurasia: North America, Greenland, Europe and Asia.",
-      "Gondwana: South America, Africa, Antarctica, India, Madagascar and Australia.",
+      "Gondwana: South America, Africa, Antarctica, India, Madagascar, Australia and Zealandia.",
       "Gondwana starts to break up too, as Madagascar slides away from East Africa.",
     ],
     "~175 million years ago",
@@ -378,7 +378,7 @@ export const EVENTS: TimelineEvent[] = [
     "South America tears away from Africa, starting at the southern end and unzipping northward.",
     [
       "Brazil's bulge fits into the Gulf of Guinea like a jigsaw piece.",
-      "Matching rocks and fossils on both coasts were early proof that continents move.",
+      "Matching rocks and fossils on both coasts were early evidence that continents move.",
       "The last link, near the equator, breaks around 100 million years ago.",
     ],
     "~130 million years ago",
@@ -390,7 +390,7 @@ export const EVENTS: TimelineEvent[] = [
     "India breaks away from Madagascar and heads north toward Asia, at its fastest 15 to 20 cm a year, several times faster than plates move today.",
     [
       "In about 40 million years it travels over 4,000 km.",
-      "Madagascar stays behind. Its animals have evolved on their own ever since.",
+      "Madagascar stays behind. Isolated ever since, it grew plants and animals found nowhere else.",
       "The ocean ahead of India sinks under Asia as it goes.",
     ],
     "~88 million years ago",
@@ -402,7 +402,7 @@ export const EVENTS: TimelineEvent[] = [
     "An asteroid about 10 km wide hits Mexico's Yucatán Peninsula. Three quarters of all species vanish, including every dinosaur except the birds.",
     [
       "At the same time, the Deccan Traps flood western India with lava.",
-      "The crater, Chicxulub, is about 180 km across and buried under Yucatán.",
+      "The crater, Chicxulub, is about 180 km across, buried under the Yucatán coast.",
       "Mammals take over the empty world.",
     ],
   ),
@@ -412,7 +412,7 @@ export const EVENTS: TimelineEvent[] = [
     "India hits Asia",
     "India collides with Asia. Its northern edge slides under Tibet, and the crust crumples up into the Himalaya and the Tibetan Plateau.",
     [
-      "Seashell fossils from the old Tethys seafloor now sit near the top of Mount Everest.",
+      "Fossils of sea creatures sit in limestone near the top of Mount Everest.",
       "India is still pushing north about 4 to 5 cm a year.",
       "Everest is 8,849 m tall and still growing.",
     ],
@@ -422,7 +422,7 @@ export const EVENTS: TimelineEvent[] = [
     "antarctica-ice",
     34,
     "Antarctica freezes",
-    "Australia and South America have pulled away, so a cold current can circle Antarctica unbroken. Cut off from warm water, it freezes over.",
+    "Carbon dioxide in the air has been falling for millions of years. Now Australia and South America pull away, a cold current starts to circle Antarctica, and it freezes over.",
     [
       "The ice sheet forms in a few hundred thousand years.",
       "Earth switches from a hothouse to an icehouse world.",
@@ -434,7 +434,7 @@ export const EVENTS: TimelineEvent[] = [
     "today",
     0,
     "Today",
-    "The continents are still moving, 2 to 10 cm a year, about as fast as your fingernails grow.",
+    "The plates are still moving, 2 to 10 cm a year, about as fast as your fingernails grow.",
     [
       "The Atlantic grows about 2.5 cm wider every year.",
       "Australia is heading toward Asia at about 7 cm a year.",

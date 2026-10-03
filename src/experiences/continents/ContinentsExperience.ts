@@ -17,14 +17,17 @@ import type {
   TimelineEvent,
   VisualizationFilter,
 } from "../../core/types";
-import { BLOCKS, EVENTS, MAP_LABELS, RANGES, type BlockDef } from "./continentsData";
+import { BLOCKS, EVENTS, MAP_LABELS, RANGES, type BlockDef, type Profile } from "./continentsData";
 import {
   OLDEST_MA,
   continentsStateAt,
   formatLatitude,
   formatMa,
   formatSpeed,
+  labelPosition,
   maAt,
+  profileAt,
+  rotationAt,
   type ContinentsState,
 } from "./ContinentsState";
 import { equatorRing, inkMaterial, labelSprite, landGeometry, oceanMesh, peakGeometry, samplePath } from "./globeModel";
@@ -69,7 +72,7 @@ interface BlockView {
 
 interface Peak {
   mesh: THREE.Mesh;
-  range: string;
+  growth: Profile;
   width: number;
   height: number;
 }
@@ -160,7 +163,7 @@ class ContinentsExperienceImpl implements FourDExperience {
         }
         block.group.add(mesh);
         const size = 0.8 + 0.4 * rand();
-        this.peaks.push({ mesh, range: range.id, width: range.height * 0.9 * size, height: range.height * size });
+        this.peaks.push({ mesh, growth: range.growth, width: range.height * 0.9 * size, height: range.height * size });
       }
     }
 
@@ -183,23 +186,25 @@ class ContinentsExperienceImpl implements FourDExperience {
   setTime(time: number): void {
     this.time = time;
     if (!this.root) return;
-    const state = continentsStateAt(time);
-    state.blocks.forEach((b, i) => {
-      const view = this.blocks[i];
-      view.group.quaternion.set(...b.quaternion);
-      view.top.color.copy(view.land).lerp(ICE, b.ice);
-      view.wall.color.copy(view.wallColor).lerp(ICE_WALL, b.ice);
-    });
+    // Writes straight into scene objects so playback allocates nothing; getState builds the same values as plain data.
+    const ma = maAt(time);
+    for (const view of this.blocks) {
+      rotationAt(view.def.id, ma, view.group.quaternion);
+      const ice = view.def.ice ? profileAt(view.def.ice, ma) : 0;
+      view.top.color.copy(view.land).lerp(ICE, ice);
+      view.wall.color.copy(view.wallColor).lerp(ICE_WALL, ice);
+    }
     for (const peak of this.peaks) {
-      const g = state.ranges[peak.range];
+      const g = profileAt(peak.growth, ma);
       peak.mesh.visible = g > 0.01;
       peak.mesh.scale.set(peak.width * (0.6 + 0.4 * g), peak.height * g, peak.width * (0.6 + 0.4 * g));
     }
-    for (const label of state.labels) {
-      const sprite = this.labelSprites.get(label.id)!;
-      sprite.position.set(...label.position).multiplyScalar(1.07);
-      sprite.userData.opacity = label.opacity;
-      sprite.visible = label.opacity > 0.01;
+    for (const def of MAP_LABELS) {
+      const sprite = this.labelSprites.get(def.id)!;
+      const opacity = profileAt(def.opacity, ma);
+      labelPosition(def.anchor, ma, sprite.position).multiplyScalar(1.07);
+      sprite.userData.opacity = opacity;
+      sprite.visible = opacity > 0.01;
     }
   }
 
@@ -253,7 +258,10 @@ class ContinentsExperienceImpl implements FourDExperience {
     if (this.ctx) {
       for (const b of this.blocks) this.ctx.unregisterHoverable(b.group);
       if (this.ocean) this.ctx.unregisterHoverable(this.ocean);
-      if (this.light) disposeObject(this.light);
+      if (this.light) {
+        disposeObject(this.light);
+        this.light.dispose();
+      }
       if (this.addedCamera) this.ctx.scene.remove(this.ctx.camera);
     }
     for (const sprite of this.labelSprites.values()) sprite.material.map?.dispose();
@@ -266,6 +274,7 @@ class ContinentsExperienceImpl implements FourDExperience {
     this.light = null;
     this.addedCamera = false;
     this.ctx = null;
+    this.time = -OLDEST_MA;
   }
 }
 

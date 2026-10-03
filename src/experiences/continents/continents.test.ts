@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { EVENTS } from "./continentsData";
 import { continentsExperience as exp } from "./ContinentsExperience";
 import { continentsStateAt, formatMa } from "./ContinentsState";
+import { triangulate } from "./globeModel";
+import { GREATER_INDIA, OUTLINES } from "./outlines";
 
 function block(ma: number, id: string) {
   return continentsStateAt(-ma).blocks.find((b) => b.id === id)!;
@@ -28,20 +30,28 @@ describe("continents time axis", () => {
   });
 
   it("runs from Pangaea to today, linearly", () => {
-    expect(exp.minTime).toBe(-250);
-    expect(exp.maxTime).toBe(0);
     expect(exp.mapping.toTime(0)).toBe(-250);
     expect(exp.mapping.toTime(1)).toBe(0);
     expect(exp.mapping.toParam(exp.mapping.toTime(0.37))).toBeCloseTo(0.37, 9);
     expect(exp.mapping.ticks().map((t) => t.label)).toEqual(["250M yrs", "200M yrs", "150M yrs", "100M yrs", "50M yrs", "Today"]);
   });
 
-  it("keeps events sorted, inside the range, from Pangaea to Today", () => {
+  it("keeps events sorted and spanning exactly the range", () => {
     for (let i = 1; i < EVENTS.length; i++) expect(EVENTS[i].time).toBeGreaterThan(EVENTS[i - 1].time);
-    expect(EVENTS[0]).toMatchObject({ time: -250, title: "Pangaea", when: "250 million years ago" });
-    expect(EVENTS[EVENTS.length - 1]).toMatchObject({ time: 0, title: "Today", when: "Today" });
-    expect(EVENTS.find((e) => e.id === "k-pg")!.time).toBe(-66);
-    expect(EVENTS.find((e) => e.id === "india-asia")!.time).toBe(-50);
+    expect(EVENTS[0].time).toBe(exp.minTime);
+    expect(Object.is(EVENTS[EVENTS.length - 1].time, exp.maxTime)).toBe(true);
+    expect(exp.getCurrentEvent(0)!.title).toBe("Today");
+    expect(exp.getCurrentEvent(-60)!.title).toBe("The dinosaurs die out");
+  });
+});
+
+describe("continents outlines", () => {
+  it("triangulates every outline as a simple polygon", () => {
+    const polygons = [...Object.values(OUTLINES).flat(), ...GREATER_INDIA];
+    for (const rings of polygons) {
+      const points = rings.reduce((n, ring) => n + ring.length, 0);
+      expect(triangulate(rings).tris).toHaveLength(points - 2 + 2 * (rings.length - 1));
+    }
   });
 });
 
@@ -89,25 +99,25 @@ describe("continents reconstruction", () => {
     expect(continentsStateAt(0).ranges.appalachians).toBeCloseTo(0.4, 9);
   });
 
-  it("is a pure function of time", () => {
-    expect(exp.getState(-123.4)).toEqual(exp.getState(-123.4));
+  it("is a pure function of time: scrubbing back lands on the same world", () => {
     exp.setTime(-150);
     exp.setTime(-40);
-    const after = exp.getHoveredObject("india");
-    exp.setTime(-40);
-    expect(exp.getHoveredObject("india")).toEqual(after);
+    expect(exp.getHoveredObject("india")).toMatchObject({
+      name: "India",
+      description: "Rams into Asia. Its northern edge slides under Tibet and the Himalaya rise.",
+      properties: { "Centre latitude": "10°N", Speed: "3 cm a year" },
+    });
+    expect(exp.getState(-123.4)).toEqual(continentsStateAt(-123.4));
   });
 });
 
 describe("continents hover and views", () => {
   it("describes blocks as they are at the current time", () => {
     exp.setTime(-150);
-    expect(exp.getHoveredObject("india")).toMatchObject({
-      name: "India",
-      properties: { "Centre latitude": `${Math.round(-block(150, "india").centre.lat)}°S` },
-    });
+    expect(exp.getHoveredObject("india")!.properties).toEqual({ "Centre latitude": "42°S", Speed: "3 cm a year" });
     exp.setTime(0);
     expect(exp.getHoveredObject("india")!.properties!["Centre latitude"]).toBe("21°N");
+    expect(exp.getHoveredObject("ocean")!.name).toBe("Ocean");
     expect(exp.getHoveredObject("nowhere")).toBeNull();
   });
 

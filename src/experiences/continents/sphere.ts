@@ -28,7 +28,7 @@ export function euler(pole: LonLat, angle: number): THREE.Quaternion {
   return new THREE.Quaternion().setFromAxisAngle(toVec(pole), angle * DEG);
 }
 
-/** East, north, up at a point. Degenerate exactly at the poles, which no anchor uses. */
+/** East, north, up at a point. Degenerate exactly at the poles, which no anchor or placement uses. */
 function frame(p: LonLat): THREE.Matrix4 {
   const up = toVec(p);
   const east = new THREE.Vector3(0, 1, 0).cross(up).normalize();

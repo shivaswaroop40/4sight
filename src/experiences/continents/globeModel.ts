@@ -24,8 +24,13 @@ interface Mesh2 {
   tris: [number, number, number][];
 }
 
-function triangulate(rings: Polygon): Mesh2 {
-  const ringVerts = rings.map((ring) => ring.map((p) => toVec(p)));
+export function triangulate(rings: Polygon): Mesh2 {
+  // GeoJSON rings may repeat the first point at the end; earcut drops it, so we must too.
+  const open = rings.map((ring) => {
+    const [first, last] = [ring[0], ring[ring.length - 1]];
+    return first[0] === last[0] && first[1] === last[1] ? ring.slice(0, -1) : ring;
+  });
+  const ringVerts = open.map((ring) => ring.map((p) => toVec(p)));
   const centre = ringVerts[0].reduce((sum, v) => sum.add(v), new THREE.Vector3()).normalize();
   const east = new THREE.Vector3(0, 1, 0).cross(centre);
   if (east.lengthSq() < 1e-6) east.set(1, 0, 0);

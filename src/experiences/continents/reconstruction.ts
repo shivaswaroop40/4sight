@@ -106,7 +106,7 @@ const india = keys((a) => {
   if (a === 66) return compose(africa[66], place(ANCHORS.india, [67, -6], -18));
   // After about 50 million years ago India is jammed against Asia, still
   // creeping north as Greater India slides under Tibet.
-  const behind: Partial<Record<Age, number>> = { 50: 12, 40: 9, 20: 4, 0: 0 };
+  const behind: Partial<Record<Age, number>> = { 50: 13, 40: 10.5, 20: 6.5, 0: 0 };
   const [lon, lat] = ANCHORS.india;
   return compose(eurasia[a], place(ANCHORS.india, [lon, lat - behind[a]!], 0));
 });
