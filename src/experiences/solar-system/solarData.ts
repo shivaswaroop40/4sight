@@ -7,7 +7,7 @@
 // not to scale.
 
 import type { TimelineEvent } from "../../core/types";
-import type { SliderKnot } from "./solarMapping";
+import type { SliderKnot } from "../../core/mappings";
 
 export const KNOTS: SliderKnot[] = [
   { u: 0.0, time: 0, label: "Nebula" },

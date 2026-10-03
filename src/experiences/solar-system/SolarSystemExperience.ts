@@ -18,7 +18,8 @@ import type {
 } from "../../core/types";
 import { AccretionField } from "./AccretionField";
 import { BODIES, EVENTS, KNOTS, type BodyDef } from "./solarData";
-import { formatYears, knotMapping } from "./solarMapping";
+import { knotMapping } from "../../core/mappings";
+import { formatYears } from "./solarMapping";
 import { solarStateAt, type SolarState } from "./SolarSystemState";
 import { bandsTexture, earthTexture, glowTexture, ringTexture } from "./textures";
 
