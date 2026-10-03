@@ -1,4 +1,6 @@
+import * as THREE from "three";
 import { describe, expect, it } from "vitest";
+import type { SceneContext } from "../../core/types";
 import { EVENTS, hoverInfo } from "./treeData";
 import {
   KNOTS,
@@ -193,9 +195,32 @@ describe("oak hover and camera", () => {
     expect(hoverInfo("scar", 130)!.name).toBe("Storm scar and hollow");
   });
 
-  it("pulls the camera in close for the acorn", () => {
+  it("frames the jay, then pulls in close on the acorn", () => {
     expect(treeExperience.cameraDistanceScale!(150)).toBe(1);
-    expect(cameraScale(0)).toBeCloseTo(0.0101, 4);
+    expect(cameraScale(0)).toBeCloseTo(0.0194, 4);
+    expect(cameraScale(0.2)).toBeCloseTo(0.0101, 4);
+  });
+
+  it("has hover text for every part it registers, and unregisters them all", () => {
+    const registered = new Map<THREE.Object3D, string>();
+    const context: SceneContext = {
+      scene: new THREE.Scene(),
+      camera: new THREE.PerspectiveCamera(),
+      renderer: {} as THREE.WebGLRenderer,
+      registerHoverable: (object, id) => registered.set(object, id),
+      unregisterHoverable: (object) => registered.delete(object),
+    };
+    treeExperience.mount(context);
+    treeExperience.setTime(150);
+    const ids = [...new Set(registered.values())].sort();
+    expect(ids).toEqual([
+      "acorns", "canopy", "hill", "jay", "owl", "rabbit", "rings", "roots", "scar",
+      "squirrel", "storm", "storm-limb", "trunk", "woodpecker", "woodpecker-hole",
+    ]);
+    for (const id of ids) expect(treeExperience.getHoveredObject(id)?.name).toBeTruthy();
+    treeExperience.dispose();
+    expect(registered.size).toBe(0);
+    expect(context.scene.children.length).toBe(0);
   });
 
   it("offers three named views", () => {

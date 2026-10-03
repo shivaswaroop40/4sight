@@ -286,12 +286,27 @@ export function hoverInfo(id: string, t: number): ObjectMetadata | null {
         category: "tree",
         properties: { Since: `${Math.floor(t - STORY.storm)} years ago` },
       };
-    case "fallen-limb":
+    case "storm-limb":
+      return t < STORY.storm
+        ? {
+            id,
+            name: "Great limb",
+            description: "One of the big lower limbs, reaching out sideways to catch light. It carries a heavy load of leaves in summer.",
+            category: "tree",
+          }
+        : {
+            id,
+            name: "Fallen limb",
+            description: "Left where it fell. Rotting wood feeds fungi, beetle grubs and the birds that eat them.",
+            category: "tree",
+            properties: { "On the ground": `${Math.floor(t - STORY.storm)} years` },
+          };
+    case "woodpecker-hole":
       return {
         id,
-        name: "Fallen limb",
-        description: "Left where it fell. Rotting wood feeds fungi, beetle grubs and the birds that eat them.",
-        category: "tree",
+        name: "Woodpecker hole",
+        description: "A round hole about 5 cm across, chiselled into soft wood. Once the woodpeckers leave, tits, starlings or bats move in.",
+        category: "wildlife",
       };
     case "storm":
       return { id, name: "Gale", description: "Winds strong enough to snap a limb as thick as a person.", category: "weather" };

@@ -30,7 +30,7 @@ const Z_AXIS = new THREE.Vector3(0, 0, 1);
 
 /** Larger-than-life factor for small things on a big tree. */
 export function propScale(t: number): number {
-  return THREE.MathUtils.clamp(frameSize(t) / 7, 1, 3.2);
+  return THREE.MathUtils.clamp(frameSize(t) / 5, 1, 4.2);
 }
 
 function trunkRadius(s: number, t: number): number {
@@ -84,7 +84,7 @@ function acornMesh(length: number): THREE.Group {
 }
 
 /** Where the jay stands, which way it faces, and how far it has flown off. */
-const JAY_SPOT = new THREE.Vector3(-0.13, groundY(0.15), 0.08);
+const JAY_SPOT = new THREE.Vector3(-0.095, groundY(0.11), 0.06);
 const JAY_FACING = -30;
 
 function jayPose(t: number): { position: THREE.Vector3; dip: number; fly: number } {
@@ -283,10 +283,10 @@ function buildSquirrel(): Prop {
     object: g,
     hover: { id: "squirrel", target: g },
     pose(t) {
-      const r = 2.3;
-      const a = THREE.MathUtils.degToRad(12);
+      const r = 2.1;
+      const a = THREE.MathUtils.degToRad(100);
       g.position.set(Math.cos(a) * r, groundY(r), Math.sin(a) * r);
-      faceAzimuth(g, 70);
+      faceAzimuth(g, 30);
       const k = smoothstep(0.15, 0.3, acornsAt(t).onGround);
       show(g, k, propScale(t));
     },

@@ -151,13 +151,13 @@ export function buildGrass(seed = 7): THREE.InstancedMesh {
 export function buildLitter(seed = 19): THREE.InstancedMesh {
   let s = seed;
   const rand = () => ((s = (s * 16807) % 2147483647) / 2147483647);
-  const count = 34;
+  const count = 26;
   const mesh = new THREE.InstancedMesh(oakLeafGeometry(), makeToonMaterial("#ffffff", { side: THREE.DoubleSide }), count);
   mesh.name = "litter";
   const m = new THREE.Matrix4();
   const q = new THREE.Quaternion();
   const color = new THREE.Color();
-  const shades = [PALETTE.leafDead, "#A9845F", "#B99368", "#8E6A4E"];
+  const shades = [PALETTE.leafDead, "#8E6A4E", "#9A7A5C", "#7E624C"];
   let placed = 0;
   while (placed < count) {
     const r = 0.06 + Math.sqrt(rand()) * 0.38;
@@ -166,7 +166,7 @@ export function buildLitter(seed = 19): THREE.InstancedMesh {
     const z = Math.sin(a) * r;
     if (inNotch(x, z)) continue;
     q.setFromEuler(new THREE.Euler(-Math.PI / 2 + (rand() - 0.5) * 0.3, 0, rand() * Math.PI * 2, "XZY"));
-    const size = 0.05 + rand() * 0.035;
+    const size = 0.035 + rand() * 0.025;
     m.compose(new THREE.Vector3(x, groundY(r) + 0.002 + placed * 0.00004, z), q, new THREE.Vector3(size, size, size));
     mesh.setMatrixAt(placed, m);
     mesh.setColorAt(placed, color.set(shades[Math.floor(rand() * shades.length)]));

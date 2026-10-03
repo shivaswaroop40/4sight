@@ -135,9 +135,15 @@ export function ringWidth(year: number): number {
 /** How big the interesting part of the scene is at t, in metres. Drives the camera. */
 export function frameSize(t: number): number {
   const h = heightAt(t);
-  // A soft max keeps the acorn stage framed without a kink when the shoot appears.
-  const floor = 0.22;
+  // A soft max keeps the acorn stage framed without a kink when the shoot
+  // appears. It starts wider so the jay fits, then settles on the acorn.
+  const floor = 0.22 + 0.2 * jayOnStage(t);
   return Math.sqrt(floor * floor + (1.12 * h) * (1.12 * h));
+}
+
+/** 1 while the jay is burying the acorn, easing to 0 as it flies off. */
+function jayOnStage(t: number): number {
+  return 1 - smoothstep(STORY.jayLeaves, STORY.jayLeaves + 0.04, t);
 }
 
 /**
@@ -147,7 +153,7 @@ export function frameSize(t: number): number {
  */
 export function viewCenter(t: number): number {
   const s = frameSize(t);
-  return s * (-0.12 + 0.37 * smoothstep(0.3, 1.6, s));
+  return s * (-0.12 + 0.37 * smoothstep(0.3, 1.6, s)) + 0.11 * jayOnStage(t);
 }
 
 export function cameraScale(t: number): number {
@@ -313,9 +319,9 @@ export interface AcornSeason {
 /** English oak acorns swell in August, ripen in September and October, and drop. */
 export function acornSeason(phase: number): AcornSeason {
   return {
-    onTree: smoothstep(0.55, 0.62, phase) * (1 - smoothstep(0.78, 0.86, phase)),
+    onTree: smoothstep(0.55, 0.62, phase) * (1 - smoothstep(0.76, 0.82, phase)),
     ripe: smoothstep(0.66, 0.78, phase),
-    onGround: smoothstep(0.78, 0.86, phase) * (1 - smoothstep(0.95, 0.999, phase)),
+    onGround: smoothstep(0.76, 0.81, phase) * (1 - smoothstep(0.89, 0.95, phase)),
   };
 }
 

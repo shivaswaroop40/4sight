@@ -271,6 +271,12 @@ class TreeExperienceImpl implements FourDExperience {
 
   private hover(object: THREE.Object3D, id: string): void {
     object.userData.id = id;
+    // The raycaster ignores `visible`, and hidden instanced meshes keep stale
+    // instances, so a hidden part must not answer.
+    const raycast = object.raycast.bind(object);
+    object.raycast = (raycaster, hits) => {
+      if (object.visible) raycast(raycaster, hits);
+    };
     this.ctx!.registerHoverable(object, id);
     this.hoverables.push(object);
   }
@@ -442,12 +448,13 @@ class TreeExperienceImpl implements FourDExperience {
       const site = sites[i];
       const clump = SKELETON.clumps[site.clump];
       const axis = SKELETON.axes[clump.axis];
-      const shown = site.rank < crop.onTree && !(axis.lost && t > STORY.storm);
+      const { position, radius } = clumpPose(SKELETON, clump, t);
+      // Only on clumps that have grown: an unborn twig's site sits where it will one day reach.
+      const shown = site.rank < crop.onTree && radius > 0.5 * clump.maxRadius && !(axis.lost && t > STORY.storm);
       if (!shown) {
         nuts.setMatrixAt(i, ZERO);
         continue;
       }
-      const { position, radius } = clumpPose(SKELETON, clump, t);
       tmpP.set(...position).addScaledVector(tmpS.set(...site.offset), radius * 0.92);
       tmpQ.setFromEuler(tmpE.set(Math.PI, site.rank * 40, 0.3));
       tmpM.compose(tmpP, tmpQ, tmpS.setScalar(size));
