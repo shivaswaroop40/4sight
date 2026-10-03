@@ -99,6 +99,12 @@ export interface SceneDef {
   maxTime: number;
   mapping: MappingSpec;
   timeFormat: TimeFormatName;
+  /**
+   * Real seconds in one unit of experience time (60 for minutes, 31557600
+   * for years). Set it when experience time is real elapsed time: the HUD
+   * then shows the one-day clock. Leave it out for anything else.
+   */
+  secondsPerUnit?: number;
   labels: { start: string; end: string };
   baseDurationSeconds: number;
   warpPresets: number[];

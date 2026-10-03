@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { spanClock } from "../../core/analogy";
 import { mitosisExperience as exp } from "./MitosisExperience";
 
 const pose = (t: number, id: string) => exp.getState(t).objects.find((o) => o.id === id)!;
@@ -103,5 +104,14 @@ describe("mitosis state", () => {
       "Shown here": 4,
       "Each chromatid": "one DNA molecule",
     });
+  });
+});
+
+describe("mitosis one-day clock", () => {
+  it("squeezes 65 minutes into a day", () => {
+    const at = (minute: number) => spanClock(minute, exp.minTime, exp.maxTime);
+    expect(exp.elapsedSpanSeconds).toBe(3900);
+    expect(at(13)).toBe("4:48:00 am");
+    expect(at(65)).toBe("midnight");
   });
 });

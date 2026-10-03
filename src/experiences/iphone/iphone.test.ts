@@ -127,3 +127,9 @@ describe("iPhone X-ray", () => {
     iphoneExperience.dispose();
   });
 });
+
+describe("iPhone one-day clock", () => {
+  it("has none: assembly time is not elapsed time", () => {
+    expect(iphoneExperience.elapsedSpanSeconds).toBeUndefined();
+  });
+});

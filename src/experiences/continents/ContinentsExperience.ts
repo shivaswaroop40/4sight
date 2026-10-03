@@ -7,6 +7,7 @@
 
 import * as THREE from "three";
 import { linearMapping } from "../../core/mappings";
+import { YEAR_SECONDS } from "../../core/timescale";
 import { THEME, addOutline, disposeObject, makeToonMaterial } from "../../core/theme";
 import { eventAt } from "../../core/Timeline";
 import type {
@@ -86,6 +87,7 @@ class ContinentsExperienceImpl implements FourDExperience {
   mapping = linearMapping(-OLDEST_MA, 0, formatMa, TICKS);
   baseDurationSeconds = 40;
   warpPresets = [0.25, 0.5, 1, 2, 4];
+  elapsedSpanSeconds = (this.maxTime - this.minTime) * 1e6 * YEAR_SECONDS;
   labels = { start: "Pangaea", end: "Today" };
   events: TimelineEvent[] = EVENTS;
 

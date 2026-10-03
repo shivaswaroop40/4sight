@@ -16,6 +16,7 @@
     ]
   },
   "timeFormat": "year",
+  "secondsPerUnit": 31557600,
   "labels": {"start":"Village","end":"Today"},
   "baseDurationSeconds": 60,
   "warpPresets": [0.25,0.5,1,2,4],

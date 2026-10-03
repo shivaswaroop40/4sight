@@ -34,6 +34,10 @@ describe("heartbeat timeline", () => {
     expect(heart.getCurrentEvent(545)!.title).toBe("Dub: outflow valves snap shut");
   });
 
+  it("has no one-day clock: a single beat is not a span worth squeezing", () => {
+    expect(heart.elapsedSpanSeconds).toBeUndefined();
+  });
+
   it("offers the three camera views", () => {
     expect(heart.getCameraPresets().map((p) => p.name)).toEqual(["Front cutaway", "Side", "Valves"]);
   });

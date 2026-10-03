@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { spanClock } from "../../core/analogy";
+import { YEAR_SECONDS } from "../../core/timescale";
 import { EVENTS } from "./continentsData";
 import { continentsExperience as exp } from "./ContinentsExperience";
 import { continentsStateAt, formatMa } from "./ContinentsState";
@@ -124,5 +126,16 @@ describe("continents hover and views", () => {
   it("offers the four ocean views and no filters", () => {
     expect(exp.getCameraPresets().map((p) => p.name)).toEqual(["Atlantic", "Indian Ocean", "Pacific", "South Pole"]);
     expect(exp.getAvailableFilters()).toEqual([]);
+  });
+});
+
+describe("continents one-day clock", () => {
+  it("counts from Pangaea, 250 million years ago, not from the zero of the axis", () => {
+    const at = (time: number) => spanClock(time, exp.minTime, exp.maxTime);
+    expect(exp.elapsedSpanSeconds).toBe(250e6 * YEAR_SECONDS);
+    expect(at(-250)).toBe("12:00:00 am");
+    expect(at(-125)).toBe("12:00:00 pm");
+    expect(at(-66)).toBe("5:39:50 pm");
+    expect(at(0)).toBe("midnight");
   });
 });

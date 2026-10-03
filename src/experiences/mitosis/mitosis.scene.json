@@ -16,6 +16,7 @@
     ]
   },
   "timeFormat": "minutes",
+  "secondsPerUnit": 60,
   "labels": {"start":"One cell","end":"Two cells"},
   "baseDurationSeconds": 45,
   "warpPresets": [0.25,0.5,1,2,4],

@@ -11,6 +11,7 @@
 import * as THREE from "three";
 import { smoothstep } from "../../core/interpolate";
 import { THEME, addWarmLights, disposeObject, makeToonMaterial } from "../../core/theme";
+import { YEAR_SECONDS } from "../../core/timescale";
 import { eventAt } from "../../core/Timeline";
 import type {
   CameraPreset,
@@ -115,6 +116,7 @@ class TreeExperienceImpl implements FourDExperience {
   mapping = mapping;
   baseDurationSeconds = 48;
   warpPresets = [0.25, 0.5, 1, 2, 4];
+  elapsedSpanSeconds = (this.maxTime - this.minTime) * YEAR_SECONDS;
   labels = { start: "Acorn", end: "150 years" };
   events: TimelineEvent[] = EVENTS;
 

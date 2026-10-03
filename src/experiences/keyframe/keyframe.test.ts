@@ -159,6 +159,11 @@ describe("keyframeExperience", () => {
     expect(exp.getCameraPresets().map((p) => p.name)).toEqual(["Front"]);
     expect(exp.getCurrentEvent(7)?.id).toBe("b");
     expect(exp.cameraDistanceScale(3)).toBe(1);
+    expect(exp.elapsedSpanSeconds).toBeUndefined();
+  });
+
+  it("opts into the one-day clock with secondsPerUnit", () => {
+    expect(keyframeExperience("mock", scene({ secondsPerUnit: 60 })).elapsedSpanSeconds).toBe(600);
   });
 
   it("changes hover text with time", () => {
@@ -267,6 +272,7 @@ describe("parseScene validation", () => {
       "must run from minTime to maxTime",
     );
     expect(bad({ timeFormat: "fortnights" })).toThrow('unknown time format "fortnights"');
+    expect(bad({ secondsPerUnit: 0 })).toThrow("secondsPerUnit: must be greater than 0");
   });
 
   it("throws SceneParseError", () => {

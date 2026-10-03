@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { spanClock } from "../../core/analogy";
 import { cityExperience as exp } from "./CityExperience";
 
 const pose = (year: number, id: string) => exp.getState(year).objects.find((o) => o.id === id)!;
@@ -141,5 +142,15 @@ describe("city state", () => {
     exp.setTime(1995);
     expect(exp.getHoveredObject("mill")?.description).toBe("Restored as a café and small museum.");
     expect(exp.getHoveredObject("chimney")?.description).toMatch(/kept as a monument/);
+  });
+});
+
+describe("city one-day clock", () => {
+  it("counts from 1700, not from year zero", () => {
+    const at = (year: number) => spanClock(year, exp.minTime, exp.maxTime);
+    expect(exp.elapsedSpanSeconds).toBe(325 * 31_557_600);
+    expect(at(1700)).toBe("12:00:00 am");
+    expect(at(1862.5)).toBe("12:00:00 pm");
+    expect(at(1880)).toBe("1:17:32 pm");
   });
 });

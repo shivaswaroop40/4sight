@@ -1,5 +1,7 @@
 import * as THREE from "three";
 import { describe, expect, it } from "vitest";
+import { spanClock } from "../../core/analogy";
+import { YEAR_SECONDS } from "../../core/timescale";
 import type { SceneContext } from "../../core/types";
 import { EVENTS, hoverInfo } from "./treeData";
 import {
@@ -281,5 +283,14 @@ describe("oak hover and camera", () => {
 
   it("offers three named views", () => {
     expect(treeExperience.getCameraPresets().map((p) => p.name)).toEqual(["Three-quarter", "Trunk and rings", "Below the canopy"]);
+  });
+});
+
+describe("tree one-day clock", () => {
+  it("squeezes 150 years into a day", () => {
+    const at = (time: number) => spanClock(time, treeExperience.minTime, treeExperience.maxTime);
+    expect(treeExperience.elapsedSpanSeconds).toBe(150 * YEAR_SECONDS);
+    expect(at(75)).toBe("12:00:00 pm");
+    expect(at(1)).toBe("12:09:36 am");
   });
 });

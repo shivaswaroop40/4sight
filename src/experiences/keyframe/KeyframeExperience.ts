@@ -74,6 +74,7 @@ export class KeyframeExperience implements FourDExperience {
   readonly mapping: TimeMapping;
   readonly baseDurationSeconds: number;
   readonly warpPresets: number[];
+  readonly elapsedSpanSeconds?: number;
   readonly labels: { start: string; end: string };
   readonly events: TimelineEvent[];
   readonly def: SceneDef;
@@ -96,6 +97,7 @@ export class KeyframeExperience implements FourDExperience {
     this.mapping = mappingFor(def);
     this.baseDurationSeconds = def.baseDurationSeconds;
     this.warpPresets = def.warpPresets;
+    if (def.secondsPerUnit !== undefined) this.elapsedSpanSeconds = (def.maxTime - def.minTime) * def.secondsPerUnit;
     this.labels = def.labels;
     this.events = def.events;
     this.currentTime = def.minTime;

@@ -5,7 +5,7 @@
 // analogy: "If 4.6 billion years fit in one day, now is 11:58:43 pm". A
 // narrow readout says "One-day clock: 11:58:43 pm" instead.
 
-import { dayClock } from "../core/analogy";
+import { spanClock } from "../core/analogy";
 import { formatSpan } from "../core/timescale";
 import type { FourDExperience } from "../core/types";
 import { DirectionIcon, PauseIcon, PlayIcon, ResetIcon } from "./icons";
@@ -62,7 +62,7 @@ export function TimeReadout({ experience }: { experience: FourDExperience }) {
 
 function DayAnalogy({ experience, spanSeconds }: { experience: FourDExperience; spanSeconds: number }) {
   const { minTime, maxTime } = experience;
-  const clock = useTime((s) => dayClock((s.time - minTime) / (maxTime - minTime)));
+  const clock = useTime((s) => spanClock(s.time, minTime, maxTime));
   return (
     <span className="readout__analogy">
       <span className="readout__long">If {formatSpan(spanSeconds)} fit in one day, now is </span>

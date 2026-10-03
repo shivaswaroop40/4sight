@@ -9,6 +9,7 @@
 
 import * as THREE from "three";
 import { knotMapping } from "../../core/mappings";
+import { YEAR_SECONDS } from "../../core/timescale";
 import { THEME, addOutline, addWarmLights, disposeObject } from "../../core/theme";
 import { eventAt } from "../../core/Timeline";
 import type {
@@ -57,6 +58,7 @@ class UniverseExperience implements FourDExperience {
   mapping = knotMapping(KNOTS, formatCosmicTime);
   baseDurationSeconds = 60;
   warpPresets = [0.25, 0.5, 1, 2, 4];
+  elapsedSpanSeconds = (this.maxTime - this.minTime) * YEAR_SECONDS;
   labels = { start: "Big Bang", end: "Today" };
   events: TimelineEvent[] = EVENTS;
 

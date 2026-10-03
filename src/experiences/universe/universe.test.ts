@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { spanClock } from "../../core/analogy";
+import { YEAR_SECONDS } from "../../core/timescale";
 import { knotMapping } from "../../core/mappings";
 import { buildCosmicWeb } from "./cosmicWeb";
 import { EVENTS, KNOTS, formatCosmicTime, seconds } from "./universeData";
@@ -178,5 +180,15 @@ describe("universe scene data", () => {
 
   it("offers the three named views, none duplicating the Overview button", () => {
     expect(universeExperience.getCameraPresets().map((p) => p.name)).toEqual(["Wide", "Inside the web", "Galaxy close-up"]);
+  });
+});
+
+describe("universe one-day clock", () => {
+  it("is the cosmic calendar: the Sun forms at 4 pm", () => {
+    const at = (time: number) => spanClock(time, universeExperience.minTime, universeExperience.maxTime);
+    expect(universeExperience.elapsedSpanSeconds).toBe(13.8e9 * YEAR_SECONDS);
+    expect(at(EVENTS.find((e) => e.id === "sun")!.time)).toBe("4:00:00 pm");
+    expect(at(13.8e9 - 300_000)).toBe("11:59:58 pm");
+    expect(at(13.8e9)).toBe("midnight");
   });
 });

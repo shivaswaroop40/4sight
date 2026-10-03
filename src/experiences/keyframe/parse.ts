@@ -315,6 +315,9 @@ export function parseScene(json: unknown): SceneDef {
   const timeFormat = str(root.timeFormat, "timeFormat");
   if (!isTimeFormatName(timeFormat)) fail("timeFormat", `unknown time format "${timeFormat}"`);
 
+  const secondsPerUnit = root.secondsPerUnit === undefined ? undefined : num(root.secondsPerUnit, "secondsPerUnit");
+  if (secondsPerUnit !== undefined && secondsPerUnit <= 0) fail("secondsPerUnit", "must be greater than 0");
+
   const labelsRaw = obj(root.labels, "labels");
   const hover: Record<string, HoverDef> = {};
   if (root.hover !== undefined) {
@@ -335,6 +338,7 @@ export function parseScene(json: unknown): SceneDef {
     maxTime,
     mapping: mappingSpec(root.mapping, minTime, maxTime, "mapping"),
     timeFormat,
+    secondsPerUnit,
     labels: { start: str(labelsRaw.start, "labels.start"), end: str(labelsRaw.end, "labels.end") },
     baseDurationSeconds: num(root.baseDurationSeconds, "baseDurationSeconds"),
     warpPresets: arr(root.warpPresets, "warpPresets").map((w, i) => num(w, `warpPresets[${i}]`)),
