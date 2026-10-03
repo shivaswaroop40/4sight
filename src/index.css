@@ -266,6 +266,26 @@ button {
   background: var(--paper-deep);
 }
 
+.actions__btn--tour {
+  display: inline-flex;
+  gap: 6px;
+  width: auto;
+  padding: 0 14px 0 9px;
+  border-radius: var(--r-pill);
+  font-weight: 800;
+  font-size: 15px;
+}
+
+.actions__btn--tour[aria-pressed="true"] {
+  background: var(--mustard);
+}
+
+.actions__btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+  background: none;
+}
+
 .menu {
   position: absolute;
   top: calc(100% + 10px);
@@ -584,6 +604,107 @@ button {
   height: 15px;
 }
 
+/* Guided tour: where it is, with Next and Exit. */
+
+.tourbar {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  max-width: calc(100vw - 24px);
+  padding: 5px 6px 5px 16px;
+  border-radius: var(--r-pill);
+  box-shadow: var(--shadow-sm);
+  animation: pop-in var(--t) var(--bounce);
+}
+
+.tourbar__count {
+  font-size: 14px;
+  font-weight: 800;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.tourbar__dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.tourbar__dot {
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: var(--cream);
+  transition:
+    background var(--t) var(--ease),
+    scale var(--t) var(--bounce);
+}
+
+.tourbar__dot[data-state="past"] {
+  background: var(--terracotta);
+}
+
+.tourbar__dot[data-state="here"],
+.tourbar__dot[data-state="heading"] {
+  background: var(--mustard);
+  scale: 1.35;
+}
+
+/* On the way: the next dot breathes until the tour arrives. */
+.tourbar__dot[data-state="heading"] {
+  animation: dot-pulse 900ms var(--ease) infinite alternate;
+}
+
+@keyframes dot-pulse {
+  from {
+    scale: 0.9;
+    background: var(--cream);
+  }
+}
+
+.tourbar__next {
+  position: relative;
+  overflow: hidden;
+  padding: 5px 10px 5px 12px;
+}
+
+.tourbar__next > :not(.tourbar__hold) {
+  position: relative;
+}
+
+/* Fills over the hold on an event: when it is full, the tour moves on. */
+.tourbar__hold {
+  position: absolute;
+  inset: 0;
+  background: var(--sage);
+  transform-origin: left;
+  animation: hold-fill linear both;
+}
+
+@keyframes hold-fill {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+.tourbar__icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--ink-soft);
+}
+
+.tourbar__icon:hover {
+  color: var(--ink);
+  background: rgba(59, 47, 42, 0.08);
+}
+
 /* First load: the stage has nothing to show yet. */
 
 .notice {
@@ -867,6 +988,14 @@ button {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+/* The tour is holding on this card's event: a mustard mat inside the ink outline. Inset, so the card keeps its footprint. */
+.info[data-reading="1"] {
+  box-shadow:
+    inset 0 0 0 5px var(--mustard),
+    var(--shadow-lg);
+  transition: box-shadow var(--t) var(--ease);
 }
 
 .info__head {
@@ -1542,6 +1671,13 @@ button {
     left: auto;
     right: -4px;
   }
+  .actions__btn--tour {
+    width: 38px;
+    padding: 0;
+  }
+  .actions__label {
+    display: none;
+  }
   .rail {
     justify-self: center;
   }
@@ -1625,6 +1761,20 @@ button {
   .flag::after {
     width: 9px;
   }
+  .tourbar {
+    gap: 8px;
+    padding-left: 14px;
+  }
+  .tourbar__word {
+    display: none;
+  }
+  .tourbar__dots {
+    gap: 3px;
+  }
+  .tourbar__dot {
+    width: 8px;
+    height: 8px;
+  }
   .brand {
     padding: 5px 6px;
   }
@@ -1664,6 +1814,10 @@ button {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  /* Its fill is the countdown itself; cut short, it would read as already full. */
+  .tourbar__hold {
+    display: none;
+  }
   *,
   *::before,
   *::after {

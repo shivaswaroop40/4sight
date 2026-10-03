@@ -98,10 +98,12 @@ export class TimeController implements ITimeController {
     this.notify();
   }
 
+  /** Lands on exactly `time` (clamped to the span), not toTime(toParam(time)), which can miss by a float step. */
   setTime(time: number): void {
-    if (!this.experience) return;
-    const param = this.experience.mapping.toParam(time);
-    this.applyParam(param);
+    if (!this.experience || !Number.isFinite(time)) return;
+    const { minTime, maxTime, mapping } = this.experience;
+    const exact = Math.min(maxTime, Math.max(minTime, time));
+    this.applyParam(clamp01(mapping.toParam(exact)), exact);
   }
 
   setParam(u: number): void {
@@ -165,9 +167,9 @@ export class TimeController implements ITimeController {
     };
   }
 
-  private applyParam(param: number): void {
+  private applyParam(param: number, exactTime?: number): void {
     if (!this.experience) return;
-    const time = this.experience.mapping.toTime(param);
+    const time = exactTime ?? this.experience.mapping.toTime(param);
     this._state = { ...this._state, param, time };
     this.experience.setTime(time);
     this.notify();

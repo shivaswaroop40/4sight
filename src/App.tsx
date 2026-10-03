@@ -20,7 +20,7 @@ import { TimeControls, TimeReadout } from "./ui/TimeControls";
 import { TimeWarp } from "./ui/TimeWarp";
 import { Timeline } from "./ui/Timeline";
 import { Mark } from "./ui/icons";
-import { controller, currentMoment, runtime, setUi, showExperience, useUi } from "./ui/runtime";
+import { controller, currentMoment, getUi, runtime, setUi, showExperience, useUi } from "./ui/runtime";
 import { startUrlSync } from "./ui/urlSync";
 import { useShortcuts } from "./ui/useShortcuts";
 
@@ -37,7 +37,7 @@ function App() {
     runtime.manager = manager;
     manager.setHoverListener((hoveredId) => setUi({ hoveredId }));
     manager.start();
-    const urlSync = startUrlSync(controller, currentMoment);
+    const urlSync = startUrlSync(controller, currentMoment, () => getUi().tour.phase === "travelling");
     runtime.urlSync = urlSync;
     const moment = parseMoment(
       window.location.search,

@@ -104,6 +104,22 @@ export const LinkIcon = () => (
   </Icon>
 );
 
+/** A pennant like the timeline's event flags: the tour visits each one. */
+export const TourIcon = () => (
+  <Icon>
+    <path d="M6.5 20.5V4" />
+    <path d="M6.5 4.5h11l-2.8 4.2 2.8 4.3h-11" fill="var(--mustard)" />
+  </Icon>
+);
+
+/** Skip to the next event. */
+export const NextIcon = () => (
+  <Icon width="16" height="16">
+    <path d="M6 5.5v13l9-6.5z" fill="currentColor" />
+    <path d="M18.5 5.5v13" />
+  </Icon>
+);
+
 /** The 4sight mark: a clock face whose hand sweeps through four ticks. */
 export const Mark = () => (
   <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true">

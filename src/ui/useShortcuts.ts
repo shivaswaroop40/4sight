@@ -1,15 +1,21 @@
 // src/ui/useShortcuts.ts
 //
 // Space play/pause, R reverse, Left/Right nudge u by 0.01, 0 reset,
-// G opens the gallery. Esc belongs to whatever is open: the gallery is a
-// native modal dialog that closes itself on Esc.
+// G opens the gallery, T starts or ends the guided tour. Esc closes the
+// top-most thing: the gallery (a native modal dialog that closes itself),
+// then an open menu or popover (which claims the key with preventDefault),
+// then the tour.
 //
-// Ignored while typing in a form control and while a modal dialog is open
-// (its own keys win); Space on a focused button is left to the button so it
-// does not toggle twice. Each shortcut is named in its button's title.
+// Ignored while a modal dialog is open (its own keys win) and, except Esc,
+// while typing in a form control; Space on a focused button is left to the
+// button so it does not toggle twice. Playing, scrubbing, nudging or
+// resetting during the tour ends it (see tour/tourRunner.ts). Each shortcut
+// is named in its button's title.
 
 import { useEffect } from "react";
-import { controller, setUi } from "./runtime";
+import { controller, getUi, setUi } from "./runtime";
+import { isTouring } from "./tour/tourMachine";
+import { dispatchTour } from "./tour/tourRunner";
 
 const NUDGE = 0.01;
 
@@ -25,8 +31,12 @@ export function useShortcuts(): void {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
-      if (isFormControl(e.target)) return;
       if (document.querySelector("dialog[open]")) return;
+      if (e.key === "Escape") {
+        if (!e.defaultPrevented) dispatchTour({ type: "exit" });
+        return;
+      }
+      if (isFormControl(e.target)) return;
       const onButton = e.target instanceof HTMLButtonElement;
       switch (e.key) {
         case " ":
@@ -53,6 +63,10 @@ export function useShortcuts(): void {
         case "G":
           e.preventDefault();
           setUi({ galleryOpen: true });
+          break;
+        case "t":
+        case "T":
+          dispatchTour({ type: isTouring(getUi().tour) ? "exit" : "start" });
           break;
       }
     };

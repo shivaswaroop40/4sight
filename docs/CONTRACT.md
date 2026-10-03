@@ -64,6 +64,7 @@ export interface TimeController {
   toggle(): void;
   reverse(): void;
 
+  /** Lands on exactly `time` (clamped to the span), so the event that starts at `time` is current. */
   setTime(time: number): void;
   setParam(u: TimeParam): void;
   setPlaybackSpeed(speed: number): void;

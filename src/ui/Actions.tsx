@@ -1,26 +1,47 @@
 // src/ui/Actions.tsx
 //
-// The actions cluster in the top bar: Filters (only when the experience has
-// any) and the More menu, whose one item copies a link to the current
-// moment. Each popup closes on Esc (focus returns to its button) and on a
-// press outside it. The menu also closes on Tab; the filters popover closes
-// once focus leaves it.
+// The actions cluster in the top bar: Tour, Filters (only when the
+// experience has any) and the More menu, whose one item copies a link to
+// the current moment. Each popup closes on Esc (focus returns to its
+// button) and on a press outside it. The menu also closes on Tab; the
+// filters popover closes once focus leaves it.
 
 import { useCallback, useEffect, useId, useRef, useState, type RefObject } from "react";
 import { isDefaultFilterState } from "../core/filters";
 import { formatMoment } from "../core/moment";
 import type { FilterState, FourDExperience, VisualizationFilter } from "../core/types";
-import { FiltersIcon, LinkIcon, MoreIcon } from "./icons";
+import { FiltersIcon, LinkIcon, MoreIcon, TourIcon } from "./icons";
 import { currentMoment, pressFilter, setUi, useUi } from "./runtime";
+import { isTouring } from "./tour/tourMachine";
+import { dispatchTour } from "./tour/tourRunner";
 
 export function Actions() {
   const experience = useUi((s) => s.experience);
   const hasFilters = (experience?.getAvailableFilters().length ?? 0) > 0;
   return (
     <div className="actions" role="group" aria-label="Actions">
+      <TourButton disabled={(experience?.events.length ?? 0) === 0} />
       {experience && hasFilters && <FiltersPopover key={experience.id} experience={experience} />}
       <MoreMenu />
     </div>
+  );
+}
+
+/** Starts the guided tour, or ends the one running. */
+function TourButton({ disabled }: { disabled: boolean }) {
+  const running = useUi((s) => isTouring(s.tour));
+  return (
+    <button
+      type="button"
+      className="actions__btn actions__btn--tour"
+      aria-pressed={running}
+      title="Tour (T)"
+      disabled={disabled}
+      onClick={() => dispatchTour({ type: running ? "exit" : "start" })}
+    >
+      <TourIcon />
+      <span className="actions__label">Tour</span>
+    </button>
   );
 }
 

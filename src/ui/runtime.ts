@@ -3,7 +3,8 @@
 // App-wide singletons and a tiny store for the UI state that lives outside
 // the TimeController: the mounted experience, the state of the latest
 // experience request, the filters it renders under, the hovered object,
-// whether the gallery is open, and the toast in the status rail.
+// whether the gallery is open, the toast in the status rail, and the guided
+// tour's state.
 // Components subscribe to exactly the fields they render.
 
 import { useSyncExternalStore } from "react";
@@ -13,6 +14,7 @@ import { TimeController } from "../core/TimeController";
 import type { ExperienceId, FilterState, FourDExperience, TimeState } from "../core/types";
 import { loadExperience } from "../experiences/index";
 import type { SceneManager } from "../renderer/SceneManager";
+import { TOUR_IDLE, type TourState } from "./tour/tourMachine";
 import type { UrlSync } from "./urlSync";
 
 export const controller = new TimeController();
@@ -36,6 +38,7 @@ interface UiState {
   hoveredId: string | null;
   galleryOpen: boolean;
   toast: Toast | null;
+  tour: TourState;
 }
 
 let ui: UiState = {
@@ -45,6 +48,7 @@ let ui: UiState = {
   hoveredId: null,
   galleryOpen: false,
   toast: null,
+  tour: TOUR_IDLE,
 };
 const uiListeners = new Set<() => void>();
 
@@ -60,7 +64,7 @@ export function getUi(): UiState {
   return ui;
 }
 
-function subscribeUi(listener: () => void): () => void {
+export function subscribeUi(listener: () => void): () => void {
   uiListeners.add(listener);
   return () => {
     uiListeners.delete(listener);
