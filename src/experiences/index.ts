@@ -16,6 +16,7 @@ import { universeExperience } from "./universe/UniverseExperience";
 import { mitosisExperience } from "./mitosis/MitosisExperience";
 import { cityExperience } from "./city/CityExperience";
 import { heartExperience } from "./heart/HeartExperience";
+import { treeExperience } from "./tree/TreeExperience";
 
 const real: FourDExperience[] = [
   iphoneExperience,
@@ -24,6 +25,7 @@ const real: FourDExperience[] = [
   mitosisExperience,
   cityExperience,
   heartExperience,
+  treeExperience,
 ];
 
 const mocks: FourDExperience[] = [mockExperience, mockLogExperience];

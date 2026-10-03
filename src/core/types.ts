@@ -11,7 +11,7 @@
 //   accumulates, never plays an animation. Scrubbing, reverse, jumping, and
 //   warping all fall out of this one rule for free.
 
-export type ExperienceId = "iphone" | "solarSystem" | "galaxy" | "universe" | "mock" | "mockLog" | "mitosis" | "city" | "heart";
+export type ExperienceId = "iphone" | "solarSystem" | "galaxy" | "universe" | "mock" | "mockLog" | "mitosis" | "city" | "heart" | "tree";
 
 /** Normalized slider and playback parameter in [0, 1]. */
 export type TimeParam = number;
