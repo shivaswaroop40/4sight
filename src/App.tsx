@@ -3,12 +3,14 @@
 // Composition only. The renderer is created once; switching experiences
 // goes through showExperience, which loads the experience's chunk and then
 // SceneManager.mount disposes the old experience, mounts the new one,
-// resets u to 0 (paused), and frames its first preset.
+// resets u to 0 (paused), and frames its first preset. The first experience
+// opens on the moment in the URL (?x=<id>&u=<u>), paused.
 
 import { useEffect, useRef } from "react";
-import type { ExperienceId } from "./core/types";
+import { parseMoment } from "./core/moment";
 import { experiences } from "./experiences/index";
 import { SceneManager } from "./renderer/SceneManager";
+import { Actions } from "./ui/Actions";
 import { ExperiencePicker, Gallery } from "./ui/Gallery";
 import { InfoPanel } from "./ui/InfoPanel";
 import { ObjectInfo } from "./ui/ObjectInfo";
@@ -18,20 +20,9 @@ import { TimeControls, TimeReadout } from "./ui/TimeControls";
 import { TimeWarp } from "./ui/TimeWarp";
 import { Timeline } from "./ui/Timeline";
 import { Mark } from "./ui/icons";
-import { controller, runtime, setUi, showExperience, useUi } from "./ui/runtime";
+import { controller, currentMoment, runtime, setUi, showExperience, useUi } from "./ui/runtime";
+import { startUrlSync } from "./ui/urlSync";
 import { useShortcuts } from "./ui/useShortcuts";
-
-function idFromUrl(): ExperienceId {
-  const wanted = new URLSearchParams(window.location.search).get("x");
-  const match = experiences.find((e) => e.id === wanted);
-  return (match ?? experiences[0]).id;
-}
-
-function writeUrl(id: ExperienceId): void {
-  const url = new URL(window.location.href);
-  url.searchParams.set("x", id);
-  window.history.replaceState(null, "", url);
-}
 
 function App() {
   const viewportRef = useRef<HTMLDivElement | null>(null);
@@ -46,15 +37,24 @@ function App() {
     runtime.manager = manager;
     manager.setHoverListener((hoveredId) => setUi({ hoveredId }));
     manager.start();
-    void showExperience(idFromUrl());
+    const urlSync = startUrlSync(controller, currentMoment);
+    runtime.urlSync = urlSync;
+    const moment = parseMoment(
+      window.location.search,
+      experiences.map((e) => e.id),
+      experiences[0].id,
+    );
+    void showExperience(moment.id, moment.u);
     return () => {
+      urlSync.dispose();
+      runtime.urlSync = null;
       manager.dispose();
       runtime.manager = null;
     };
   }, []);
 
   useEffect(() => {
-    if (experience) writeUrl(experience.id);
+    if (experience) runtime.urlSync?.flush();
   }, [experience]);
 
   // The mobile bottom sheet sits just above the transport bar, whatever its height.
@@ -79,6 +79,7 @@ function App() {
             <Mark />
             <span className="brand__word">4sight</span>
           </div>
+          <Actions />
         </div>
         <ExperiencePicker />
         <PerspectiveControls />

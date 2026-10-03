@@ -131,6 +131,7 @@ button {
 
 .topbar {
   position: absolute;
+  z-index: 2;
   top: var(--s5);
   left: var(--s5);
   right: var(--s5);
@@ -234,6 +235,73 @@ button {
   background: #8fc0a8;
 }
 
+/* Actions cluster and the More menu */
+
+.actions {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  background: var(--cream);
+  border: var(--outline);
+  border-radius: var(--r-pill);
+  box-shadow: var(--shadow);
+}
+
+.actions__btn {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  transition: background var(--t-fast) var(--ease);
+}
+
+.actions__btn:hover,
+.actions__btn[aria-expanded="true"] {
+  background: var(--paper-deep);
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: -4px;
+  min-width: 190px;
+  padding: 6px;
+  display: grid;
+  gap: 2px;
+  border-radius: var(--r);
+  animation: pop-in var(--t-fast) var(--ease);
+}
+
+.menu__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 12px;
+  border: 0;
+  border-radius: var(--r-sm);
+  background: none;
+  font-weight: 800;
+  font-size: 15px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.menu__item:hover,
+.menu__item:focus-visible {
+  background: var(--paper);
+}
+
+.menu__item:focus-visible {
+  outline-offset: -3px;
+}
+
 /* Experience picker */
 
 .picker {
@@ -326,6 +394,7 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 10px;
+  flex-wrap: wrap;
   max-width: calc(100vw - 24px);
   padding: 6px 6px 6px 16px;
   font-size: 14px;
@@ -336,6 +405,29 @@ button {
 
 .toast--error {
   background: #f8d9cc;
+}
+
+.toast--ok {
+  padding: 8px 18px 8px 14px;
+  background: var(--sage);
+}
+
+.toast--ok svg {
+  width: 18px;
+  height: 18px;
+}
+
+.toast__url {
+  flex: 1 1 220px;
+  min-width: 0;
+  padding: 5px 10px;
+  border: 2px solid var(--ink);
+  border-radius: var(--r-sm);
+  background: var(--cream);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
 }
 
 .toast__dismiss {
@@ -1270,6 +1362,14 @@ button {
   }
   .picker__span {
     display: none;
+  }
+  .actions {
+    grid-column: 3;
+    grid-row: 1;
+  }
+  .menu {
+    left: auto;
+    right: -4px;
   }
   .rail {
     justify-self: center;

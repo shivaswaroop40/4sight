@@ -16,6 +16,7 @@ Live site: https://shivaswaroop40.github.io/4sight/
 - **Gallery.** The picker at the top (or G) opens every experience as a ladder of timescales, from seconds to billions of years. Each experience downloads only when you pick it.
 - **Scrub, play, reverse, warp.** Drag the timeline, play either way, and pick a time warp. Event flags jump to the big moments.
 - **Camera views.** Preset views per experience, plus Overview.
+- **Links to a moment.** The address bar follows the experience and the timeline position (`?x=solarSystem&u=0.5`) whenever playback stops. More > Copy link copies the exact moment, even mid-playback. A link opens paused on that frame.
 
 ## Status
 

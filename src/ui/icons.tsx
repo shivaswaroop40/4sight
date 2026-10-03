@@ -78,6 +78,22 @@ export const CloseIcon = () => (
   </Icon>
 );
 
+export const MoreIcon = () => (
+  <Icon>
+    <circle cx="5.5" cy="12" r="1.9" fill="currentColor" stroke="none" />
+    <circle cx="12" cy="12" r="1.9" fill="currentColor" stroke="none" />
+    <circle cx="18.5" cy="12" r="1.9" fill="currentColor" stroke="none" />
+  </Icon>
+);
+
+/** Two chain links. */
+export const LinkIcon = () => (
+  <Icon width="20" height="20">
+    <path d="M10.2 13.8a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1.4 1.4" />
+    <path d="M13.8 10.2a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1.4-1.4" />
+  </Icon>
+);
+
 /** The 4sight mark: a clock face whose hand sweeps through four ticks. */
 export const Mark = () => (
   <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true">

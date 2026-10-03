@@ -2,19 +2,22 @@
 //
 // App-wide singletons and a tiny store for the UI state that lives outside
 // the TimeController: the mounted experience, the state of the latest
-// experience request, the hovered object, and whether the gallery is open.
+// experience request, the hovered object, whether the gallery is open, and
+// the toast in the status rail.
 // Components subscribe to exactly the fields they render.
 
 import { useSyncExternalStore } from "react";
+import { formatMoment, type Moment } from "../core/moment";
 import { TimeController } from "../core/TimeController";
 import type { ExperienceId, FourDExperience, TimeState } from "../core/types";
 import { loadExperience } from "../experiences/index";
 import type { SceneManager } from "../renderer/SceneManager";
+import type { UrlSync } from "./urlSync";
 
 export const controller = new TimeController();
 
 /** Set by App once the renderer exists. */
-export const runtime: { manager: SceneManager | null } = { manager: null };
+export const runtime: { manager: SceneManager | null; urlSync: UrlSync | null } = { manager: null, urlSync: null };
 
 /** The latest experience request. "ready" means the mounted experience is the one asked for. */
 export type LoadState =
@@ -22,14 +25,17 @@ export type LoadState =
   | { status: "ready" }
   | { status: "failed"; id: ExperienceId; message: string };
 
+export type Toast = { kind: "copied" } | { kind: "copyFailed"; url: string };
+
 interface UiState {
   experience: FourDExperience | null;
   load: LoadState;
   hoveredId: string | null;
   galleryOpen: boolean;
+  toast: Toast | null;
 }
 
-let ui: UiState = { experience: null, load: { status: "ready" }, hoveredId: null, galleryOpen: false };
+let ui: UiState = { experience: null, load: { status: "ready" }, hoveredId: null, galleryOpen: false, toast: null };
 const uiListeners = new Set<() => void>();
 
 export function setUi(patch: Partial<UiState>): void {
@@ -58,8 +64,14 @@ export function useUi<T>(select: (s: UiState) => T): T {
 let latestRequest = 0;
 const failedIds = new Set<ExperienceId>();
 
+/** The mounted experience and the exact current u. */
+export function currentMoment(): Moment | null {
+  const experience = runtime.manager?.current;
+  return experience ? { id: experience.id, u: controller.state.param } : null;
+}
+
 /**
- * Loads an experience's chunk and mounts it at u = 0, paused. The current
+ * Loads an experience's chunk and mounts it at u, paused. The current
  * experience keeps running while the chunk downloads, and only the latest
  * request may mount, so picking A then B quickly ends on B.
  *
@@ -67,16 +79,14 @@ const failedIds = new Set<ExperienceId>();
  * browser remembers a failed module fetch for the life of the page, so a
  * second import() of the same chunk fails without touching the network.
  */
-export async function showExperience(id: ExperienceId): Promise<void> {
+export async function showExperience(id: ExperienceId, u = 0): Promise<void> {
   const request = ++latestRequest;
   if (ui.experience?.id === id) {
     setUi({ load: { status: "ready" } });
     return;
   }
   if (failedIds.has(id)) {
-    const url = new URL(window.location.href);
-    url.searchParams.set("x", id);
-    window.location.replace(url);
+    window.location.replace(formatMoment(window.location.href, { id, u }));
     return;
   }
   setUi({ load: { status: "loading", id } });
@@ -85,6 +95,7 @@ export async function showExperience(id: ExperienceId): Promise<void> {
     const manager = runtime.manager;
     if (request !== latestRequest || !manager) return;
     manager.mount(experience, ui.experience !== null);
+    if (u > 0) controller.setParam(u);
     setUi({ experience, load: { status: "ready" }, hoveredId: null });
   } catch (error) {
     failedIds.add(id);
