@@ -1,4 +1,6 @@
+import * as THREE from "three";
 import { describe, expect, it } from "vitest";
+import type { SceneContext } from "../../core/types";
 import { EASINGS } from "./easing";
 import { keyframeExperience } from "./KeyframeExperience";
 import { SceneParseError, parseScene } from "./parse";
@@ -175,6 +177,39 @@ describe("keyframeExperience", () => {
 
   it("refuses a scene whose id does not match", () => {
     expect(() => keyframeExperience("iphone", scene())).toThrow('scene id "mock" does not match experience id "iphone"');
+  });
+});
+
+describe("mounted scene", () => {
+  it("lets the pointer reach solid objects inside a see-through shell", () => {
+    const shelled = keyframeExperience(
+      "mock",
+      scene({
+        hover: { shell: { name: "Shell", description: "" }, core: { name: "Core", description: "" } },
+        objects: [
+          { id: "shell", primitive: "sphere", params: { radius: 3 }, opacity: 0.3, hover: "shell" },
+          { id: "core", primitive: "sphere", params: { radius: 0.5 }, hover: "core" },
+        ],
+      }),
+    );
+    const hoverables = new Map<THREE.Object3D, string>();
+    const ctx = {
+      scene: new THREE.Scene(),
+      registerHoverable: (o: THREE.Object3D, id: string) => hoverables.set(o, id),
+      unregisterHoverable: (o: THREE.Object3D) => hoverables.delete(o),
+    } as unknown as SceneContext;
+    shelled.mount(ctx);
+    ctx.scene.updateMatrixWorld(true);
+
+    const ray = (y: number) => {
+      const raycaster = new THREE.Raycaster(new THREE.Vector3(0, y, 10), new THREE.Vector3(0, 0, -1));
+      return hoverables.get(raycaster.intersectObjects([...hoverables.keys()], true)[0].object);
+    };
+    expect(ray(0)).toBe("core");
+    expect(ray(2)).toBe("shell");
+
+    shelled.dispose();
+    expect(hoverables.size).toBe(0);
   });
 });
 

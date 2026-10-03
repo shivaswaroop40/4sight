@@ -51,6 +51,21 @@ function mappingFor(def: SceneDef): TimeMapping {
 
 const DEG = Math.PI / 180;
 
+/**
+ * A see-through shell wraps the things you can see inside it, so it must not
+ * steal the pointer from them. Its ray hits are pushed far back: anything
+ * solid under the pointer wins, and among shells the inner layers (lower
+ * renderOrder) win over the outer ones.
+ */
+function seeThroughForHover(mesh: THREE.Mesh, renderOrder: number): void {
+  const raycast = mesh.raycast.bind(mesh);
+  mesh.raycast = (raycaster, hits) => {
+    const first = hits.length;
+    raycast(raycaster, hits);
+    for (let i = first; i < hits.length; i++) hits[i].distance += 1e6 * (1 + renderOrder);
+  };
+}
+
 export class KeyframeExperience implements FourDExperience {
   readonly id: ExperienceId;
   readonly name: string;
@@ -69,6 +84,7 @@ export class KeyframeExperience implements FourDExperience {
   private views: ObjectView[] = [];
   private hoverables: THREE.Object3D[] = [];
   private resources = new Set<{ dispose(): void }>();
+  private depthMaterial: THREE.MeshBasicMaterial | null = null;
   private currentTime: number;
 
   constructor(id: ExperienceId, def: SceneDef) {
@@ -119,20 +135,29 @@ export class KeyframeExperience implements FourDExperience {
         const material = this.material(def, staticMaterials);
         view.material = material;
         const mesh = new THREE.Mesh(geometry.surface, material);
-        mesh.renderOrder = 2 * def.renderOrder;
         view.node.add(mesh);
+        // See-through objects draw in three passes per renderOrder layer:
+        // depth of every shell in the layer, then their tint, then their
+        // hulls. Overlapping shells in one layer then tint each pixel once
+        // and read as a single merged volume, and the hulls, depth-tested
+        // against the front faces, show only the outer silhouette instead
+        // of a dark disc behind the glass.
+        if (def.transparent) {
+          const depth = new THREE.Mesh(geometry.surface, this.depthOnly());
+          depth.renderOrder = 3 * def.renderOrder;
+          view.node.add(depth);
+          mesh.renderOrder = 3 * def.renderOrder + 1;
+          seeThroughForHover(mesh, def.renderOrder);
+        }
         if (def.outline > 0) {
           const hull = addOutline(mesh, def.outline);
           hull.geometry = geometry.hull;
           this.resources.add(geometry.hull);
           const hullMaterial = hull.material as THREE.MeshBasicMaterial;
           this.resources.add(hullMaterial);
-          // A see-through shell draws its hull after itself, depth-tested
-          // against its own front faces, so only the silhouette ring shows
-          // instead of a dark disc behind the glass.
           if (def.transparent) {
             hullMaterial.transparent = true;
-            hull.renderOrder = 2 * def.renderOrder + 1;
+            hull.renderOrder = 3 * def.renderOrder + 2;
           }
           view.hull = hullMaterial;
         }
@@ -161,11 +186,19 @@ export class KeyframeExperience implements FourDExperience {
       def.shading === "flat" ? new THREE.MeshBasicMaterial({ color }) : makeToonMaterial(color);
     if (def.transparent) {
       material.transparent = true;
-      material.depthWrite = true;
+      material.depthWrite = false;
     }
     if (reusable) shared.set(key, material);
     this.resources.add(material);
     return material;
+  }
+
+  private depthOnly(): THREE.MeshBasicMaterial {
+    if (!this.depthMaterial) {
+      this.depthMaterial = new THREE.MeshBasicMaterial({ colorWrite: false, transparent: true });
+      this.resources.add(this.depthMaterial);
+    }
+    return this.depthMaterial;
   }
 
   setTime(time: number): void {
@@ -229,6 +262,7 @@ export class KeyframeExperience implements FourDExperience {
     for (const r of this.resources) r.dispose();
     if (this.lights) disposeObject(this.lights);
     this.resources.clear();
+    this.depthMaterial = null;
     this.hoverables = [];
     this.views = [];
     this.root = null;
