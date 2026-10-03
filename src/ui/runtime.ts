@@ -2,14 +2,15 @@
 //
 // App-wide singletons and a tiny store for the UI state that lives outside
 // the TimeController: the mounted experience, the state of the latest
-// experience request, the hovered object, whether the gallery is open, and
-// the toast in the status rail.
+// experience request, the filters it renders under, the hovered object,
+// whether the gallery is open, and the toast in the status rail.
 // Components subscribe to exactly the fields they render.
 
 import { useSyncExternalStore } from "react";
+import { defaultFilterState, toggleFilter } from "../core/filters";
 import { formatMoment, type Moment } from "../core/moment";
 import { TimeController } from "../core/TimeController";
-import type { ExperienceId, FourDExperience, TimeState } from "../core/types";
+import type { ExperienceId, FilterState, FourDExperience, TimeState } from "../core/types";
 import { loadExperience } from "../experiences/index";
 import type { SceneManager } from "../renderer/SceneManager";
 import type { UrlSync } from "./urlSync";
@@ -30,12 +31,21 @@ export type Toast = { kind: "copied" } | { kind: "copyFailed"; url: string };
 interface UiState {
   experience: FourDExperience | null;
   load: LoadState;
+  /** The filter state the mounted experience renders under. Reset to its defaults on every switch. */
+  filters: FilterState;
   hoveredId: string | null;
   galleryOpen: boolean;
   toast: Toast | null;
 }
 
-let ui: UiState = { experience: null, load: { status: "ready" }, hoveredId: null, galleryOpen: false, toast: null };
+let ui: UiState = {
+  experience: null,
+  load: { status: "ready" },
+  filters: {},
+  hoveredId: null,
+  galleryOpen: false,
+  toast: null,
+};
 const uiListeners = new Set<() => void>();
 
 export function setUi(patch: Partial<UiState>): void {
@@ -94,15 +104,26 @@ export async function showExperience(id: ExperienceId, u = 0): Promise<void> {
     const experience = await loadExperience(id);
     const manager = runtime.manager;
     if (request !== latestRequest || !manager) return;
-    manager.mount(experience, ui.experience !== null);
+    const filters = defaultFilterState(experience.getAvailableFilters());
+    manager.mount(experience, filters, ui.experience !== null);
     if (u > 0) controller.setParam(u);
-    setUi({ experience, load: { status: "ready" }, hoveredId: null });
+    setUi({ experience, filters, load: { status: "ready" }, hoveredId: null });
   } catch (error) {
     failedIds.add(id);
     if (request !== latestRequest) return;
     const message = error instanceof Error ? error.message : String(error);
     setUi({ load: { status: "failed", id, message } });
   }
+}
+
+/** Applies the viewer pressing filter `id`: the scene re-renders at the current moment, paused or not. */
+export function pressFilter(id: string): void {
+  const experience = ui.experience;
+  if (!experience) return;
+  const filters = toggleFilter(experience.getAvailableFilters(), ui.filters, id);
+  if (filters === ui.filters) return;
+  runtime.manager?.setFilters(filters);
+  setUi({ filters });
 }
 
 function subscribeTime(listener: () => void): () => void {

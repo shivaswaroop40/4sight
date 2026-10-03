@@ -6,10 +6,12 @@
 //
 // The rule that makes everything else work:
 //
-//   setTime(t) is a pure function of t. Calling it twice with the same t
-//   produces the same scene. It never reads the previous time, never
-//   accumulates, never plays an animation. Scrubbing, reverse, jumping, and
-//   warping all fall out of this one rule for free.
+//   The scene is a pure function of (t, filter state). setTime(t) renders
+//   the scene for t under the filter state last passed to setFilters.
+//   Calling it twice with the same t and the same filter state produces the
+//   same scene. It never reads the previous time, never accumulates, never
+//   plays an animation. Scrubbing, reverse, jumping, and warping all fall
+//   out of this one rule for free.
 
 export type ExperienceId = "iphone" | "solarSystem" | "galaxy" | "universe" | "mock" | "mockLog";
 
@@ -84,22 +86,19 @@ export interface ObjectMetadata {
   properties?: Record<string, string | number>;
 }
 
-export interface FilterContext {
-  experience: FourDExperience;
-  /** Shader uniforms the experience exposes for filters to drive. */
-  uniforms: Record<string, { value: unknown }>;
-  /** Named Three.js objects filters may show, hide, or restyle. */
-  objects: Record<string, import("three").Object3D>;
-}
-
 export interface VisualizationFilter {
   id: string;
   name: string;
-  /** Filters in the same group are mutually exclusive (radio). Ungrouped filters toggle. */
+  /** Filters sharing a group are radio options: exactly one is on. Ungrouped filters toggle. */
   group?: string;
-  apply(context: FilterContext): void;
-  reset?(context: FilterContext): void;
+  /** On when the experience mounts. In a group, exactly one option defaults on. */
+  defaultOn: boolean;
+  /** One line shown as the control's hint. */
+  description?: string;
 }
+
+/** Which filters are on, by id. View state owned by the shell. */
+export type FilterState = Readonly<Record<string, boolean>>;
 
 export type CameraMode = "orbit" | "free" | "follow" | "overview";
 
@@ -142,13 +141,19 @@ export interface FourDExperience {
 
   /** Add objects to the scene. Called once when the experience becomes active. */
   mount(context: SceneContext): void;
-  /** Reconstruct the scene at time t. Pure. Idempotent. */
+  /** Reconstruct the scene at time t under the stored filter state. Pure. Idempotent. */
   setTime(time: number): void;
   /** Plain data describing the world at time t. Useful for tests and the HUD. */
   getState(time: number): unknown;
   getCurrentEvent(time: number): TimelineEvent | null;
   getHoveredObject(id: string): ObjectMetadata | null;
   getAvailableFilters(): VisualizationFilter[];
+  /**
+   * Stores the filter state. Required when getAvailableFilters() returns any.
+   * It does not render: the shell calls setTime(t) right after, and setTime(t)
+   * renders the scene for t under the stored filter state.
+   */
+  setFilters?(state: FilterState): void;
   getCameraPresets(): CameraPreset[];
   /**
    * Optional multiplier on the preset camera's distance at time t, for scenes

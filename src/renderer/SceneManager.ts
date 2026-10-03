@@ -6,7 +6,7 @@
 // interface. The renderer is created once and never recreated.
 
 import * as THREE from "three";
-import type { FourDExperience, SceneContext, TimeController } from "../core/types";
+import type { FilterState, FourDExperience, SceneContext, TimeController } from "../core/types";
 import { disposeObject } from "../core/theme";
 import { CameraManager } from "./CameraManager";
 
@@ -77,12 +77,17 @@ export class SceneManager {
     this.onHoverChange = listener;
   }
 
-  /** Disposes the current experience, mounts the next, resets u to 0 (paused), and frames its first preset. */
-  mount(experience: FourDExperience, animateCamera = false): void {
+  /**
+   * Disposes the current experience, mounts the next under `filters`, resets
+   * u to 0 (paused), and frames its first preset. The filters are stored
+   * before the controller attaches, so the first frame is already filtered.
+   */
+  mount(experience: FourDExperience, filters: FilterState, animateCamera = false): void {
     if (this.experience) this.unmount();
     this.experience = experience;
     this.setHovered(null);
     experience.mount(this.context);
+    experience.setFilters?.(filters);
     this.timeController.attach(experience);
     this.scene.updateMatrixWorld(true);
     this.warmUp();
@@ -125,6 +130,13 @@ export class SceneManager {
     this.renderer.render(this.scene, this.camera);
     this.renderer.setScissorTest(false);
     for (const o of hidden) o.visible = false;
+  }
+
+  /** Re-renders the current moment under new filters. Time does not move. */
+  setFilters(filters: FilterState): void {
+    if (!this.experience) return;
+    this.experience.setFilters?.(filters);
+    this.experience.setTime(this.timeController.state.time);
   }
 
   applyPreset(id: string): void {

@@ -86,6 +86,16 @@ export const MoreIcon = () => (
   </Icon>
 );
 
+/** Three sliders. */
+export const FiltersIcon = () => (
+  <Icon>
+    <path d="M4 7h16M4 12h16M4 17h16" />
+    <circle cx="9" cy="7" r="2.3" fill="var(--cream)" />
+    <circle cx="15.5" cy="12" r="2.3" fill="var(--cream)" />
+    <circle cx="7.5" cy="17" r="2.3" fill="var(--cream)" />
+  </Icon>
+);
+
 /** Two chain links. */
 export const LinkIcon = () => (
   <Icon width="20" height="20">

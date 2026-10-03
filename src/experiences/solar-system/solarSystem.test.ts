@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { fakeSceneContext } from "../../renderer/fakeSceneContext";
 import { EVENTS, KNOTS } from "./solarData";
 import { formatYears, knotMapping } from "./solarMapping";
 import { solarStateAt } from "./SolarSystemState";
@@ -85,5 +86,47 @@ describe("solar state", () => {
   it("is a pure function of time", () => {
     const t = mapping.toTime(0.63);
     expect(solarSystemExperience.getState(t)).toEqual(solarSystemExperience.getState(t));
+  });
+});
+
+describe("solar filters", () => {
+  it("offers Gas & dust and Orbits, both on by default", () => {
+    expect(solarSystemExperience.getAvailableFilters().map((f) => [f.id, f.name, f.defaultOn])).toEqual([
+      ["gas-and-dust", "Gas & dust", true],
+      ["orbits", "Orbits", true],
+    ]);
+  });
+
+  it("hides the gas and dust and the orbit lines at the same t only while their filters are off", () => {
+    const ctx = fakeSceneContext();
+    solarSystemExperience.mount(ctx);
+    const gas = ctx.scene.getObjectByName("gas-and-dust")!;
+    const orbits = () => ctx.scene.getObjectsByProperty("name", "orbit").map((o) => o.visible);
+    const today = mapping.toTime(1);
+
+    solarSystemExperience.setFilters!({ "gas-and-dust": true, orbits: true });
+    solarSystemExperience.setTime(today);
+    expect(gas.visible).toBe(true);
+    expect(orbits()).toEqual(Array(8).fill(true));
+
+    solarSystemExperience.setFilters!({ "gas-and-dust": false, orbits: false });
+    solarSystemExperience.setTime(today);
+    expect(gas.visible).toBe(false);
+    expect(orbits()).toEqual(Array(8).fill(false));
+
+    solarSystemExperience.setFilters!({ "gas-and-dust": true, orbits: true });
+    solarSystemExperience.setTime(today);
+    expect(gas.visible).toBe(true);
+    expect(orbits()).toEqual(Array(8).fill(true));
+    solarSystemExperience.dispose();
+  });
+
+  it("draws no orbit lines before the planets settle, whatever the filter says", () => {
+    const ctx = fakeSceneContext();
+    solarSystemExperience.mount(ctx);
+    solarSystemExperience.setFilters!({ "gas-and-dust": true, orbits: true });
+    solarSystemExperience.setTime(mapping.toTime(0.3));
+    expect(ctx.scene.getObjectsByProperty("name", "orbit").some((o) => o.visible)).toBe(false);
+    solarSystemExperience.dispose();
   });
 });
