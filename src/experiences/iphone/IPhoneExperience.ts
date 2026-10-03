@@ -21,6 +21,7 @@ import type {
 } from "../../core/types";
 import {
   cameraDistanceScale,
+  cameraSubjectAspect,
   componentAssembledFraction,
   componentPose,
   eyeOpenness,
@@ -241,6 +242,10 @@ class IPhoneExperienceImpl implements FourDExperience {
 
   cameraDistanceScale(time: number): number {
     return cameraDistanceScale(time);
+  }
+
+  cameraSubjectAspect(time: number): number {
+    return cameraSubjectAspect(time);
   }
 
   reset(): void {

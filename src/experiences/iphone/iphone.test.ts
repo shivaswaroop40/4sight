@@ -80,6 +80,11 @@ describe("iPhone events and presets", () => {
     expect(iphoneExperience.cameraDistanceScale!(1)).toBe(1);
   });
 
+  it("frames the exploded layout wider than the finished phone", () => {
+    expect(iphoneExperience.cameraSubjectAspect!(0)).toBeCloseTo(1.45, 6);
+    expect(iphoneExperience.cameraSubjectAspect!(1)).toBeCloseTo(1.1, 6);
+  });
+
   it("offers four camera presets with three-quarter first", () => {
     expect(iphoneExperience.getCameraPresets().map((p) => p.name)).toEqual(["Three-quarter", "Front", "Back", "Side"]);
   });

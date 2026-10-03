@@ -167,6 +167,13 @@ export interface FourDExperience {
    * after a preset, until the viewer drags, zooms, or follows an object.
    */
   cameraDistanceScale?(time: number): number;
+  /**
+   * Optional width over height of what the presets frame at time t. Presets
+   * are authored on a 1440x900 screen; on a narrower one the camera fits a
+   * subject this wide into the stage. Leave it out for a subject about as
+   * wide as it is tall (1.1); return more while the scene spreads sideways.
+   */
+  cameraSubjectAspect?(time: number): number;
 
   reset(): void;
   dispose(): void;

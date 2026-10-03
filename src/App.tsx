@@ -8,6 +8,7 @@ import { useEffect, useRef } from "react";
 import { parseMoment } from "./core/moment";
 import { experiences } from "./experiences/index";
 import { SceneManager } from "./renderer/SceneManager";
+import type { FreeBand } from "./renderer/stageFit";
 import { Actions } from "./ui/Actions";
 import { ExportDialog } from "./ui/ExportDialog";
 import { ExperiencePicker, Gallery } from "./ui/Gallery";
@@ -26,6 +27,7 @@ import { useShortcuts } from "./ui/useShortcuts";
 function App() {
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const transportRef = useRef<HTMLElement | null>(null);
+  const topbarRef = useRef<HTMLElement | null>(null);
   const experience = useUi((s) => s.experience);
   useShortcuts();
 
@@ -60,14 +62,18 @@ function App() {
     if (experience) runtime.urlSync?.flush();
   }, [experience]);
 
-  // The mobile bottom sheet sits just above the transport bar, whatever its height.
+  // The mobile bottom sheet sits just above the transport bar, whatever its
+  // height, and camera presets frame their subject in the band the HUD leaves free.
   useEffect(() => {
-    const el = transportRef.current;
-    if (!el) return;
-    const ro = new ResizeObserver(() =>
-      document.documentElement.style.setProperty("--transport-h", `${el.offsetHeight}px`),
-    );
-    ro.observe(el);
+    const stage = viewportRef.current;
+    const topbar = topbarRef.current;
+    const transport = transportRef.current;
+    if (!stage || !topbar || !transport) return;
+    const ro = new ResizeObserver(() => {
+      document.documentElement.style.setProperty("--transport-h", `${transport.offsetHeight}px`);
+      runtime.manager?.setFreeBand(freeBand(stage, topbar, transport));
+    });
+    for (const el of [stage, topbar, transport]) ro.observe(el);
     return () => ro.disconnect();
   }, [experience]);
 
@@ -76,7 +82,7 @@ function App() {
       <div className="stage" ref={viewportRef} />
       <div className="vignette" aria-hidden="true" />
 
-      <header className="topbar">
+      <header className="topbar" ref={topbarRef}>
         <div className="topbar__start">
           <div className="brand sticker">
             <Mark />
@@ -110,6 +116,28 @@ function App() {
       <ExportDialog />
     </div>
   );
+}
+
+/**
+ * The stage between the top bar and the bottom chrome. Status chips come and
+ * go, so they do not count. A bottom sheet counts at its collapsed height,
+ * so opening it to read does not move the camera.
+ */
+function freeBand(stage: HTMLElement, topbar: HTMLElement, transport: HTMLElement): FreeBand {
+  const box = stage.getBoundingClientRect();
+  const bars = topbar.querySelectorAll(":scope > :not(.rail), :scope > .topbar__start > *");
+  const top = Math.max(box.top, ...Array.from(bars, (el) => el.getBoundingClientRect().bottom));
+  let bottom = transport.getBoundingClientRect().top;
+  const sheet = document.querySelector<HTMLElement>(".info");
+  const head = sheet?.querySelector<HTMLElement>(".info__head");
+  if (sheet && head) {
+    const r = sheet.getBoundingClientRect();
+    const middle = box.left + box.width / 2;
+    if (r.left < middle && r.right > middle) {
+      bottom = Math.min(bottom, r.bottom - head.offsetHeight - (sheet.offsetHeight - sheet.clientHeight));
+    }
+  }
+  return { top: (top - box.top) / box.height, bottom: (bottom - box.top) / box.height };
 }
 
 export default App;
