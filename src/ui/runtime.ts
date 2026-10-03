@@ -4,7 +4,7 @@
 // the TimeController: the mounted experience, the state of the latest
 // experience request, the filters it renders under, the hovered object,
 // what the camera is following, whether the gallery is open, the toast in
-// the status rail, and the guided tour's state.
+// the status rail, the guided tour's state, and a video export's progress.
 // Components subscribe to exactly the fields they render.
 
 import { useSyncExternalStore } from "react";
@@ -13,6 +13,7 @@ import { formatMoment, type Moment } from "../core/moment";
 import { TimeController } from "../core/TimeController";
 import type { ExperienceId, FilterState, FourDExperience, TimeState } from "../core/types";
 import { loadExperience } from "../experiences/index";
+import type { ExportPlan } from "../renderer/exportPlan";
 import type { CameraView, SceneManager } from "../renderer/SceneManager";
 import { TOUR_IDLE, type TourState } from "./tour/tourMachine";
 import type { UrlSync } from "./urlSync";
@@ -28,7 +29,15 @@ export type LoadState =
   | { status: "ready" }
   | { status: "failed"; id: ExperienceId; message: string };
 
-export type Toast = { kind: "copied" } | { kind: "copyFailed"; url: string };
+export type Toast = { kind: "copied" } | { kind: "copyFailed"; url: string } | { kind: "saved"; fileName: string };
+
+/** A video export. Rendering counts frames up to plan.frames; at plan.frames the file is being finished. */
+export type ExportState =
+  | { phase: "idle" }
+  | { phase: "rendering"; frame: number; plan: ExportPlan }
+  | { phase: "failed"; message: string };
+
+export const EXPORT_IDLE: ExportState = { phase: "idle" };
 
 interface UiState {
   experience: FourDExperience | null;
@@ -41,6 +50,9 @@ interface UiState {
   galleryOpen: boolean;
   toast: Toast | null;
   tour: TourState;
+  exporting: ExportState;
+  /** True once this browser is known to encode a video codec export can use. */
+  exportable: boolean;
 }
 
 let ui: UiState = {
@@ -52,6 +64,8 @@ let ui: UiState = {
   galleryOpen: false,
   toast: null,
   tour: TOUR_IDLE,
+  exporting: EXPORT_IDLE,
+  exportable: false,
 };
 const uiListeners = new Set<() => void>();
 

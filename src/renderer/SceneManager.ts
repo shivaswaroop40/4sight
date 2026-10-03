@@ -9,6 +9,10 @@
 // lets go of a preset, and a click on a hoverable follows it. The UI learns
 // what the camera is doing through the camera listener, which reports a
 // CameraView whenever it changes.
+//
+// A video export borrows the renderer through holdForExport: the loop stops
+// and nothing else may restart it or resize the canvas until the stage is
+// released, which puts the size, pixel ratio and camera back.
 
 import * as THREE from "three";
 import type { CameraMode, FilterState, FourDExperience, SceneContext, TimeController } from "../core/types";
@@ -26,6 +30,17 @@ export type CameraView =
   | { mode: Extract<CameraMode, "follow">; id: string; shown: boolean };
 
 const ORBIT: CameraView = { mode: "orbit" };
+
+/** The render loop. "held" belongs to a video export: visibility and resizes leave it alone. */
+type Loop = "running" | "stopped" | "held";
+
+/** The renderer on loan to a video export. */
+export interface ExportStage {
+  /** Renders the current moment at the export size, with the camera settled for it. The canvas holds the frame until the next render. */
+  render(): HTMLCanvasElement;
+  /** Puts the renderer and camera back and restarts the loop. Safe to call twice. */
+  release(): void;
+}
 
 export class SceneManager {
   readonly scene: THREE.Scene;
@@ -50,7 +65,7 @@ export class SceneManager {
 
   private lastFrameTime = 0;
   private frameId = 0;
-  private running = false;
+  private loop: Loop = "stopped";
   private resizeObserver: ResizeObserver;
 
   constructor(container: HTMLElement, timeController: TimeController) {
@@ -182,12 +197,17 @@ export class SceneManager {
     this.cameras.stopFollowing();
   }
 
+  /** The stage's size in CSS pixels. */
+  get viewport(): { width: number; height: number } {
+    return { width: this.container.clientWidth, height: this.container.clientHeight };
+  }
+
   start(): void {
-    if (this.running) return;
-    this.running = true;
+    if (this.loop !== "stopped") return;
+    this.loop = "running";
     this.lastFrameTime = performance.now();
     const loop = (now: number) => {
-      if (!this.running) return;
+      if (this.loop !== "running") return;
       const dt = Math.min(Math.max((now - this.lastFrameTime) / 1000, 0), 0.1);
       this.lastFrameTime = now;
       this.timeController.tick(dt);
@@ -202,8 +222,40 @@ export class SceneManager {
   }
 
   stop(): void {
-    this.running = false;
+    if (this.loop !== "running") return;
+    this.loop = "stopped";
     cancelAnimationFrame(this.frameId);
+  }
+
+  /**
+   * Stops the loop and sizes the drawing buffer to exactly width x height
+   * pixels. The canvas keeps its CSS size, so the page layout does not move.
+   */
+  holdForExport(width: number, height: number): ExportStage {
+    this.stop();
+    this.loop = "held";
+    const camera = this.cameras.snapshot();
+    const pixelRatio = this.renderer.getPixelRatio();
+    this.renderer.setPixelRatio(1);
+    this.renderer.setSize(width, height, false);
+    this.camera.aspect = width / height;
+    this.camera.updateProjectionMatrix();
+    return {
+      render: () => {
+        this.cameras.setDistanceScale(this.experience?.cameraDistanceScale?.(this.timeController.state.time) ?? 1);
+        this.cameras.settle();
+        this.renderer.render(this.scene, this.camera);
+        return this.renderer.domElement;
+      },
+      release: () => {
+        if (this.loop !== "held") return;
+        this.loop = "stopped";
+        this.renderer.setPixelRatio(pixelRatio);
+        this.handleResize();
+        this.cameras.restore(camera);
+        if (!document.hidden) this.start();
+      },
+    };
   }
 
   dispose(): void {
@@ -224,6 +276,7 @@ export class SceneManager {
   }
 
   private handleVisibility = (): void => {
+    if (this.loop === "held") return;
     if (document.hidden) this.stop();
     else this.start();
   };
@@ -311,6 +364,7 @@ export class SceneManager {
   }
 
   private handleResize(): void {
+    if (this.loop === "held") return;
     const width = this.container.clientWidth;
     const height = this.container.clientHeight;
     if (width === 0 || height === 0) return;

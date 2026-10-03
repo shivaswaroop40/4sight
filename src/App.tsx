@@ -11,6 +11,7 @@ import { parseMoment } from "./core/moment";
 import { experiences } from "./experiences/index";
 import { SceneManager } from "./renderer/SceneManager";
 import { Actions } from "./ui/Actions";
+import { ExportDialog } from "./ui/ExportDialog";
 import { ExperiencePicker, Gallery } from "./ui/Gallery";
 import { InfoPanel } from "./ui/InfoPanel";
 import { ObjectInfo } from "./ui/ObjectInfo";
@@ -38,7 +39,10 @@ function App() {
     manager.setHoverListener((hoveredId) => setUi({ hoveredId }));
     manager.setCameraListener((camera) => setUi({ camera }));
     manager.start();
-    const urlSync = startUrlSync(controller, currentMoment, () => getUi().tour.phase === "travelling");
+    const urlSync = startUrlSync(controller, currentMoment, () => {
+      const { tour, exporting } = getUi();
+      return tour.phase === "travelling" || exporting.phase === "rendering";
+    });
     runtime.urlSync = urlSync;
     const moment = parseMoment(
       window.location.search,
@@ -105,6 +109,7 @@ function App() {
       )}
 
       <Gallery />
+      <ExportDialog />
     </div>
   );
 }

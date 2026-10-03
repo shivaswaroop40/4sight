@@ -2,11 +2,12 @@
 //
 // Transient chips under the top bar, centered: the guided tour's bar, the
 // object the camera follows with a stop button, a failed experience load
-// with Retry, and the result of Copy link. "Link copied" fades on its own;
-// a failed copy stays, with the link selectable, until dismissed. The tour bar shows where the tour is (one dot per event)
-// with Next and Exit, then "Tour complete" for a moment. While the tour
-// holds on an event, Next fills up over the hold, so the viewer can see
-// when it moves on.
+// with Retry, the result of Copy link, and the file a video export saved.
+// "Link copied" and "Saved" fade on their own; a failed copy stays, with
+// the link selectable, until dismissed. The tour bar shows where the tour
+// is (one dot per event) with Next and Exit, then "Tour complete" for a
+// moment. While the tour holds on an event, Next fills up over the hold,
+// so the viewer can see when it moves on.
 //
 // StageNotice covers the one case the rail cannot: nothing is mounted yet,
 // so the first load's progress or failure takes the stage.
@@ -14,12 +15,12 @@
 import { useEffect, useRef } from "react";
 import type { FourDExperience } from "../core/types";
 import { entryFor } from "../experiences/index";
-import { CloseIcon, FollowIcon, LinkIcon, NextIcon, ResetIcon, TourIcon } from "./icons";
+import { CloseIcon, FollowIcon, LinkIcon, NextIcon, ResetIcon, TourIcon, VideoIcon } from "./icons";
 import { getUi, runtime, setUi, showExperience, useUi } from "./runtime";
 import { holdMs } from "./tour/tourMachine";
 import { dispatchTour } from "./tour/tourRunner";
 
-const COPIED_MS = 2000;
+const FADE_MS = { copied: 2000, saved: 3500 } as const;
 
 export function StatusRail() {
   const load = useUi((s) => s.load);
@@ -29,10 +30,10 @@ export function StatusRail() {
   const ref = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (toast?.kind !== "copied") return;
+    if (toast?.kind !== "copied" && toast?.kind !== "saved") return;
     const timer = window.setTimeout(() => {
       if (getUi().toast === toast) setUi({ toast: null });
-    }, COPIED_MS);
+    }, FADE_MS[toast.kind]);
     return () => window.clearTimeout(timer);
   }, [toast]);
 
@@ -72,6 +73,12 @@ export function StatusRail() {
         <div className="sticker toast toast--ok">
           <LinkIcon />
           <span>Link copied</span>
+        </div>
+      )}
+      {toast?.kind === "saved" && (
+        <div className="sticker toast toast--ok">
+          <VideoIcon />
+          <span>Saved {toast.fileName}</span>
         </div>
       )}
       {toast?.kind === "copyFailed" && (

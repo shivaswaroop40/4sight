@@ -15,6 +15,10 @@
 //              the camera moves by the same amount, so the viewer keeps
 //              their angle and distance and can still orbit and zoom.
 //              A preset, Overview or stopFollowing ends it.
+//
+// Video export renders frames in a loop of its own: settle() puts the
+// camera where update() is easing it for the current time, at once, and
+// snapshot() and restore() put the viewer's camera back afterwards.
 
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
@@ -37,6 +41,15 @@ interface Tween {
   toTarget: THREE.Vector3;
   elapsed: number;
   duration: number;
+}
+
+/** The viewer's camera as export found it. */
+export interface CameraSnapshot {
+  position: THREE.Vector3;
+  target: THREE.Vector3;
+  framing: Framing;
+  tween: Tween | null;
+  damping: boolean;
 }
 
 export class CameraManager {
@@ -131,6 +144,53 @@ export class CameraManager {
       const next = f.from.clone().lerp(goal, easeInOutCubic(Math.min(1, f.elapsed / PRESET_MS)));
       this.camera.position.add(next.clone().sub(this.controls.target));
       this.controls.target.copy(next);
+    }
+    this.controls.update();
+  }
+
+  snapshot(): CameraSnapshot {
+    const f = this.framingState;
+    return {
+      position: this.camera.position.clone(),
+      target: this.controls.target.clone(),
+      framing: f.kind === "following" ? { ...f, from: f.from.clone() } : f,
+      tween: this.tween && { ...this.tween },
+      damping: this.controls.enableDamping,
+    };
+  }
+
+  restore(snapshot: CameraSnapshot): void {
+    this.tween = snapshot.tween;
+    this.setFraming(snapshot.framing);
+    this.controls.enableDamping = snapshot.damping;
+    this.camera.position.copy(snapshot.position);
+    this.controls.target.copy(snapshot.target);
+    this.controls.update();
+  }
+
+  /**
+   * Lands the camera where update() would ease it for the current time and
+   * distance scale: a tween ends, an anchor sits at its distance, a followed
+   * object is centred. Damping stays off until restore(), so leftover drag
+   * inertia is spent in the first frame instead of drifting through the rest.
+   */
+  settle(): void {
+    this.controls.enableDamping = false;
+    this.controls.update();
+    const t = this.tween;
+    if (t) {
+      this.camera.position.copy(t.toPos);
+      this.controls.target.copy(t.toTarget);
+      this.tween = null;
+    }
+    const f = this.framingState;
+    if (f.kind === "anchored") {
+      this.camera.position.copy(this.anchoredPosition(f.preset));
+    } else if (f.kind === "following") {
+      f.elapsed = PRESET_MS;
+      const goal = f.object.getWorldPosition(new THREE.Vector3());
+      this.camera.position.add(goal.clone().sub(this.controls.target));
+      this.controls.target.copy(goal);
     }
     this.controls.update();
   }

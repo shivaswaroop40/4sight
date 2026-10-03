@@ -1,16 +1,18 @@
 // src/ui/Actions.tsx
 //
 // The actions cluster in the top bar: Tour, Filters (only when the
-// experience has any) and the More menu, whose one item copies a link to
-// the current moment. Each popup closes on Esc (focus returns to its
-// button) and on a press outside it. The menu also closes on Tab; the
-// filters popover closes once focus leaves it.
+// experience has any) and the More menu. Copy link copies a link to the
+// current moment. Export video, shown once this browser is known to encode
+// a codec export uses, renders u 0 to 1 into a file. Each popup closes on
+// Esc (focus returns to its button) and on a press outside it. The menu
+// also closes on Tab; the filters popover closes once focus leaves it.
 
 import { useCallback, useEffect, useId, useRef, useState, type RefObject } from "react";
 import { isDefaultFilterState } from "../core/filters";
 import { formatMoment } from "../core/moment";
 import type { FilterState, FourDExperience, VisualizationFilter } from "../core/types";
-import { FiltersIcon, LinkIcon, MoreIcon, TourIcon } from "./icons";
+import { checkExportSupport, startExport } from "./exportRunner";
+import { FiltersIcon, LinkIcon, MoreIcon, TourIcon, VideoIcon } from "./icons";
 import { currentMoment, pressFilter, setUi, useUi } from "./runtime";
 import { isTouring } from "./tour/tourMachine";
 import { dispatchTour } from "./tour/tourRunner";
@@ -211,6 +213,7 @@ function FilterRadios({ group, options, state }: { group: string; options: Visua
 }
 
 function MoreMenu() {
+  const exportable = useUi((s) => s.exportable);
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
@@ -249,7 +252,12 @@ function MoreMenu() {
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
-        onClick={() => setOpen((o) => !o)}
+        onPointerEnter={checkExportSupport}
+        onFocus={checkExportSupport}
+        onClick={() => {
+          checkExportSupport();
+          setOpen((o) => !o);
+        }}
       >
         <MoreIcon />
       </button>
@@ -267,6 +275,21 @@ function MoreMenu() {
             <LinkIcon />
             <span>Copy link</span>
           </button>
+          {exportable && (
+            <button
+              type="button"
+              role="menuitem"
+              className="menu__item"
+              onClick={() => {
+                // Focus on More first, so the export dialog hands it back there when it closes.
+                close(true);
+                void startExport();
+              }}
+            >
+              <VideoIcon />
+              <span>Export video</span>
+            </button>
+          )}
         </div>
       )}
     </div>

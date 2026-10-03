@@ -113,6 +113,14 @@ export const LinkIcon = () => (
   </Icon>
 );
 
+/** A video camera. */
+export const VideoIcon = () => (
+  <Icon width="20" height="20">
+    <rect x="2.8" y="6.5" width="12.4" height="11" rx="2.4" />
+    <path d="M15.2 10.6l5.6-3.1v9l-5.6-3.1z" />
+  </Icon>
+);
+
 /** A pennant like the timeline's event flags: the tour visits each one. */
 export const TourIcon = () => (
   <Icon>
