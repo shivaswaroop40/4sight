@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { fakeSceneContext } from "../../renderer/fakeSceneContext";
 import { chamberVolume, ecg, valveIsOpen, type ValveId } from "./heartCycle";
 import { formatMs } from "./heartData";
 import { parcelsAt } from "./heartFlow";
@@ -70,7 +71,7 @@ describe("heart cycle", () => {
     heart.setTime(580);
     const lv = heart.getHoveredObject("leftVentricle")!.properties!;
     expect(lv["Volume now"]).toBe("50 mL");
-    // The hover card shows the first three properties, so live values lead.
+    // Live values lead the card.
     expect(Object.keys(lv).slice(0, 2)).toEqual(["Volume now", "Pressure now"]);
     expect(heart.getHoveredObject("aortic")!.properties!["Right now"]).toBe("Shut");
     heart.setTime(400);
@@ -117,5 +118,27 @@ describe("blood flow", () => {
   it("moves the valve ring toward the apex as the ventricles squeeze", () => {
     expect(deform(0, 0.2, 0, { baseShift: 0.3, ventSqueeze: 1, atrialSqueeze: 0 })[1]).toBeCloseTo(-0.1, 9);
     expect(deform(0.8, -2.9, 0, { baseShift: 0.3, ventSqueeze: 0, atrialSqueeze: 0 })).toEqual([0.8, -2.9, 0]);
+  });
+});
+
+describe("heart filters", () => {
+  it("offers the electrical signal and blood flow, both on", () => {
+    expect(heart.getAvailableFilters().map((f) => [f.id, f.name, f.defaultOn])).toEqual([
+      ["electrical", "Electrical signal", true],
+      ["blood-flow", "Blood flow", true],
+    ]);
+  });
+
+  it("hides the spark, the nodes and the flow arrows, and shows them again", () => {
+    const ctx = fakeSceneContext();
+    heart.mount(ctx);
+    const shown = () => [ctx.scene.getObjectByName("electrical")!.visible, ctx.scene.getObjectByName("blood-flow")!.visible];
+    heart.setFilters!({ electrical: false, "blood-flow": false });
+    heart.setTime(150);
+    expect(shown()).toEqual([false, false]);
+    heart.setFilters!({ electrical: true, "blood-flow": false });
+    heart.setTime(150);
+    expect(shown()).toEqual([true, false]);
+    heart.dispose();
   });
 });

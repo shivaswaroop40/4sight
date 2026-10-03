@@ -4,14 +4,17 @@
 // squeeze in order, valves snap shut on the lub and the dub, blood flows
 // blue in and out the right side and red through the left, and the
 // electrical spark travels SA node -> AV node -> His -> Purkinje while a live
-// ECG draws itself underneath. setTime rebuilds all of it from t.
+// ECG draws itself underneath. setTime rebuilds all of it from t. Two
+// filters hide the electrical signal and the blood-flow arrows.
 
 import * as THREE from "three";
+import { defaultFilterState } from "../../core/filters";
 import { smoothstep, window as windowFn } from "../../core/interpolate";
 import { THEME, addWarmLights, disposeObject } from "../../core/theme";
 import { eventAt } from "../../core/Timeline";
 import type {
   CameraPreset,
+  FilterState,
   FourDExperience,
   ObjectMetadata,
   SceneContext,
@@ -85,6 +88,15 @@ const ECG_SCALE = 1.2;
 const WIRE_IDS: ConductionId[] = ["internodal", "his", "bundleBranches", "purkinje"];
 const VALVE_IDS: ValveId[] = ["tricuspid", "pulmonary", "mitral", "aortic"];
 const CHAMBER_IDS: ChamberId[] = ["rightAtrium", "rightVentricle", "leftAtrium", "leftVentricle"];
+const FILTERS: VisualizationFilter[] = [
+  {
+    id: "electrical",
+    name: "Electrical signal",
+    defaultOn: true,
+    description: "The spark from the SA node down to the ventricle walls",
+  },
+  { id: "blood-flow", name: "Blood flow", defaultOn: true, description: "Arrows of blood moving through the heart" },
+];
 const OXY_FLOW = new THREE.Color(HEART_COLORS.oxyFlow);
 const DEOXY_FLOW = new THREE.Color(HEART_COLORS.deoxyFlow);
 
@@ -128,6 +140,8 @@ class HeartExperience implements FourDExperience {
   private saHalo: THREE.Sprite | null = null;
   private avHalo: THREE.Sprite | null = null;
   private flow: THREE.InstancedMesh | null = null;
+  private electrical: THREE.Group | null = null;
+  private filters: FilterState = defaultFilterState(FILTERS);
   private ecgGroup: THREE.Group | null = null;
   private ecgTrace: THREE.Mesh | null = null;
   private ecgHead: THREE.Mesh | null = null;
@@ -144,6 +158,7 @@ class HeartExperience implements FourDExperience {
 
   mount(ctx: SceneContext): void {
     this.ctx = ctx;
+    this.filters = defaultFilterState(FILTERS);
     this.lights = addWarmLights(ctx.scene);
     const root = new THREE.Group();
     root.name = "heartbeat";
@@ -202,12 +217,17 @@ class HeartExperience implements FourDExperience {
       return s;
     };
 
+    // One group, so the filter hides the nodes from hover too.
+    const electrical = new THREE.Group();
+    electrical.name = "electrical";
+    heart.add(electrical);
+    this.electrical = electrical;
     for (const id of WIRE_IDS) {
       const view = buildWire(id, u);
       this.wires.push(view);
-      for (const m of view.meshes) heart.add(m);
+      for (const m of view.meshes) electrical.add(m);
       const heads = view.curves.map(() => sprite(0.42));
-      for (const h of heads) heart.add(h);
+      for (const h of heads) electrical.add(h);
       this.sparks.set(id, heads);
     }
 
@@ -215,12 +235,13 @@ class HeartExperience implements FourDExperience {
     this.avNode = buildNode(0.1);
     this.saHalo = sprite(1.1);
     this.avHalo = sprite(0.9);
-    heart.add(this.saNode, this.avNode, this.saHalo, this.avHalo);
+    electrical.add(this.saNode, this.avNode, this.saHalo, this.avHalo);
     this.hover(this.saNode, "saNode");
     this.hover(this.avNode, "avNode");
 
     const capacity = PARCELS_PER_SIDE * 2;
     this.flow = new THREE.InstancedMesh(chevronGeometry(0.1), new THREE.MeshBasicMaterial(), capacity);
+    this.flow.name = "blood-flow";
     this.flow.raycast = () => {};
     this.flow.frustumCulled = false;
     this.flow.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
@@ -349,13 +370,17 @@ class HeartExperience implements FourDExperience {
     this.deformUniforms.uVentSqueeze.value = params.ventSqueeze;
     this.deformUniforms.uAtrialSqueeze.value = params.atrialSqueeze;
 
+    const electrical = this.filters.electrical;
+    if (this.electrical) this.electrical.visible = electrical;
+    if (this.flow) this.flow.visible = this.filters["blood-flow"];
+
     if (this.body) {
       const a = atrialWave(t);
       const v = ventricularWave(t);
       this.body.wave.uAtrialSpread.value = a.spread;
-      this.body.wave.uAtrialTint.value = a.tint;
+      this.body.wave.uAtrialTint.value = electrical ? a.tint : 0;
       this.body.wave.uVentSpread.value = v.spread;
-      this.body.wave.uVentTint.value = v.tint;
+      this.body.wave.uVentTint.value = electrical ? v.tint : 0;
     }
 
     for (const pool of this.pools) pool.uniforms.uPoolShrink.value = poolShrink(POOLS[pool.id].band, t);
@@ -476,7 +501,11 @@ class HeartExperience implements FourDExperience {
   }
 
   getAvailableFilters(): VisualizationFilter[] {
-    return [];
+    return FILTERS;
+  }
+
+  setFilters(state: FilterState): void {
+    this.filters = state;
   }
 
   getCameraPresets(): CameraPreset[] {
@@ -509,6 +538,7 @@ class HeartExperience implements FourDExperience {
     this.saNode = this.avNode = null;
     this.saHalo = this.avHalo = null;
     this.flow = null;
+    this.electrical = null;
     this.ecgGroup = this.ecgTrace = this.ecgHead = null;
     this.lub = this.dub = null;
     this.root = null;
