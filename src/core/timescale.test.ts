@@ -16,6 +16,24 @@ describe("formatSpan", () => {
     expect(formatSpan(4.6e9 * YEAR_SECONDS)).toBe("4.6 billion years");
     expect(formatSpan(13.8e9 * YEAR_SECONDS)).toBe("13.8 billion years");
   });
+
+  it("labels every gallery span naturally", () => {
+    expect(formatSpan(0.8)).toBe("0.8 seconds");
+    expect(formatSpan(10)).toBe("10 seconds");
+    expect(formatSpan(65 * 60)).toBe("65 minutes");
+    expect(formatSpan(150 * YEAR_SECONDS)).toBe("150 years");
+    expect(formatSpan(325 * YEAR_SECONDS)).toBe("325 years");
+    expect(formatSpan(250e6 * YEAR_SECONDS)).toBe("250 million years");
+    expect(formatSpan(4.6e9 * YEAR_SECONDS)).toBe("4.6 billion years");
+    expect(formatSpan(13.8e9 * YEAR_SECONDS)).toBe("13.8 billion years");
+  });
+
+  it("steps down a unit instead of showing two decimals, unless that runs into thousands", () => {
+    expect(formatSpan(100 * 60)).toBe("100 minutes");
+    expect(formatSpan(2.5 * 3600)).toBe("2.5 hours");
+    expect(formatSpan(4.57e9 * YEAR_SECONDS)).toBe("4.57 billion years");
+    expect(formatSpan(0.25)).toBe("0.25 seconds");
+  });
 });
 
 describe("byTimescale", () => {

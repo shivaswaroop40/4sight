@@ -19,13 +19,23 @@ const UNITS: [name: string, seconds: number][] = [
   ["second", 1],
 ];
 
-/** "1 second", "1 hour", "250,000 years", "4.6 billion years". Three significant digits. */
+/** "0.8 seconds", "65 minutes", "250,000 years", "4.6 billion years". Three significant digits. */
 export function formatSpan(seconds: number): string {
-  const [unit, size] = UNITS.find(([, size]) => seconds >= size) ?? UNITS[UNITS.length - 1];
+  let i = UNITS.findIndex(([, size]) => seconds >= size);
+  if (i < 0) i = UNITS.length - 1;
+  // "1.08 hours" reads worse than "65 minutes": step down a unit while the
+  // value needs two decimals and the smaller unit still reads in hundreds.
+  while (i < UNITS.length - 1 && !atMostOneDecimal(seconds / UNITS[i][1]) && seconds / UNITS[i + 1][1] < 1000) i++;
+  const [unit, size] = UNITS[i];
   const value = Number((seconds / size).toPrecision(3));
   const text = value.toLocaleString("en-US");
   if (unit.endsWith("years")) return `${text} ${unit}`;
   return `${text} ${unit}${value === 1 ? "" : "s"}`;
+}
+
+function atMostOneDecimal(value: number): boolean {
+  const tenths = Number(value.toPrecision(3)) * 10;
+  return Math.abs(tenths - Math.round(tenths)) < 1e-9;
 }
 
 /** Shortest span first. Stable, so equal spans keep their registry order. */
