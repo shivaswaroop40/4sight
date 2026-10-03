@@ -1,0 +1,265 @@
+// src/experiences/continents/globeModel.ts
+//
+// Geometry for the cartoon globe. Each block becomes a chunky slab that
+// hugs the sphere: a curved top, faceted side walls dropping below the
+// ocean, and an ink rim along the coast. Outlines are triangulated in a
+// gnomonic projection (great circles map to straight lines, so polygon
+// edges stay edges) and then refined until no triangle edge is long enough
+// to cut a chord into the sphere.
+
+import * as THREE from "three";
+import { THEME, addOutline, makeToonMaterial } from "../../core/theme";
+import type { Polygon } from "./outlines";
+import { arc, toVec, type LonLat } from "./sphere";
+
+/** Longest triangle edge on the land surface, in radians (about 2 degrees). */
+const MAX_EDGE = 0.035;
+/** The walls reach this far below the ocean surface. */
+const BASE_RADIUS = 0.985;
+/** Width of the ink rim along each coast, in radians. */
+const RIM_WIDTH = 0.0075;
+
+interface Mesh2 {
+  verts: THREE.Vector3[];
+  tris: [number, number, number][];
+}
+
+function triangulate(rings: Polygon): Mesh2 {
+  const ringVerts = rings.map((ring) => ring.map((p) => toVec(p)));
+  const centre = ringVerts[0].reduce((sum, v) => sum.add(v), new THREE.Vector3()).normalize();
+  const east = new THREE.Vector3(0, 1, 0).cross(centre);
+  if (east.lengthSq() < 1e-6) east.set(1, 0, 0);
+  east.normalize();
+  const north = centre.clone().cross(east);
+  const project = (v: THREE.Vector3) => {
+    const p = v.clone().divideScalar(v.dot(centre));
+    return new THREE.Vector2(p.dot(east), p.dot(north));
+  };
+  const [outer, ...holes] = ringVerts.map((ring) => ring.map(project));
+  const faces = THREE.ShapeUtils.triangulateShape(outer, holes);
+  const verts = ringVerts.flat();
+  const tris = faces.map(([a, b, c]) => {
+    const n = verts[b].clone().sub(verts[a]).cross(verts[c].clone().sub(verts[a]));
+    return (n.dot(verts[a]) > 0 ? [a, b, c] : [a, c, b]) as [number, number, number];
+  });
+  return { verts, tris };
+}
+
+/** Splits every edge longer than MAX_EDGE, in both triangles that share it, until none are left. */
+function refine(mesh: Mesh2): void {
+  for (;;) {
+    const mids = new Map<string, number>();
+    const key = (a: number, b: number) => (a < b ? `${a}:${b}` : `${b}:${a}`);
+    for (const t of mesh.tris) {
+      for (let k = 0; k < 3; k++) {
+        const a = t[k];
+        const b = t[(k + 1) % 3];
+        const id = key(a, b);
+        if (!mids.has(id) && arc(mesh.verts[a], mesh.verts[b]) > MAX_EDGE) {
+          mids.set(id, mesh.verts.push(mesh.verts[a].clone().add(mesh.verts[b]).normalize()) - 1);
+        }
+      }
+    }
+    if (mids.size === 0) return;
+    const next: [number, number, number][] = [];
+    for (const t of mesh.tris) {
+      const m = [0, 1, 2].map((k) => mids.get(key(t[k], t[(k + 1) % 3])));
+      const split = m.filter((x) => x !== undefined).length;
+      if (split === 0) {
+        next.push(t);
+      } else if (split === 3) {
+        const [ab, bc, ca] = m as number[];
+        next.push([t[0], ab, ca], [ab, t[1], bc], [ca, bc, t[2]], [ab, bc, ca]);
+      } else {
+        // Rotate so edge 0 (a-b) is split, and for two splits, edge 1 (b-c) too.
+        let r = 0;
+        while (m[r] === undefined || (split === 2 && m[(r + 1) % 3] === undefined)) r++;
+        const [a, b, c] = [t[r], t[(r + 1) % 3], t[(r + 2) % 3]];
+        const ab = m[r]!;
+        if (split === 1) {
+          next.push([a, ab, c], [ab, b, c]);
+        } else {
+          const bc = m[(r + 1) % 3]!;
+          next.push([ab, b, bc], [a, ab, bc], [a, bc, c]);
+        }
+      }
+    }
+    mesh.tris = next;
+  }
+}
+
+/**
+ * One block's land: a curved top (group 0), side walls (group 1) and an ink
+ * rim just above the top (group 2), all in present-day coordinates.
+ */
+export function landGeometry(polygons: Polygon[], height: number): THREE.BufferGeometry {
+  const top = 1 + height;
+  const positions: number[] = [];
+  const normals: number[] = [];
+  const index: number[] = [];
+  const groups: [number, number][] = [];
+
+  const vertex = (p: THREE.Vector3, n: THREE.Vector3) => {
+    positions.push(p.x, p.y, p.z);
+    normals.push(n.x, n.y, n.z);
+    return positions.length / 3 - 1;
+  };
+
+  const meshes = polygons.map((rings) => {
+    const mesh = triangulate(rings);
+    refine(mesh);
+    return mesh;
+  });
+
+  // Coast edges, directed with the land on their left when seen from above.
+  const coasts = meshes.map((mesh) => {
+    const directed = new Set(mesh.tris.flatMap(([a, b, c]) => [`${a}:${b}`, `${b}:${c}`, `${c}:${a}`]));
+    const edges: [number, number][] = [];
+    for (const id of directed) {
+      const [a, b] = id.split(":").map(Number);
+      if (!directed.has(`${b}:${a}`)) edges.push([a, b]);
+    }
+    return edges;
+  });
+
+  let start = index.length;
+  for (const mesh of meshes) {
+    const base = positions.length / 3;
+    for (const v of mesh.verts) vertex(v.clone().multiplyScalar(top), v);
+    for (const [a, b, c] of mesh.tris) index.push(base + a, base + b, base + c);
+  }
+  groups.push([start, index.length - start]);
+
+  start = index.length;
+  meshes.forEach((mesh, m) => {
+    for (const [i, j] of coasts[m]) {
+      const vi = mesh.verts[i];
+      const vj = mesh.verts[j];
+      const outward = vj.clone().sub(vi).cross(vi.clone().add(vj)).normalize();
+      const ti = vertex(vi.clone().multiplyScalar(top), outward);
+      const tj = vertex(vj.clone().multiplyScalar(top), outward);
+      const bi = vertex(vi.clone().multiplyScalar(BASE_RADIUS), outward);
+      const bj = vertex(vj.clone().multiplyScalar(BASE_RADIUS), outward);
+      index.push(ti, bi, bj, ti, bj, tj);
+    }
+  });
+  groups.push([start, index.length - start]);
+
+  start = index.length;
+  meshes.forEach((mesh, m) => {
+    const inward = new Map<number, THREE.Vector3>();
+    for (const [i, j] of coasts[m]) {
+      const left = mesh.verts[i].clone().add(mesh.verts[j]).cross(mesh.verts[j].clone().sub(mesh.verts[i])).normalize();
+      for (const k of [i, j]) inward.set(k, (inward.get(k) ?? new THREE.Vector3()).add(left));
+    }
+    const rim = top + 0.0015;
+    for (const [i, j] of coasts[m]) {
+      const inner = (k: number) =>
+        mesh.verts[k].clone().addScaledVector(inward.get(k)!.clone().normalize(), RIM_WIDTH).normalize().multiplyScalar(rim);
+      const oi = vertex(mesh.verts[i].clone().multiplyScalar(rim), mesh.verts[i]);
+      const oj = vertex(mesh.verts[j].clone().multiplyScalar(rim), mesh.verts[j]);
+      const ii = vertex(inner(i), mesh.verts[i]);
+      const ij = vertex(inner(j), mesh.verts[j]);
+      index.push(oi, oj, ij, oi, ij, ii);
+    }
+  });
+  groups.push([start, index.length - start]);
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+  geometry.setAttribute("normal", new THREE.Float32BufferAttribute(normals, 3));
+  geometry.setIndex(index);
+  groups.forEach(([s, count], i) => geometry.addGroup(s, count, i));
+  geometry.computeBoundingSphere();
+  return geometry;
+}
+
+export function inkMaterial(): THREE.MeshBasicMaterial {
+  return new THREE.MeshBasicMaterial({ color: THEME.ink, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -4 });
+}
+
+/** A unit mountain: a five-sided rock cone with a snow cap, base at y = 0, apex at y = 1. */
+export function peakGeometry(): THREE.BufferGeometry {
+  const rock = new THREE.ConeGeometry(1, 1, 5, 1, true).translate(0, 0.5, 0);
+  const snow = new THREE.ConeGeometry(0.4, 0.38, 5, 1, true).translate(0, 0.81, 0);
+  const geometry = new THREE.BufferGeometry();
+  const merged = [rock, snow];
+  const positions: number[] = [];
+  const normals: number[] = [];
+  const index: number[] = [];
+  merged.forEach((g, i) => {
+    const offset = positions.length / 3;
+    positions.push(...g.getAttribute("position").array);
+    normals.push(...g.getAttribute("normal").array);
+    const start = index.length;
+    for (const k of g.getIndex()!.array) index.push(offset + k);
+    geometry.addGroup(start, index.length - start, i);
+    g.dispose();
+  });
+  geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+  geometry.setAttribute("normal", new THREE.Float32BufferAttribute(normals, 3));
+  geometry.setIndex(index);
+  return geometry;
+}
+
+/** Evenly spaced points along a path on the sphere, about `spacing` radians apart. */
+export function samplePath(path: LonLat[], spacing: number): THREE.Vector3[] {
+  const points: THREE.Vector3[] = [];
+  for (let i = 0; i < path.length - 1; i++) {
+    const a = toVec(path[i]);
+    const b = toVec(path[i + 1]);
+    const n = Math.max(1, Math.round(arc(a, b) / spacing));
+    for (let k = 0; k < n; k++) points.push(a.clone().lerp(b, k / n).normalize());
+  }
+  points.push(toVec(path[path.length - 1]));
+  return points;
+}
+
+export function oceanMesh(): THREE.Mesh {
+  const ocean = new THREE.Mesh(new THREE.SphereGeometry(1, 96, 64), makeToonMaterial("#8FC6C6"));
+  ocean.name = "ocean";
+  addOutline(ocean, 0.018);
+  return ocean;
+}
+
+/** A faint ink ring around the equator, so you can see who crosses it. */
+export function equatorRing(): THREE.Mesh {
+  const ring = new THREE.Mesh(
+    new THREE.TorusGeometry(1.0015, 0.0022, 6, 256),
+    new THREE.MeshBasicMaterial({ color: THEME.ink, transparent: true, opacity: 0.3, depthWrite: false }),
+  );
+  ring.rotation.x = Math.PI / 2;
+  ring.raycast = () => {};
+  return ring;
+}
+
+/** A hand-lettered ocean name: ink italics with a cream halo so it reads over sea and land. */
+export function labelSprite(text: string): THREE.Sprite {
+  const canvas = document.createElement("canvas");
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  const material = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false, depthWrite: false });
+  const sprite = new THREE.Sprite(material);
+  const draw = () => {
+    const font = `italic 600 64px Fredoka, Nunito, ui-rounded, system-ui, sans-serif`;
+    const ctx = canvas.getContext("2d")!;
+    ctx.font = font;
+    const width = Math.ceil(ctx.measureText(text).width) + 48;
+    canvas.width = width;
+    canvas.height = 112;
+    ctx.font = font;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.lineJoin = "round";
+    ctx.lineWidth = 14;
+    ctx.strokeStyle = THEME.cream;
+    ctx.strokeText(text, width / 2, 58);
+    ctx.fillStyle = THEME.ink;
+    ctx.fillText(text, width / 2, 58);
+    texture.needsUpdate = true;
+    sprite.scale.set((0.11 * width) / canvas.height, 0.11, 1);
+  };
+  draw();
+  document.fonts?.ready.then(draw);
+  return sprite;
+}
