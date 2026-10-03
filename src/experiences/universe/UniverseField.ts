@@ -41,7 +41,6 @@ void main() {
   vec3 col = mix(gas, web, f * smoothstep(0.3, 1.0, aDensity + 0.3));
   col = mix(col, warm, uGalaxies * smoothstep(0.7, 1.0, aDensity) * f);
 
-  // The web stays dim until galaxies light it up.
   float alpha = uVisible * mix(0.3, 0.85, f * (0.4 + 0.6 * aDensity)) * mix(0.6, 1.0, uGalaxies);
   float size = mix(1.6, 2.4, aDensity * f);
 
@@ -65,7 +64,6 @@ varying float vAlpha;
 void main() {
   float d = length(gl_PointCoord - 0.5);
   if (d > 0.5) discard;
-  // A crisp printed dot, not a soft glow.
   float a = 1.0 - smoothstep(0.32, 0.5, d);
   gl_FragColor = vec4(vColor, a * vAlpha);
 }
@@ -171,12 +169,12 @@ void main() {
   vec3 core = uHeat < 0.5 ? mix(vec3(1.0, 0.99, 0.9), vec3(1.0, 0.87, 0.56), uHeat * 2.0) : mix(vec3(1.0, 0.87, 0.56), vec3(0.97, 0.62, 0.42), uHeat * 2.0 - 1.0);
   vec3 blobc = uHeat < 0.5 ? mix(vec3(1.0, 0.86, 0.5), vec3(0.98, 0.74, 0.42), uHeat * 2.0) : mix(vec3(0.98, 0.74, 0.42), vec3(0.9, 0.48, 0.34), uHeat * 2.0 - 1.0);
   vec3 rimc = uHeat < 0.5 ? mix(vec3(0.98, 0.8, 0.45), vec3(0.94, 0.6, 0.34), uHeat * 2.0) : mix(vec3(0.94, 0.6, 0.34), vec3(0.78, 0.36, 0.27), uHeat * 2.0 - 1.0);
-  float boil = fbm(vObj * 2.6 + vec3(uPhase));
+  // Unequal per-axis offsets: the hash is symmetric in x, y, z, which would mirror the pattern.
+  float boil = fbm(vObj * 2.6 + vec3(uPhase, uPhase * 0.7 + 2.1, uPhase * 1.3 + 5.2));
   vec3 fog = mix(core, blobc, step(0.55, boil));
   fog = mix(fog, rimc, step(facing, 0.32));
 
-  // Sound waves in the plasma, posterised into a picture-book CMB map.
-  float m = fbm(vObj * 4.0 + vec3(uPhase * 0.25) + 7.0);
+  float m = fbm(vObj * 4.0 + vec3(uPhase * 0.25 + 7.3, 1.9, 4.6));
   vec3 cold = vec3(0.45, 0.66, 0.66);
   vec3 cool = vec3(0.98, 0.93, 0.80);
   vec3 warmc = vec3(0.95, 0.76, 0.45);
@@ -185,7 +183,6 @@ void main() {
 
   vec3 col = mix(fog, cmb, uRipples * 0.85);
 
-  // Free quarks: coloured specks in the earliest soup.
   vec3 cell = floor(vObj * 7.0);
   float q = hash(cell);
   if (uQuarks > 0.0 && q > 0.86) {
@@ -196,7 +193,7 @@ void main() {
 
   // The fog lifts in patches rather than fading to mud, and the released
   // light lingers as a crisp ring at the rim that thins as it cools.
-  float lift = clamp((fbm(vObj * 5.0 + 3.0) - 0.25) * 2.0, 0.0, 1.0);
+  float lift = clamp((fbm(vObj * 5.0 + vec3(3.0, 8.4, 1.7)) - 0.25) * 2.0, 0.0, 1.0);
   float fogAlpha = step(1.0 - uFog, lift * 0.98 + 0.01);
   float shell = step(facing, 0.42 * uAfterglow);
   float alpha = max(fogAlpha, shell);
@@ -208,6 +205,8 @@ export class UniverseField {
   readonly matter: THREE.Points;
   readonly galaxies: THREE.Mesh;
   readonly veil: THREE.Mesh;
+  /** The veil's far side, drawn before the matter so it never paints over nearer dots. */
+  readonly veilBack: THREE.Mesh;
   private matterUniforms: Record<string, THREE.IUniform>;
   private galaxyUniforms: Record<string, THREE.IUniform>;
   private veilUniforms: Record<string, THREE.IUniform>;
@@ -288,8 +287,7 @@ export class UniverseField {
       uPhase: { value: 0 },
       uQuarks: { value: 0 },
     };
-    this.veil = new THREE.Mesh(
-      this.track(new THREE.SphereGeometry(1, 96, 64)),
+    const veilMaterial = (side: THREE.Side) =>
       this.track(
         new THREE.ShaderMaterial({
           uniforms: this.veilUniforms,
@@ -297,12 +295,16 @@ export class UniverseField {
           fragmentShader: veilFragment,
           transparent: true,
           depthWrite: false,
-          side: THREE.DoubleSide,
+          side,
         }),
-      ),
-    );
+      );
+    const sphere = this.track(new THREE.SphereGeometry(1, 96, 64));
+    this.veil = new THREE.Mesh(sphere, veilMaterial(THREE.FrontSide));
     this.veil.renderOrder = 3;
     this.veil.raycast = () => {};
+    this.veilBack = new THREE.Mesh(sphere, veilMaterial(THREE.BackSide));
+    this.veilBack.renderOrder = 0;
+    this.veilBack.raycast = () => {};
   }
 
   update(state: UniverseState): void {
@@ -326,8 +328,11 @@ export class UniverseField {
     v.uAfterglow.value = state.afterglow;
     v.uPhase.value = state.boil;
     v.uQuarks.value = state.quarks;
-    this.veil.scale.setScalar(state.radius);
-    this.veil.visible = state.fog > 0.001 || state.afterglow > 0.001;
+    const veiled = state.fog > 0.001 || state.afterglow > 0.001;
+    for (const mesh of [this.veil, this.veilBack]) {
+      mesh.scale.setScalar(state.radius);
+      mesh.visible = veiled;
+    }
   }
 
   dispose(): void {

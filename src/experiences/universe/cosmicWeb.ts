@@ -148,7 +148,6 @@ export function buildCosmicWeb(particleCount = 60000, galaxyCount = 650, seedVal
     const a = knots[f.from].position;
     const b = knots[f.to].position;
     const s = rand();
-    // Thicker in the middle, pinched where it meets a knot.
     const w = thickness * (0.5 + Math.sin(Math.PI * s));
     return [a[0] + (b[0] - a[0]) * s + gauss() * w, a[1] + (b[1] - a[1]) * s + gauss() * w, a[2] + (b[2] - a[2]) * s + gauss() * w];
   };

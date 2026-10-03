@@ -108,7 +108,7 @@ export const EVENTS: TimelineEvent[] = [
   {
     id: "recombination",
     time: 3.8e5,
-    title: "First atoms, first light",
+    title: "First atoms, light breaks free",
     when: "380,000 years",
     description:
       "At about 3,000 degrees electrons settle onto nuclei and the first atoms form. The glowing fog clears and light travels freely for the first time. We still see that flash today as the cosmic microwave background.",
@@ -177,12 +177,12 @@ export const EVENTS: TimelineEvent[] = [
   },
   {
     id: "dark-energy",
-    time: 9e9,
+    time: 7.7e9,
     title: "Dark energy takes over",
-    when: "About 9 billion years",
+    when: "About 7.7 billion years · 6 billion years ago",
     description:
-      "For billions of years gravity slowed the expansion down. As matter thinned out, dark energy won. The expansion is now speeding up, and it still is.",
-    keyPoints: ["Expansion started speeding up 5 to 6 billion years ago", "Dark energy is about 68% of everything", "Nobody yet knows what it is"],
+      "For billions of years gravity slowed the expansion down. As matter thinned out, dark energy won. The expansion started speeding up, and it still is.",
+    keyPoints: ["By about 10 billion years it outweighs all matter", "Dark energy is about 68% of everything", "Nobody yet knows what it is"],
     category: "expansion",
   },
   {

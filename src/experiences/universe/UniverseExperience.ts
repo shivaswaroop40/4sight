@@ -100,7 +100,7 @@ class UniverseExperience implements FourDExperience {
     this.wash = wash;
 
     this.field = new UniverseField(web, ctx.renderer.getPixelRatio(), this.track(galaxyAtlas()));
-    root.add(this.field.matter, this.field.galaxies, this.field.veil);
+    root.add(this.field.matter, this.field.galaxies, this.field.veilBack, this.field.veil);
 
     this.whoosh = this.sprite(this.track(expansionTexture()));
     root.add(this.whoosh);
@@ -286,11 +286,11 @@ class UniverseExperience implements FourDExperience {
       return;
     }
     if (ray.origin.length() < R) return;
-    const closest = ray.closestPointToPoint(centre, new THREE.Vector3());
-    const d = closest.length();
-    if (d > R * 0.9 && d < R * 1.03) {
-      intersects.push({ distance: ray.origin.distanceTo(closest), point: closest, object: this.proxies[0].mesh });
-    }
+    const d = ray.closestPointToPoint(centre, new THREE.Vector3()).length();
+    if (d < R * 0.9 || d > R * 1.03) return;
+    // Report where the ray enters the skin, so anything drawn in front of it still wins.
+    const entry = ray.intersectSphere(new THREE.Sphere(centre, R * 1.03), new THREE.Vector3());
+    if (entry) intersects.push({ distance: ray.origin.distanceTo(entry), point: entry, object: this.proxies[0].mesh });
   };
 
   private addProxy(

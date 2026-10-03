@@ -96,19 +96,20 @@ describe("universe state", () => {
       previous = a;
     }
     expect(scaleFactor(0)).toBe(0);
-    expect(scaleFactor(1.38e10)).toBeCloseTo(1, 12);
+    expect(scaleFactor(1.38e10)).toBeCloseTo(1, 9);
   });
 
-  it("stretches recombination light about a thousandfold, as the CMB shows", () => {
-    const z = universeStateAt(3.8e5).redshift;
-    expect(z).toBeGreaterThan(900);
-    expect(z).toBeLessThan(1500);
+  it("matches the measured redshifts of recombination and matter-radiation equality", () => {
+    expect(universeStateAt(3.8e5).redshift).toBeGreaterThan(1050);
+    expect(universeStateAt(3.8e5).redshift).toBeLessThan(1150);
+    expect(1 / scaleFactor(5.1e4) - 1).toBeGreaterThan(3300);
+    expect(1 / scaleFactor(5.1e4) - 1).toBeLessThan(3500);
   });
 
   it("speeds up late, when dark energy takes over", () => {
     const rate = (t: number) => (scaleFactor(t * 1.01) - scaleFactor(t)) / (0.01 * t);
     expect(rate(5e9)).toBeLessThan(rate(1e9));
-    expect(rate(1.3e10)).toBeGreaterThan(rate(7e9));
+    expect(rate(1.3e10)).toBeGreaterThan(rate(8e9));
   });
 
   it("is opaque before recombination and clear after", () => {
@@ -132,10 +133,15 @@ describe("universe state", () => {
     expect(cameraScale(1.38e10)).toBeCloseTo(1, 12);
   });
 
-  it("is a pure function of time", () => {
-    const t = mapping.toTime(0.63);
-    expect(universeExperience.getState(t)).toEqual(universeExperience.getState(t));
-    expect(universeStateAt(t)).toEqual(universeStateAt(t));
+  it("is a pure function of time, whatever was asked before", () => {
+    const expected = universeStateAt(1e9);
+    universeExperience.getState(1.38e10);
+    universeExperience.setTime(0);
+    expect(universeExperience.getState(1e9)).toEqual(expected);
+    expect(expected.fog).toBe(0);
+    expect(expected.scaleFactor).toBeCloseTo(0.15, 2);
+    expect(expected.stages.galaxies).toBe(1);
+    expect(expected.radius).toBeCloseTo(6.39, 2);
   });
 });
 
@@ -143,8 +149,24 @@ describe("universe scene data", () => {
   it("generates the same web every time", () => {
     const a = buildCosmicWeb(2000, 100);
     const b = buildCosmicWeb(2000, 100);
+    expect(a.particles.count).toBe(2000);
+    expect(a.galaxies.count).toBe(100);
+    expect(a.knots[a.cluster].position).toEqual([0.42, 0.16, 0.22]);
+    expect(a.filaments.length).toBeGreaterThan(40);
     expect(a.particles.home).toEqual(b.particles.home);
     expect(a.filaments).toEqual(b.filaments);
+  });
+
+  it("keeps every particle inside the ball and galaxies clear of the Milky Way", () => {
+    const web = buildCosmicWeb(2000, 300);
+    for (let i = 0; i < web.particles.count; i++) {
+      const [x, y, z] = web.particles.home.subarray(i * 3, i * 3 + 3);
+      expect(Math.hypot(x, y, z)).toBeLessThanOrEqual(0.9401);
+    }
+    for (let g = 0; g < web.galaxies.count; g++) {
+      const [x, y, z] = web.galaxies.position.subarray(g * 3, g * 3 + 3);
+      expect(Math.hypot(x, y, z)).toBeGreaterThanOrEqual(0.1);
+    }
   });
 
   it("tells a different hover story before and after the CMB is released", () => {

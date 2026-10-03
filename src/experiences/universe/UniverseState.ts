@@ -55,26 +55,56 @@ export function dominantStage(t: number): Stage {
   return STAGES.reduce((best, s) => (w[s] > w[best] ? s : best), STAGES[0]);
 }
 
-// Flat Lambda-CDM with Planck-like parameters. After matter-radiation
-// equality the matter + dark energy solution is exact; before it, radiation
-// dominates and a grows as the square root of time.
+// Flat Lambda-CDM with Planck 2018 parameters, radiation (with neutrinos)
+// included. t(a) = integral of da / (a H) has no closed form with all three
+// terms, so it is tabulated once on a log grid and inverted by interpolation.
 const HUBBLE_TIME = 14.44e9; // 1 / H0 in years, H0 = 67.7 km/s/Mpc
+const OMEGA_R = 9.1e-5;
 const OMEGA_M = 0.31;
-const OMEGA_L = 0.69;
-const T_EQUALITY = 5.1e4;
+const OMEGA_L = 1 - OMEGA_M - OMEGA_R;
+const A_MIN = 1e-12;
+const STEPS = 4000;
 
-function matterLambda(t: number): number {
-  return Math.cbrt(OMEGA_M / OMEGA_L) * Math.pow(Math.sinh(1.5 * Math.sqrt(OMEGA_L) * (t / HUBBLE_TIME)), 2 / 3);
+const { lnA, lnT } = (() => {
+  const lnA = new Float64Array(STEPS + 1);
+  const lnT = new Float64Array(STEPS + 1);
+  const x0 = Math.log(A_MIN);
+  const dx = (Math.log(1.2) - x0) / STEPS;
+  const hubble = (x: number) => {
+    const a = Math.exp(x);
+    return Math.sqrt(OMEGA_R / a ** 4 + OMEGA_M / a ** 3 + OMEGA_L);
+  };
+  // Deep in the radiation era, t = a^2 / (2 H0 sqrt(OmegaR)).
+  let t = (HUBBLE_TIME * A_MIN * A_MIN) / (2 * Math.sqrt(OMEGA_R));
+  for (let i = 0; i <= STEPS; i++) {
+    const x = x0 + i * dx;
+    if (i > 0) t += (HUBBLE_TIME * dx * (1 / hubble(x - dx) + 1 / hubble(x))) / 2;
+    lnA[i] = x;
+    lnT[i] = Math.log(t);
+  }
+  return { lnA, lnT };
+})();
+
+function interpolate(xs: Float64Array, ys: Float64Array, x: number): number {
+  let lo = 0;
+  let hi = xs.length - 1;
+  while (hi - lo > 1) {
+    const mid = (lo + hi) >> 1;
+    if (xs[mid] <= x) lo = mid;
+    else hi = mid;
+  }
+  return ys[lo] + ((ys[hi] - ys[lo]) * (x - xs[lo])) / (xs[hi] - xs[lo]);
 }
 
-const A_TODAY = matterLambda(TODAY);
-const A_EQUALITY = matterLambda(T_EQUALITY) / A_TODAY;
+// The model's own age (about 13.8 billion years) is stretched onto TODAY so a = 1 lands exactly there.
+const LN_MODEL_AGE = interpolate(lnA, lnT, 0);
 
-/** Size of the universe relative to today (a = 1 today). Approximate, monotonic. */
+/** Size of the universe relative to today (a = 1 today). Monotonic. */
 export function scaleFactor(t: number): number {
   if (t <= 0) return 0;
-  if (t >= T_EQUALITY) return matterLambda(t) / A_TODAY;
-  return A_EQUALITY * Math.sqrt(t / T_EQUALITY);
+  const lt = Math.log(t / TODAY) + LN_MODEL_AGE;
+  if (lt <= lnT[0]) return A_MIN * Math.exp((lt - lnT[0]) / 2);
+  return Math.exp(interpolate(lnT, lnA, lt));
 }
 
 /** Display radius of the observable-universe ball today, in scene units. */
