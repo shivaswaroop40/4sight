@@ -10,6 +10,7 @@ import * as THREE from "three";
 import { defaultFilterState } from "../../core/filters";
 import { lerp } from "../../core/interpolate";
 import { eventAt } from "../../core/Timeline";
+import { YEAR_SECONDS } from "../../core/timescale";
 import type {
   CameraPreset,
   FilterState,
@@ -62,6 +63,7 @@ class SolarSystemExperience implements FourDExperience {
   maxTime = KNOTS[KNOTS.length - 1].time;
   mapping = knotMapping(KNOTS, formatYears);
   baseDurationSeconds = 40;
+  elapsedSpanSeconds = (this.maxTime - this.minTime) * YEAR_SECONDS;
   warpPresets = [0.25, 0.5, 1, 2, 4];
   labels = { start: "Nebula", end: "Today" };
   events: TimelineEvent[] = EVENTS;

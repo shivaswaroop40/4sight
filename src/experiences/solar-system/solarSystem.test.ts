@@ -31,6 +31,15 @@ describe("solar mapping", () => {
     ]);
   });
 
+  it("never reads 1000 of a unit in the readout", () => {
+    expect([999.7, 998_000, 999_700, 999.7e6].map(formatYears)).toEqual([
+      "1.0 thousand years",
+      "998 thousand years",
+      "1.0 million years",
+      "1.00 billion years",
+    ]);
+  });
+
   it("states the start in elapsed time, like the readout", () => {
     expect(EVENTS[0].when).toBe("Year 0 · 4.6 billion years ago");
   });
@@ -81,6 +90,10 @@ describe("solar state", () => {
 
   it("offers named camera views, none duplicating the Overview button", () => {
     expect(solarSystemExperience.getCameraPresets().map((p) => p.name)).toEqual(["Tilted", "Top", "Edge-on"]);
+  });
+
+  it("spans 4.6 billion years of real elapsed time, for the one-day analogy", () => {
+    expect(solarSystemExperience.elapsedSpanSeconds).toBeCloseTo(4.6e9 * 365.25 * 86_400, -3);
   });
 
   it("is a pure function of time", () => {

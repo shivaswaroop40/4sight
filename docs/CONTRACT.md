@@ -144,6 +144,12 @@ export interface FourDExperience {
   baseDurationSeconds: number;
   /** Time warp values offered in the UI for this experience. */
   warpPresets: number[];
+  /**
+   * Set when experience time is real elapsed time: the span from minTime to
+   * maxTime, in seconds. The UI then shows "If <span> fit in one day, now is
+   * 11:58:43 pm". Leave unset when time is not a duration (iPhone assembly).
+   */
+  elapsedSpanSeconds?: number;
   /** Labels at the two ends of the slider. */
   labels: { start: string; end: string };
   /** Sorted timeline events. Drives the "What's happening?" panel. */

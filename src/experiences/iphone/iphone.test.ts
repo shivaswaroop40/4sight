@@ -71,6 +71,10 @@ describe("iPhone events and presets", () => {
     expect(faceOpacity(wake.time)).toBe(1);
   });
 
+  it("has no one-day analogy, since assembly progress is not elapsed time", () => {
+    expect(iphoneExperience.elapsedSpanSeconds).toBeUndefined();
+  });
+
   it("pulls the camera in as the phone assembles", () => {
     expect(iphoneExperience.cameraDistanceScale!(0)).toBeCloseTo(1.3, 6);
     expect(iphoneExperience.cameraDistanceScale!(1)).toBe(1);

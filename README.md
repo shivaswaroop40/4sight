@@ -15,6 +15,7 @@ Live site: https://shivaswaroop40.github.io/4sight/
 
 - **Gallery.** The picker at the top (or G) opens every experience as a ladder of timescales, from seconds to billions of years. Each experience downloads only when you pick it.
 - **Scrub, play, reverse, warp.** Drag the timeline, play either way, and pick a time warp. Event flags jump to the big moments.
+- **One-day clock.** When time is real elapsed time, the readout squeezes the whole span into one day: "If 4.6 billion years fit in one day, now is 5:32:10 pm".
 - **Camera views.** Preset views per experience, plus Overview.
 - **Filters.** The sliders button in the top bar shows or hides layers of a scene, paused or playing: the gas and dust and the orbit lines in Solar System, an X-ray view of the iPhone that lets you hover the parts inside.
 - **Links to a moment.** The address bar follows the experience and the timeline position (`?x=solarSystem&u=0.5`) whenever playback stops. More > Copy link copies the exact moment, even mid-playback. A link opens paused on that frame.
