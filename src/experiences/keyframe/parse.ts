@@ -14,7 +14,7 @@
 
 import type { CameraPreset, TimelineEvent, TimeTick } from "../../core/types";
 import { THEME } from "../../core/theme";
-import type { SliderKnot } from "../solar-system/solarMapping";
+import type { SliderKnot } from "../../core/mappings";
 import { isEasingName } from "./easing";
 import { COMMON_PARAMS, PRIMITIVES, isPrimitiveName } from "./primitives";
 import { isTimeFormatName } from "./timeFormats";

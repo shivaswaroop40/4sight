@@ -8,7 +8,7 @@
 // (years, minutes, ...), the same unit as minTime and maxTime.
 
 import type { CameraPreset, TimelineEvent, TimeTick } from "../../core/types";
-import type { SliderKnot } from "../solar-system/solarMapping";
+import type { SliderKnot } from "../../core/mappings";
 import type { EasingName } from "./easing";
 import type { PrimitiveName } from "./primitives";
 import type { TimeFormatName } from "./timeFormats";

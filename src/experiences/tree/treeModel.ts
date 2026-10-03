@@ -6,7 +6,7 @@
 // hover text both read from here, so what you see and what you read agree.
 
 import { smoothstep } from "../../core/interpolate";
-import { knotMapping, type SliderKnot } from "../solar-system/solarMapping";
+import { knotMapping, type SliderKnot } from "../../core/mappings";
 
 /** Story times in years after the acorn fell. Events and visuals both key off these. */
 export const STORY = {

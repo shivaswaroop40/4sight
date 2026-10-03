@@ -23,7 +23,7 @@ import type {
   TimelineEvent,
   VisualizationFilter,
 } from "../../core/types";
-import { knotMapping } from "../solar-system/solarMapping";
+import { knotMapping } from "../../core/mappings";
 import { parseScene } from "./parse";
 import { buildGeometry, hullGeometry } from "./primitives";
 import { cameraDistanceScaleAt, hoverDescription, sampleScene } from "./sample";
