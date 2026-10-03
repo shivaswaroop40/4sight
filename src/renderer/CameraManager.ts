@@ -10,9 +10,9 @@
 //              along the preset's line of sight to follow the experience's
 //              distance scale for the current time and the stage fit.
 //   following  after a click on an object: the orbit target glides onto the
-//              object over PRESET_MS, then rides with it every frame, and
-//              the camera moves by the same amount, so the viewer keeps
-//              their angle and distance and can still orbit and zoom.
+//              object's centre over PRESET_MS, then rides with it every
+//              frame, and the camera moves by the same amount, so the viewer
+//              keeps their angle and distance and can still orbit and zoom.
 //              A preset, Overview or stopFollowing ends it.
 //
 // The stage fit (see stageFit.ts) carries presets authored for a desktop
@@ -165,8 +165,7 @@ export class CameraManager {
       this.camera.position.lerp(this.anchoredPosition(f.preset), 1 - Math.exp(-dtSeconds * 5));
     } else if (f.kind === "following") {
       f.elapsed += dtSeconds * 1000;
-      // getWorldPosition refreshes the matrix, so this frame's setTime counts, not last frame's.
-      const goal = f.object.getWorldPosition(new THREE.Vector3());
+      const goal = visualCentre(f.object, new THREE.Vector3());
       const next = f.from.clone().lerp(goal, easeInOutCubic(Math.min(1, f.elapsed / PRESET_MS)));
       this.camera.position.add(next.clone().sub(this.controls.target));
       this.controls.target.copy(next);
@@ -214,7 +213,7 @@ export class CameraManager {
       this.camera.position.copy(this.anchoredPosition(f.preset));
     } else if (f.kind === "following") {
       f.elapsed = PRESET_MS;
-      const goal = f.object.getWorldPosition(new THREE.Vector3());
+      const goal = visualCentre(f.object, new THREE.Vector3());
       this.camera.position.add(goal.clone().sub(this.controls.target));
       this.controls.target.copy(goal);
     }
@@ -263,6 +262,27 @@ export class CameraManager {
       duration: PRESET_MS,
     };
   }
+}
+
+const bounds = new THREE.Box3();
+const part = new THREE.Box3();
+
+/**
+ * The centre of an object's meshes in world space. A hoverable is often a
+ * group placed at its parent's origin, like a continent that turns about the
+ * globe's centre, so its position is not where it is on screen. Refreshes
+ * the matrices, so this frame's setTime counts, not last frame's.
+ */
+function visualCentre(object: THREE.Object3D, out: THREE.Vector3): THREE.Vector3 {
+  object.updateWorldMatrix(true, true);
+  bounds.makeEmpty();
+  object.traverse((node) => {
+    const geometry = (node as THREE.Mesh).geometry;
+    if (!geometry || node.name === "outline") return;
+    if (!geometry.boundingBox) geometry.computeBoundingBox();
+    bounds.union(part.copy(geometry.boundingBox!).applyMatrix4(node.matrixWorld));
+  });
+  return bounds.isEmpty() ? object.getWorldPosition(out) : bounds.getCenter(out);
 }
 
 function prefersReducedMotion(): boolean {
