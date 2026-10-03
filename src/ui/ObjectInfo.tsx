@@ -43,7 +43,7 @@ export function ObjectInfo({ experience }: { experience: FourDExperience }) {
   }, [meta]);
 
   if (!meta) return null;
-  const props = Object.entries(meta.properties ?? {}).slice(0, 3);
+  const props = Object.entries(meta.properties ?? {});
 
   return (
     <div className="card tip" ref={ref} role="tooltip">
