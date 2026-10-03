@@ -9,6 +9,7 @@ import * as THREE from "three";
 import type { FilterState, FourDExperience, SceneContext, TimeController } from "../core/types";
 import { disposeObject } from "../core/theme";
 import { CameraManager } from "./CameraManager";
+import { NO_PRESS, stepPress, type Press, type PressInput } from "./pointerGesture";
 
 export class SceneManager {
   readonly scene: THREE.Scene;
@@ -25,6 +26,7 @@ export class SceneManager {
   private raycaster = new THREE.Raycaster();
   private pointer = new THREE.Vector2();
   private pointerInside = false;
+  private press: Press = NO_PRESS;
   private hoveredId: string | null = null;
   private onHoverChange?: (id: string | null) => void;
 
@@ -61,8 +63,12 @@ export class SceneManager {
     };
 
     const canvas = this.renderer.domElement;
+    canvas.addEventListener("pointerdown", this.handlePointerDown);
     canvas.addEventListener("pointermove", this.handlePointerMove);
+    canvas.addEventListener("pointerup", this.handlePointerUp);
+    canvas.addEventListener("pointercancel", this.handlePointerCancel);
     canvas.addEventListener("pointerleave", this.handlePointerLeave);
+    canvas.addEventListener("wheel", this.handleWheel, { passive: true });
     document.addEventListener("visibilitychange", this.handleVisibility);
 
     this.resizeObserver = new ResizeObserver(() => this.handleResize());
@@ -178,8 +184,12 @@ export class SceneManager {
     this.cameras.dispose();
     this.resizeObserver.disconnect();
     const canvas = this.renderer.domElement;
+    canvas.removeEventListener("pointerdown", this.handlePointerDown);
     canvas.removeEventListener("pointermove", this.handlePointerMove);
+    canvas.removeEventListener("pointerup", this.handlePointerUp);
+    canvas.removeEventListener("pointercancel", this.handlePointerCancel);
     canvas.removeEventListener("pointerleave", this.handlePointerLeave);
+    canvas.removeEventListener("wheel", this.handleWheel);
     document.removeEventListener("visibilitychange", this.handleVisibility);
     this.renderer.dispose();
     if (canvas.parentElement === this.container) this.container.removeChild(canvas);
@@ -190,12 +200,35 @@ export class SceneManager {
     else this.start();
   };
 
+  private handlePointerDown = (event: PointerEvent): void => {
+    this.stepPress("down", event);
+  };
+
   private handlePointerMove = (event: PointerEvent): void => {
     const rect = this.renderer.domElement.getBoundingClientRect();
     this.pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
     this.pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
     this.pointerInside = true;
+    this.stepPress("move", event);
   };
+
+  private handlePointerUp = (event: PointerEvent): void => {
+    this.stepPress("up", event);
+  };
+
+  private handlePointerCancel = (event: PointerEvent): void => {
+    this.stepPress("cancel", event);
+  };
+
+  private handleWheel = (): void => {
+    this.cameras.viewerMoved();
+  };
+
+  private stepPress(type: PressInput["type"], event: PointerEvent): void {
+    const { press, outcome } = stepPress(this.press, { type, x: event.clientX, y: event.clientY });
+    this.press = press;
+    if (outcome === "drag") this.cameras.viewerMoved();
+  }
 
   private handlePointerLeave = (): void => {
     this.pointerInside = false;

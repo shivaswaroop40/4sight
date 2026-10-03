@@ -3,7 +3,7 @@
 // Orbit controls plus animated camera presets. The render loop calls
 // update(dt) every frame; applyPreset and overview tween position and
 // target over PRESET_MS with an ease-in-out curve. After a preset, the
-// camera stays anchored to it until the viewer moves the camera: it eases
+// camera stays anchored to it until the viewer drags or zooms: it eases
 // along the preset's line of sight to follow the experience's distance scale
 // for the current time and the viewport's aspect ratio.
 
@@ -37,11 +37,15 @@ export class CameraManager {
     this.controls.dampingFactor = 0.08;
     this.controls.enablePan = true;
     this.controls.screenSpacePanning = true;
-    // A user drag cancels any preset in flight and releases the anchor.
-    this.controls.addEventListener("start", () => {
-      this.tween = null;
-      this.anchor = null;
-    });
+  }
+
+  /**
+   * The viewer moved the camera by hand (a drag or a wheel zoom): a preset
+   * in flight stops and the anchor lets go. A plain click is not a move.
+   */
+  viewerMoved(): void {
+    this.tween = null;
+    this.anchor = null;
   }
 
   applyPreset(preset: CameraPreset, animate = true): void {
