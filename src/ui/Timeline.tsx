@@ -10,7 +10,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { FourDExperience, TimeTick } from "../core/types";
-import { controller } from "./runtime";
+import { controller, runtime } from "./runtime";
 
 const NUDGE = 0.01;
 
@@ -78,6 +78,7 @@ export function Timeline({ experience }: { experience: FourDExperience }) {
     if (e.currentTarget.dataset.dragging !== "1") return;
     e.currentTarget.dataset.dragging = "0";
     controller.setScrubbing(false);
+    runtime.urlSync?.flush();
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -132,7 +133,10 @@ export function Timeline({ experience }: { experience: FourDExperience }) {
             style={{ left: `${u * 100}%` }}
             title={`${event.title} · ${event.when}`}
             aria-label={`Jump to ${event.title}`}
-            onClick={() => controller.jumpToEvent(event.id)}
+            onClick={() => {
+              controller.jumpToEvent(event.id);
+              runtime.urlSync?.flush();
+            }}
           >
             <span className="flag__tip">{event.title}</span>
           </button>

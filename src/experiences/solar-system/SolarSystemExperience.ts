@@ -4,12 +4,16 @@
 // their moons. The slider walks 4.6 billion years on a knotted log scale.
 // Particles do the gathering (AccretionField); solid meshes take over once a
 // body has formed, glowing hot and then cooling to its final colours.
+// Two filters hide the gas and dust and the orbit guide lines.
 
 import * as THREE from "three";
+import { defaultFilterState } from "../../core/filters";
 import { lerp } from "../../core/interpolate";
 import { eventAt } from "../../core/Timeline";
+import { YEAR_SECONDS } from "../../core/timescale";
 import type {
   CameraPreset,
+  FilterState,
   FourDExperience,
   ObjectMetadata,
   SceneContext,
@@ -27,6 +31,11 @@ const CAMERA_PRESETS: CameraPreset[] = [
   { id: "tilted", name: "Tilted", position: [0, 13, 27], target: [0, 0, 0] },
   { id: "top", name: "Top", position: [0, 40, 0.01], target: [0, 0, 0] },
   { id: "edge-on", name: "Edge-on", position: [0, 0.6, 30], target: [0, 0, 0] },
+];
+
+const FILTERS: VisualizationFilter[] = [
+  { id: "gas-and-dust", name: "Gas & dust", defaultOn: true, description: "The cloud and disk the planets grow from" },
+  { id: "orbits", name: "Orbits", defaultOn: true, description: "Guide lines along each planet's path" },
 ];
 
 const MOLTEN = new THREE.Color(0.22, 0.07, 0.03);
@@ -55,6 +64,7 @@ class SolarSystemExperience implements FourDExperience {
   maxTime = KNOTS[KNOTS.length - 1].time;
   mapping = knotMapping(KNOTS, formatYears);
   baseDurationSeconds = 40;
+  elapsedSpanSeconds = (this.maxTime - this.minTime) * YEAR_SECONDS;
   warpPresets = [0.25, 0.5, 1, 2, 4];
   labels = { start: "Nebula", end: "Today" };
   events: TimelineEvent[] = EVENTS;
@@ -67,9 +77,11 @@ class SolarSystemExperience implements FourDExperience {
   private corona: THREE.Sprite | null = null;
   private disposables: { dispose(): void }[] = [];
   private currentP = 0;
+  private filters: FilterState = defaultFilterState(FILTERS);
 
   mount(ctx: SceneContext): void {
     this.ctx = ctx;
+    this.filters = defaultFilterState(FILTERS);
     const root = new THREE.Group();
     this.root = root;
     ctx.scene.add(root);
@@ -83,6 +95,7 @@ class SolarSystemExperience implements FourDExperience {
     root.add(this.starfield());
 
     this.field = new AccretionField(ctx.renderer.getPixelRatio());
+    this.field.points.name = "gas-and-dust";
     root.add(this.field.points);
 
     this.sunLight = new THREE.PointLight(0xffffff, 0, 0, 0);
@@ -155,6 +168,7 @@ class SolarSystemExperience implements FourDExperience {
           new THREE.LineBasicMaterial({ color: 0x6f86b8, transparent: true, opacity: 0, depthWrite: false }),
         );
         const orbit = new THREE.LineLoop(orbitGeometry, orbitMaterial);
+        orbit.name = "orbit";
         orbit.scale.setScalar(def.orbit);
         root.add(orbit);
         view.orbit = orbit;
@@ -188,6 +202,7 @@ class SolarSystemExperience implements FourDExperience {
     if (!this.field) return;
     const state = solarStateAt(p);
     this.field.update(state);
+    this.field.points.visible = this.filters["gas-and-dust"];
     for (const [i, view] of this.views.entries()) {
       this.applyBody(view, state, i);
     }
@@ -221,7 +236,11 @@ class SolarSystemExperience implements FourDExperience {
   }
 
   getAvailableFilters(): VisualizationFilter[] {
-    return [];
+    return FILTERS;
+  }
+
+  setFilters(state: FilterState): void {
+    this.filters = state;
   }
 
   getCameraPresets(): CameraPreset[] {
@@ -301,7 +320,7 @@ class SolarSystemExperience implements FourDExperience {
     }
     if (view.orbit) {
       (view.orbit.material as THREE.LineBasicMaterial).opacity = 0.2 * state.orbits;
-      view.orbit.visible = state.orbits > 0.001;
+      view.orbit.visible = state.orbits > 0.001 && this.filters.orbits;
     }
   }
 
