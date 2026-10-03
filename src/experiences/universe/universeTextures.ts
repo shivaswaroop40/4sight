@@ -54,12 +54,12 @@ function spiralArm(ctx: CanvasRenderingContext2D, cx: number, cy: number, size: 
 }
 
 function drawSpiral(ctx: CanvasRenderingContext2D, cx: number, cy: number, size: number, arm: string, core: string): void {
-  ctx.beginPath();
-  ctx.arc(cx, cy, size * 0.3, 0, Math.PI * 2);
-  ctx.fillStyle = arm;
-  ctx.globalAlpha = 0.5;
-  ctx.fill();
-  ctx.globalAlpha = 1;
+  const halo = ctx.createRadialGradient(cx, cy, 0, cx, cy, size * 0.36);
+  halo.addColorStop(0, arm);
+  halo.addColorStop(0.55, arm + "AA");
+  halo.addColorStop(1, arm + "00");
+  ctx.fillStyle = halo;
+  ctx.fillRect(cx - size / 2, cy - size / 2, size, size);
   ctx.lineJoin = "round";
   for (const offset of [0, Math.PI]) {
     spiralArm(ctx, cx, cy, size, offset);
@@ -101,16 +101,16 @@ function drawElliptical(ctx: CanvasRenderingContext2D, cx: number, cy: number, s
  * elliptical on the right. Light colours so the shader can tint them.
  */
 export function galaxyAtlas(): THREE.CanvasTexture {
-  const [c, ctx] = canvas(512, 256);
-  drawSpiral(ctx, 128, 128, 240, "#F4ECFF", "#FFE7B8");
-  drawElliptical(ctx, 384, 128, 240);
+  const [c, ctx] = canvas(1024, 512);
+  drawSpiral(ctx, 256, 256, 480, "#F4ECFF", "#FFE7B8");
+  drawElliptical(ctx, 768, 256, 480);
   return toTexture(c);
 }
 
 /** Our galaxy: a bigger, warmer spiral so it reads as special. */
 export function milkyWayTexture(): THREE.CanvasTexture {
-  const [c, ctx] = canvas(256, 256);
-  drawSpiral(ctx, 128, 128, 240, "#E9DDFB", THEME.mustard);
+  const [c, ctx] = canvas(512, 512);
+  drawSpiral(ctx, 256, 256, 480, "#E9DDFB", THEME.mustard);
   return toTexture(c);
 }
 
@@ -207,19 +207,22 @@ export function sunTexture(): THREE.CanvasTexture {
   return toTexture(c);
 }
 
-/** A ring of stubby cartoon rays, clear in the middle, for the hot early ball. */
-export function raysTexture(): THREE.CanvasTexture {
+/**
+ * Comic "whoosh" marks around the ball: groups of three outward dashes that
+ * say "growing". White with ink edges so the sprite colour can tint them.
+ */
+export function expansionTexture(): THREE.CanvasTexture {
   const [c, ctx] = canvas(512, 512);
-  const rays = 28;
-  for (let i = 0; i < rays; i++) {
-    const a = (i / rays) * Math.PI * 2;
-    const long = i % 2 === 0;
-    const r0 = 200;
-    const r1 = long ? 250 : 232;
-    ctx.beginPath();
-    ctx.moveTo(256 + Math.cos(a) * r0, 256 + Math.sin(a) * r0);
-    ctx.lineTo(256 + Math.cos(a) * r1, 256 + Math.sin(a) * r1);
-    inked(ctx, long ? THEME.mustard : "#F8DDA8", 11, 3.5);
+  const groups = 10;
+  for (let g = 0; g < groups; g++) {
+    const base = (g / groups) * Math.PI * 2 + 0.2;
+    for (const [da, r0, r1] of [[-0.06, 216, 234], [0, 212, 246], [0.06, 216, 234]]) {
+      const a = base + da;
+      ctx.beginPath();
+      ctx.moveTo(256 + Math.cos(a) * r0, 256 + Math.sin(a) * r0);
+      ctx.lineTo(256 + Math.cos(a) * r1, 256 + Math.sin(a) * r1);
+      inked(ctx, "#FFFFFF", 5, 2.5);
+    }
   }
   return toTexture(c);
 }

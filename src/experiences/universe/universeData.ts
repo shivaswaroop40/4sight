@@ -59,7 +59,7 @@ export function formatCosmicTime(t: number): string {
   if (s < 2 * 86400) return count(s / 3600, "hour");
   if (t < 1) return count(s / 86400, "day");
   if (t < 1e3) return count(t, "year");
-  if (t < 1e6) return `${count(t / 1e3, "thousand")} years`.replace("thousands", "thousand");
+  if (t < 1e6) return `${(Math.round(t / 100) * 100).toLocaleString("en-US")} years`;
   if (t < 1e9) return `${count(t / 1e6, "million")} years`.replace("millions", "million");
   return `${(t / 1e9).toFixed(t < 1e10 ? 2 : 1)} billion years`;
 }

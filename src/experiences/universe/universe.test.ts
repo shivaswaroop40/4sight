@@ -39,7 +39,7 @@ describe("universe mapping", () => {
     expect(formatCosmicTime(seconds(1e-36))).toBe("10⁻³⁶ seconds");
     expect(formatCosmicTime(seconds(3e-20))).toBe("3 × 10⁻²⁰ seconds");
     expect(formatCosmicTime(seconds(180))).toBe("3 minutes");
-    expect(formatCosmicTime(3.8e5)).toBe("380 thousand years");
+    expect(formatCosmicTime(3.8e5)).toBe("380,000 years");
     expect(formatCosmicTime(2e8)).toBe("200 million years");
     expect(formatCosmicTime(9.2e9)).toBe("9.20 billion years");
     expect(formatCosmicTime(1.38e10)).toBe("13.8 billion years");

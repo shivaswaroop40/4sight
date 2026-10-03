@@ -9,7 +9,7 @@
 
 import * as THREE from "three";
 import { knotMapping } from "../../core/mappings";
-import { addOutline, addWarmLights, disposeObject } from "../../core/theme";
+import { THEME, addOutline, addWarmLights, disposeObject } from "../../core/theme";
 import { eventAt } from "../../core/Timeline";
 import type {
   CameraPreset,
@@ -24,16 +24,18 @@ import { UniverseField } from "./UniverseField";
 import { EVENTS, KNOTS, TODAY, formatCosmicTime } from "./universeData";
 import { hoverInfo, type HoverId } from "./universeHover";
 import { cameraScale, universeStateAt, type UniverseState } from "./UniverseState";
-import { burstTexture, galaxyAtlas, milkyWayTexture, pinTexture, raysTexture, sparkleTexture, sunTexture } from "./universeTextures";
+import { burstTexture, expansionTexture, galaxyAtlas, milkyWayTexture, pinTexture, sparkleTexture, sunTexture } from "./universeTextures";
 
 const CAMERA_PRESETS: CameraPreset[] = [
   { id: "wide", name: "Wide", position: [20.1, 9.6, 32.7], target: [0, -1.8, 0] },
   { id: "inside-web", name: "Inside the web", position: [-2.2, 1.4, 4.2], target: [3.2, 0.6, 1.4] },
-  { id: "galaxy", name: "Galaxy close-up", position: [0.75, 0.5, 1.5], target: [0, 0, 0] },
+  { id: "galaxy", name: "Galaxy close-up", position: [1.2, 0.8, 2.4], target: [0, -0.15, 0] },
 ];
 
 const NIGHT_DARK = new THREE.Color("#171A30");
 const NIGHT = new THREE.Color("#222B52");
+const WHOOSH_HOT = new THREE.Color(THEME.mustard);
+const WHOOSH_COOL = new THREE.Color(THEME.cream);
 
 interface Proxy {
   id: HoverId;
@@ -65,7 +67,7 @@ class UniverseExperience implements FourDExperience {
   private field: UniverseField | null = null;
   private wash: THREE.Mesh | null = null;
   private burst: THREE.Sprite | null = null;
-  private rays: THREE.Sprite | null = null;
+  private whoosh: THREE.Sprite | null = null;
   private starGroup: THREE.Group | null = null;
   private stars: { sprite: THREE.Sprite; home: Vec3; size: number; delay: number }[] = [];
   private milkyWay: THREE.Sprite | null = null;
@@ -103,11 +105,11 @@ class UniverseExperience implements FourDExperience {
     this.field = new UniverseField(web, ctx.renderer.getPixelRatio(), this.track(galaxyAtlas()));
     root.add(this.field.matter, this.field.galaxies, this.field.veil);
 
-    this.rays = this.sprite(this.track(raysTexture()));
-    root.add(this.rays);
+    this.whoosh = this.sprite(this.track(expansionTexture()));
+    root.add(this.whoosh);
 
+    // Drawn before the veil so the growing plasma ball covers the burst's heart.
     this.burst = this.sprite(this.track(burstTexture()), { depthTest: false });
-    this.burst.renderOrder = 5;
     root.add(this.burst);
 
     const sparkle = this.track(sparkleTexture());
@@ -159,9 +161,11 @@ class UniverseExperience implements FourDExperience {
     this.addProxy("cluster", (s) => s.structure > 0.25, sphere, hidden, web.knots[web.cluster].position, 0.09);
     this.addProxy("filament", (s) => s.structure > 0.2, tube, hidden, mid);
 
+    // The Sun sits on the Milky Way sprite at the same depth; registering it
+    // first lets it win the tie in the hover raycast.
+    this.register(this.sun, "sun");
     this.register(this.milkyWay, "milky-way");
     this.register(this.pin, "milky-way");
-    this.register(this.sun, "sun");
 
     this.setTime(0);
   }
@@ -178,8 +182,8 @@ class UniverseExperience implements FourDExperience {
 
     const burst = this.burst!;
     burst.visible = s.flash > 0.001;
-    burst.scale.setScalar(1.6 + 2.6 * (1 - s.flash));
-    (burst.material as THREE.SpriteMaterial).opacity = s.flash;
+    burst.scale.setScalar(1.6 + 4 * (1 - s.flash));
+    burst.material.opacity = Math.min(1, s.flash * 3);
     burst.material.rotation = (1 - s.flash) * 0.6;
 
     this.starGroup!.visible = s.firstStars > 0.02;
@@ -191,11 +195,11 @@ class UniverseExperience implements FourDExperience {
       (star.sprite.material as THREE.SpriteMaterial).opacity = Math.min(1, k * 3);
     }
 
-    const rays = this.rays!;
-    rays.visible = s.fog > 0.001 && s.flash < 0.999;
-    rays.scale.setScalar(R * 2.55);
-    rays.material.rotation = s.boil * 0.2;
-    (rays.material as THREE.SpriteMaterial).opacity = s.fog * (1 - s.flash);
+    const whoosh = this.whoosh!;
+    whoosh.visible = s.flash < 0.999;
+    whoosh.scale.setScalar(R * 2.5);
+    whoosh.material.color.copy(WHOOSH_COOL).lerp(WHOOSH_HOT, s.fog);
+    whoosh.material.opacity = 1 - s.flash;
 
     const mw = this.milkyWay!;
     mw.visible = s.milkyWay > 0.001;
@@ -261,7 +265,7 @@ class UniverseExperience implements FourDExperience {
     this.web = null;
     this.wash = null;
     this.burst = null;
-    this.rays = null;
+    this.whoosh = null;
     this.milkyWay = null;
     this.pin = null;
     this.sun = null;

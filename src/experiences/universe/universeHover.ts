@@ -64,7 +64,7 @@ const HOVERS: Record<HoverId, HoverDef> = {
       [0, "The patch of gas that will become our galaxy. The observable universe is a ball centred on us, so we sit in the middle."],
       [6e8, "Our galaxy as a young clump, growing by swallowing smaller galaxies. Its oldest stars are already shining."],
       [5e9, "Our galaxy's thin, spinning disk has settled, with the spiral arms we know."],
-      [9.2e9, "Our galaxy. In one of its arms, the Sun has just formed."],
+      [9.2e9, "Our galaxy. The Sun formed in one of its arms, about halfway out from the centre, 4.6 billion years ago."],
     ],
   },
   sun: {
