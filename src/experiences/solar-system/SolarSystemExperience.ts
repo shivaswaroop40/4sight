@@ -22,7 +22,11 @@ import { formatYears, knotMapping } from "./solarMapping";
 import { solarStateAt, type SolarState } from "./SolarSystemState";
 import { bandsTexture, earthTexture, glowTexture, ringTexture } from "./textures";
 
-const CAMERA: CameraPreset = { id: "overview", name: "Overview", position: [0, 13, 27], target: [0, 0, 0] };
+const CAMERA_PRESETS: CameraPreset[] = [
+  { id: "tilted", name: "Tilted", position: [0, 13, 27], target: [0, 0, 0] },
+  { id: "top", name: "Top", position: [0, 40, 0.01], target: [0, 0, 0] },
+  { id: "edge-on", name: "Edge-on", position: [0, 0.6, 30], target: [0, 0, 0] },
+];
 
 const MOLTEN = new THREE.Color(0.22, 0.07, 0.03);
 const EMISSIVE_HOT = new THREE.Color(1.0, 0.55, 0.15);
@@ -201,7 +205,11 @@ class SolarSystemExperience implements FourDExperience {
     if (!def) return null;
     const body = solarStateAt(this.currentP).bodies.find((b) => b.id === id)!;
     const stage =
-      body.solid < 1 ? "Still gathering from dust and gas. " : body.heat > 0.3 ? "Molten and glowing. " : "";
+      body.solid < 1
+        ? "Still gathering from dust and gas. "
+        : def.kind !== "star" && body.heat > 0.3
+          ? "Molten and glowing. "
+          : "";
     return {
       id,
       name: def.name,
@@ -216,7 +224,7 @@ class SolarSystemExperience implements FourDExperience {
   }
 
   getCameraPresets(): CameraPreset[] {
-    return [CAMERA];
+    return CAMERA_PRESETS;
   }
 
   reset(): void {

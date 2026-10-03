@@ -162,6 +162,12 @@ export interface FourDExperience {
   getHoveredObject(id: string): ObjectMetadata | null;
   getAvailableFilters(): VisualizationFilter[];
   getCameraPresets(): CameraPreset[];
+  /**
+   * Optional multiplier on the preset camera's distance at time t, for scenes
+   * that shrink or grow over time. 1 keeps the authored framing. It applies
+   * until the viewer moves the camera.
+   */
+  cameraDistanceScale?(time: number): number;
 
   reset(): void;
   dispose(): void;

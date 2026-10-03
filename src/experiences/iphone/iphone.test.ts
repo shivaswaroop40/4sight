@@ -70,8 +70,8 @@ describe("iPhone events and presets", () => {
   });
 
   it("pulls the camera in as the phone assembles", () => {
-    expect(iphoneExperience.cameraDistanceScale!(0)).toBe(1);
-    expect(iphoneExperience.cameraDistanceScale!(1)).toBeCloseTo(0.6, 6);
+    expect(iphoneExperience.cameraDistanceScale!(0)).toBeCloseTo(1.3, 6);
+    expect(iphoneExperience.cameraDistanceScale!(1)).toBe(1);
   });
 
   it("offers four camera presets with three-quarter first", () => {

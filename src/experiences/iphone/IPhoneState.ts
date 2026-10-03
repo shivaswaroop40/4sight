@@ -5,7 +5,7 @@
 // scrubbing backwards plays every move in reverse.
 
 import * as THREE from "three";
-import { lerp, smoothstep, window as windowFn } from "../../core/interpolate";
+import { easeInOutCubic, lerp, smoothstep, window as windowFn } from "../../core/interpolate";
 import type { IPhoneComponent } from "./iphoneData";
 
 export type Vec3 = [number, number, number];
@@ -104,6 +104,11 @@ export const WAKE = {
   hop: [0.93, 1.0],
   sparkles: [0.955, 1.0],
 } as const;
+
+/** Presets frame the finished phone; the exploded layout needs a wider shot until the back glass and display land. */
+export function cameraDistanceScale(t: number): number {
+  return lerp(1.3, 1, easeInOutCubic(windowFn(t, 0.62, 0.92)));
+}
 
 export function screenOpacity(t: number): number {
   return smoothstep(WAKE.screenOn[0], WAKE.screenOn[1], t);
