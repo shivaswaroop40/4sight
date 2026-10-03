@@ -147,20 +147,7 @@ export function Timeline({ experience }: { experience: FourDExperience }) {
       <div className="timeline__flags" role="group" aria-label="Events" ref={flagsRef}>
         {clusters.map((c) =>
           c.items.length === 1 ? (
-            <button
-              key={c.items[0].event.id}
-              type="button"
-              className="flag"
-              data-u={c.u}
-              data-color={c.items[0].color}
-              data-edge={flagEdge(c.u)}
-              style={{ left: `${c.u * 100}%` }}
-              title={`${c.items[0].event.title} · ${c.items[0].event.when}`}
-              aria-label={`Jump to ${c.items[0].event.title}`}
-              onClick={() => jump(c.items[0].event.id)}
-            >
-              <span className="flag__tip">{c.items[0].event.title}</span>
-            </button>
+            <EventFlag key={c.items[0].event.id} marker={c.items[0]} onPick={jump} />
           ) : (
             <ClusterFlag
               key={c.items[0].event.id}
@@ -186,6 +173,24 @@ export function Timeline({ experience }: { experience: FourDExperience }) {
 
 function flagEdge(u: number): "start" | "end" | undefined {
   return u < 0.04 ? "start" : u > 0.96 ? "end" : undefined;
+}
+
+function EventFlag({ marker: { event, u, color }, onPick }: { marker: Marker; onPick: (id: string) => void }) {
+  return (
+    <button
+      type="button"
+      className="flag"
+      data-u={u}
+      data-color={color}
+      data-edge={flagEdge(u)}
+      style={{ left: `${u * 100}%` }}
+      title={`${event.title} · ${event.when}`}
+      aria-label={`Jump to ${event.title}`}
+      onClick={() => onPick(event.id)}
+    >
+      <span className="flag__tip">{event.title}</span>
+    </button>
+  );
 }
 
 /** One flag for several close events. It opens a list of them; Escape or a click elsewhere closes it. */
@@ -245,7 +250,7 @@ function ClusterFlag({
         title={cluster.items.map((m) => `${m.event.title} · ${m.event.when}`).join("\n")}
         aria-label={`${cluster.items.length} events: ${cluster.items.map((m) => m.event.title).join("; ")}`}
         aria-expanded={open}
-        aria-controls={listId}
+        aria-controls={open ? listId : undefined}
         onClick={() => setOpenId(open ? null : first.event.id)}
         onKeyDown={(e) => {
           if (e.key === "Escape" && open) {
