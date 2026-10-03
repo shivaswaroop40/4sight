@@ -262,7 +262,6 @@ function buildSquirrel(): Prop {
     eye.position.set(side * 0.03, 0.2, 0.08);
     g.add(ear, eye);
   }
-  // A bushy S of a tail.
   const tail = new THREE.Group();
   const pts = [
     [0, 0.04, -0.08, 0.05],
@@ -313,7 +312,6 @@ function buildScar(): Prop {
   const hollow = new THREE.Mesh(new THREE.CircleGeometry(1, 32), new THREE.MeshBasicMaterial({ color: "#2A201B" }));
   hollow.position.z = 0.02;
   face.add(wood, lips, hollow);
-  // Splinters on the snapped stub.
   const splinters = new THREE.Group();
   for (let i = 0; i < 6; i++) {
     const s = toon(new THREE.ConeGeometry(0.18, 0.6 + (i % 3) * 0.25, 4), PALETTE.wound, 0.03);

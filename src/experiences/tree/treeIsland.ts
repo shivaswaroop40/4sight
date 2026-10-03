@@ -71,7 +71,6 @@ export function buildIsland(): Island {
   addOutline(lathe, 0.06);
   group.add(lathe);
 
-  // The two cut faces of the wedge.
   const shape = new THREE.Shape(pts.map((p) => new THREE.Vector2(p.x, p.y)));
   const faces: THREE.BufferGeometry[] = [];
   for (const azimuth of [NOTCH_AZIMUTH - NOTCH_HALF_ANGLE, NOTCH_AZIMUTH + NOTCH_HALF_ANGLE]) {
