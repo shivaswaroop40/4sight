@@ -129,3 +129,62 @@ export function piecewiseLogMapping(
 
   return { toTime, toParam, ticks, format };
 }
+
+export interface SliderKnot {
+  u: number;
+  time: number;
+  label: string;
+}
+
+/**
+ * Like piecewiseLogMapping, but each knot carries its own slider position so
+ * a busy era can get more width than a quiet one. Segments that start at
+ * time 0 interpolate linearly (log(0) is undefined); every other segment is
+ * log-interpolated.
+ */
+export function knotMapping(knots: SliderKnot[], format: (t: number) => string): TimeMapping {
+  const last = knots.length - 1;
+
+  function segmentForU(u: number): number {
+    for (let i = 0; i < last; i++) {
+      if (u <= knots[i + 1].u) return i;
+    }
+    return last - 1;
+  }
+
+  function segmentForTime(time: number): number {
+    for (let i = 0; i < last; i++) {
+      if (time <= knots[i + 1].time) return i;
+    }
+    return last - 1;
+  }
+
+  return {
+    toTime(u: number): number {
+      const uc = clamp01(u);
+      const i = segmentForU(uc);
+      const a = knots[i];
+      const b = knots[i + 1];
+      const s = clamp01((uc - a.u) / (b.u - a.u));
+      if (s <= 0) return a.time;
+      if (s >= 1) return b.time;
+      if (a.time <= 0) return a.time + (b.time - a.time) * s;
+      return Math.exp(Math.log(a.time) + (Math.log(b.time) - Math.log(a.time)) * s);
+    },
+    toParam(time: number): number {
+      const t = Math.min(Math.max(time, knots[0].time), knots[last].time);
+      const i = segmentForTime(t);
+      const a = knots[i];
+      const b = knots[i + 1];
+      const s =
+        a.time <= 0
+          ? (t - a.time) / (b.time - a.time)
+          : (Math.log(Math.max(t, a.time)) - Math.log(a.time)) / (Math.log(b.time) - Math.log(a.time));
+      return clamp01(a.u + clamp01(s) * (b.u - a.u));
+    },
+    ticks(): TimeTick[] {
+      return knots.map((k) => ({ u: k.u, label: k.label }));
+    },
+    format,
+  };
+}

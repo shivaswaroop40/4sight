@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { EVENTS, KNOTS } from "./solarData";
-import { formatYears, knotMapping } from "./solarMapping";
+import { knotMapping } from "../../core/mappings";
+import { formatYears } from "./solarMapping";
 import { solarStateAt } from "./SolarSystemState";
 import { solarSystemExperience } from "./SolarSystemExperience";
 
