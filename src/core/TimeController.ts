@@ -98,7 +98,6 @@ export class TimeController implements ITimeController {
     this.notify();
   }
 
-  /** Lands on exactly `time` (clamped to the span), not toTime(toParam(time)), which can miss by a float step. */
   setTime(time: number): void {
     if (!this.experience || !Number.isFinite(time)) return;
     const { minTime, maxTime, mapping } = this.experience;

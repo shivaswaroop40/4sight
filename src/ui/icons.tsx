@@ -105,7 +105,6 @@ export const FiltersIcon = () => (
   </Icon>
 );
 
-/** Two chain links. */
 export const LinkIcon = () => (
   <Icon width="20" height="20">
     <path d="M10.2 13.8a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1.4 1.4" />
@@ -113,7 +112,6 @@ export const LinkIcon = () => (
   </Icon>
 );
 
-/** A video camera. */
 export const VideoIcon = () => (
   <Icon width="20" height="20">
     <rect x="2.8" y="6.5" width="12.4" height="11" rx="2.4" />
@@ -129,7 +127,6 @@ export const TourIcon = () => (
   </Icon>
 );
 
-/** Skip to the next event. */
 export const NextIcon = () => (
   <Icon width="16" height="16">
     <path d="M6 5.5v13l9-6.5z" fill="currentColor" />

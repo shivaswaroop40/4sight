@@ -43,7 +43,6 @@ interface Tween {
   duration: number;
 }
 
-/** The viewer's camera as export found it. */
 export interface CameraSnapshot {
   position: THREE.Vector3;
   target: THREE.Vector3;
@@ -95,7 +94,6 @@ export class CameraManager {
     this.setFraming({ kind: "following", object, id, from: this.controls.target.clone(), elapsed });
   }
 
-  /** The camera stays where it is. */
   stopFollowing(): void {
     if (this.framingState.kind === "following") this.setFraming(FREE);
   }

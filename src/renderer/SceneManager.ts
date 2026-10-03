@@ -36,7 +36,10 @@ type Loop = "running" | "stopped" | "held";
 
 /** The renderer on loan to a video export. */
 export interface ExportStage {
-  /** Renders the current moment at the export size, with the camera settled for it. The canvas holds the frame until the next render. */
+  /**
+   * Renders the current moment at the export size, with the camera settled for it. Read the canvas before
+   * yielding: without preserveDrawingBuffer, WebGL clears it once the browser composites.
+   */
   render(): HTMLCanvasElement;
   /** Puts the renderer and camera back and restarts the loop. Safe to call twice. */
   release(): void;

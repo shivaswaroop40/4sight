@@ -1,8 +1,7 @@
 // src/core/types.ts
 //
-// Shared contract. Frozen after Phase 1. Every experience compiles against
-// this file. Changing it requires a message in the team chat and all three
-// developers agreeing.
+// Shared contract. Every experience compiles against this file, so a change
+// here is a change for every lane: update docs/CONTRACT.md with it.
 //
 // The rule that makes everything else work:
 //

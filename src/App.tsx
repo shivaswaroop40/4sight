@@ -1,10 +1,8 @@
 // src/App.tsx
 //
 // Composition only. The renderer is created once; switching experiences
-// goes through showExperience, which loads the experience's chunk and then
-// SceneManager.mount disposes the old experience, mounts the new one,
-// resets u to 0 (paused), and frames its first preset. The first experience
-// opens on the moment in the URL (?x=<id>&u=<u>), paused.
+// goes through showExperience. The first experience opens on the moment in
+// the URL (?x=<id>&u=<u>), paused.
 
 import { useEffect, useRef } from "react";
 import { parseMoment } from "./core/moment";

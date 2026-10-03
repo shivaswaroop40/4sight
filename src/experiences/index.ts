@@ -27,7 +27,7 @@ export interface ExperienceEntry {
   name: string;
   /** One line for the gallery card, under ~60 characters. */
   tagline: string;
-  /** Length of the span of time the experience shows, in real seconds. Orders the gallery; the label comes from formatSpan. */
+  /** Length of the span of time the experience shows, in real seconds. */
   spanSeconds: number;
   /** Dynamic import, so each experience is its own chunk. */
   load: () => Promise<FourDExperience>;

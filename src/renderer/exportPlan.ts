@@ -24,7 +24,6 @@ export function exportPlan(baseDurationSeconds: number, aspect: number, fps = 30
   return { fps, frames, width, height };
 }
 
-/** The timeline position of frame `i`. */
 export function frameParam(plan: ExportPlan, i: number): number {
   return i / (plan.frames - 1);
 }

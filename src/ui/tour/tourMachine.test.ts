@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { easeInOutCubic, holdMs, isTouring, tourReducer, travelMs, type TourAction, type TourState } from "./tourMachine";
+import { holdMs, isTouring, tourReducer, travelMs, type TourAction, type TourState } from "./tourMachine";
 
 const idle: TourState = { phase: "idle" };
 const done: TourState = { phase: "done" };
@@ -92,8 +92,4 @@ describe("tour timing", () => {
     expect(holdMs({ title: "Ten words", description: "one two three four five six seven eight" })).toBe(4500);
   });
 
-  it("eases in and out between 0 and 1", () => {
-    expect([easeInOutCubic(0), easeInOutCubic(0.5), easeInOutCubic(1)]).toEqual([0, 0.5, 1]);
-    expect(easeInOutCubic(0.25)).toBe(0.0625);
-  });
 });

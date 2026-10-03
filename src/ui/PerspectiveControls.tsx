@@ -1,8 +1,7 @@
 // src/ui/PerspectiveControls.tsx
 //
 // Camera presets of the active experience plus an Overview that frames the
-// scene's bounding sphere. Presets animate over ~600 ms. Either one stops
-// following an object.
+// scene's bounding sphere. Either one stops following an object.
 
 import { CameraIcon, OverviewIcon } from "./icons";
 import { runtime, useUi } from "./runtime";

@@ -44,9 +44,13 @@ function advance(index: number, eventCount: number): TourState {
   return index + 1 < eventCount ? { phase: "travelling", index: index + 1 } : { phase: "done" };
 }
 
-/** Travel takes 12 s per full timeline, eased, but never under 1 s or over 4 s. */
+/** Close to the iPhone's 1x pace (a 10 s pass), so gaps between events read as a glide, not a jump. */
+const TRAVEL_MS_PER_PASS = 12_000;
+const MIN_TRAVEL_MS = 1_000;
+const MAX_TRAVEL_MS = 4_000;
+
 export function travelMs(fromU: number, toU: number): number {
-  return Math.min(4000, Math.max(1000, Math.abs(toU - fromU) * 12000));
+  return Math.min(MAX_TRAVEL_MS, Math.max(MIN_TRAVEL_MS, Math.abs(toU - fromU) * TRAVEL_MS_PER_PASS));
 }
 
 /** How long the tour holds on an event: a 1.5 s look at the scene, then its title and description at 200 words a minute. */
@@ -58,6 +62,3 @@ export function holdMs(event: { title: string; description: string }): number {
 /** How long "Tour complete" stays up. */
 export const DONE_MS = 2500;
 
-export function easeInOutCubic(x: number): number {
-  return x < 0.5 ? 4 * x * x * x : 1 - (-2 * x + 2) ** 3 / 2;
-}

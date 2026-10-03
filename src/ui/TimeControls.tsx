@@ -3,7 +3,7 @@
 // Play/pause, direction, reset, and the current-time readout. When the
 // experience's time is real elapsed time, the readout adds the one-day
 // analogy: "If 4.6 billion years fit in one day, now is 11:58:43 pm". A
-// narrow readout (phones) says "One-day clock: 11:58:43 pm" instead.
+// narrow readout says "One-day clock: 11:58:43 pm" instead.
 
 import { dayClock } from "../core/analogy";
 import { formatSpan } from "../core/timescale";

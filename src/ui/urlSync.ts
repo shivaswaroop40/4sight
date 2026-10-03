@@ -2,13 +2,12 @@
 //
 // Keeps the address bar on the current moment (?x=<id>&u=<u>) with
 // history.replaceState, so reloading or sharing the URL lands on the same
-// frame. Writes are throttled (trailing, 250 ms) and never happen while
-// playing or while `held()` says something else moves u every frame (the
-// guided tour's travel between events, a video export). Pausing, scrubbing
-// while paused, keys and event jumps all settle into a paused state, which
-// schedules a write. flush() writes now, for the moments the shell knows
-// are final: an experience switch, a flag click, the end of a scrub, the
-// tour reaching an event or stopping.
+// frame. Writes are throttled (trailing) and never happen while playing or
+// while `held()` says something else moves u every frame (tour travel, a
+// video export); playback would otherwise write every frame. Pausing,
+// scrubbing while paused, keys and event jumps all settle into a paused
+// state, which schedules a write. flush() writes at once, for moments the
+// caller knows are final.
 
 import { formatMoment, type Moment } from "../core/moment";
 import type { TimeController } from "../core/types";

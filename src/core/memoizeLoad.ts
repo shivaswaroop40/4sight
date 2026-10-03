@@ -1,8 +1,9 @@
 // src/core/memoizeLoad.ts
 //
 // One in-flight or settled promise per key, so picking an experience twice
-// downloads its chunk once. A rejected promise is forgotten, so Retry asks
-// the network again instead of replaying the old failure.
+// downloads its chunk once. A rejected promise is forgotten rather than
+// replayed; see showExperience in ui/runtime.ts for why a failed experience
+// chunk is retried with a page reload instead.
 
 export function memoizeLoad<K, V>(load: (key: K) => Promise<V>): (key: K) => Promise<V> {
   const cache = new Map<K, Promise<V>>();

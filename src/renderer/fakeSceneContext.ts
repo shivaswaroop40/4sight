@@ -16,7 +16,7 @@ import type { SceneContext } from "../core/types";
 
 export interface FakeSceneContext extends SceneContext {
   hoverables: Map<THREE.Object3D, string>;
-  /** The hoverable id a ray from `origin` towards `target` hits first, as SceneManager resolves it. */
+  /** The hoverable id a ray from `origin` towards `target` hits first. Unlike SceneManager it ignores hidden parents. */
   hoverAt(origin: THREE.Vector3Tuple, target: THREE.Vector3Tuple): string | null;
 }
 

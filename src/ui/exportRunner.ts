@@ -26,7 +26,6 @@ let encoder: Promise<Encoder> | null = null;
 let checked = false;
 let abort: AbortController | null = null;
 
-/** A failed chunk download is forgotten, so the next attempt asks the network again. */
 function loadEncoder(): Promise<Encoder> {
   encoder ??= import("../renderer/videoExport").catch((error: unknown) => {
     encoder = null;
@@ -107,12 +106,7 @@ export function cancelExport(): void {
   abort?.abort();
 }
 
-/**
- * Lands on the exact u and time the viewer left. A scrub set u (time is
- * toTime(u)); an event jump set the time (u is toParam(time)), and
- * toTime(toParam(time)) can miss it by a float step, so the event before
- * would be current.
- */
+/** Restores u and, when an event jump set it, the exact time (see TimeController.setTime). */
 function restoreTime(before: TimeState): void {
   controller.setParam(before.param);
   if (controller.state.time !== before.time) controller.setTime(before.time);

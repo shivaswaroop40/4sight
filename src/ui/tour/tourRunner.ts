@@ -16,7 +16,8 @@
 
 import type { FourDExperience, TimeState, TimelineEvent } from "../../core/types";
 import { controller, getUi, runtime, setUi, subscribeUi } from "../runtime";
-import { DONE_MS, easeInOutCubic, holdMs, isTouring, tourReducer, travelMs, type TourAction, type TourState } from "./tourMachine";
+import { easeInOutCubic } from "../../core/interpolate";
+import { DONE_MS, holdMs, isTouring, tourReducer, travelMs, type TourAction, type TourState } from "./tourMachine";
 
 let leavePhase: (() => void) | null = null;
 let stopWatching: (() => void) | null = null;

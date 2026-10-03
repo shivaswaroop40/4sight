@@ -3,9 +3,6 @@
 // The filter state reducer. The shell owns which filters are on; an
 // experience only stores the state and renders under it in setTime.
 //
-//   const state = defaultFilterState(experience.getAvailableFilters());
-//   const next = toggleFilter(filters, state, "orbits");
-//
 // Ungrouped filters flip. Filters sharing a group are radio options: picking
 // one turns the rest of its group off, and picking the one already on keeps
 // it on, so a group always has exactly one option on.
