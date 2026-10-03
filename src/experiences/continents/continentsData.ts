@@ -266,36 +266,62 @@ export const RANGES: RangeDef[] = [
   },
 ];
 
-/** Where an ocean label sits: halfway between two points that ride on blocks, or at a fixed spot. */
+/** Where a map label sits: halfway between two points that ride on blocks, or at a fixed spot. */
 export type LabelAnchor =
   | { kind: "between"; a: [BlockId, LonLat]; b: [BlockId, LonLat] }
   | { kind: "fixed"; at: LonLat };
 
-export interface OceanLabelDef {
+export interface MapLabelDef {
   id: string;
   text: string;
+  /** Oceans are lettered in italics, supercontinents in bold capitals. */
+  kind: "ocean" | "land";
   anchor: LabelAnchor;
   opacity: Profile;
 }
 
-export const OCEAN_LABELS: OceanLabelDef[] = [
-  { id: "panthalassa", text: "Panthalassa", anchor: { kind: "fixed", at: [-150, 8] }, opacity: [[190, 1], [170, 0]] },
-  { id: "pacific", text: "Pacific Ocean", anchor: { kind: "fixed", at: [-150, 8] }, opacity: [[170, 0], [150, 1]] },
+export const MAP_LABELS: MapLabelDef[] = [
+  {
+    id: "pangaea",
+    text: "PANGAEA",
+    kind: "land",
+    anchor: { kind: "between", a: ["africa", [5, 12]], b: ["northAmerica", [-90, 38]] },
+    opacity: [[205, 1], [185, 0]],
+  },
+  {
+    id: "laurasia",
+    text: "LAURASIA",
+    kind: "land",
+    anchor: { kind: "between", a: ["northAmerica", [-95, 52]], b: ["eurasia", [30, 56]] },
+    opacity: [[185, 0], [170, 1], [135, 1], [120, 0]],
+  },
+  {
+    id: "gondwana",
+    text: "GONDWANA",
+    kind: "land",
+    anchor: { kind: "between", a: ["africa", [24, -12]], b: ["southAmerica", [-52, -12]] },
+    opacity: [[185, 0], [170, 1], [140, 1], [128, 0]],
+  },
+  { id: "panthalassa", text: "Panthalassa", kind: "ocean", anchor: { kind: "fixed", at: [-150, 8] }, opacity: [[190, 1], [170, 0]] },
+  { id: "pacific", text: "Pacific Ocean", kind: "ocean", anchor: { kind: "fixed", at: [-150, 8] }, opacity: [[170, 0], [150, 1]] },
   {
     id: "tethys",
     text: "Tethys Ocean",
+    kind: "ocean",
     anchor: { kind: "between", a: ["arabia", [56, 20]], b: ["eurasia", [102, 26]] },
     opacity: [[75, 1], [56, 0]],
   },
   {
     id: "atlantic",
     text: "Atlantic Ocean",
+    kind: "ocean",
     anchor: { kind: "between", a: ["northAmerica", [-72, 36]], b: ["africa", [-12, 18]] },
     opacity: [[160, 0], [130, 1]],
   },
   {
     id: "indian",
     text: "Indian Ocean",
+    kind: "ocean",
     anchor: { kind: "between", a: ["africa", [40, -16]], b: ["australia", [115, -26]] },
     opacity: [[110, 0], [90, 1]],
   },

@@ -181,7 +181,7 @@ export function inkMaterial(): THREE.MeshBasicMaterial {
 /** A unit mountain: a five-sided rock cone with a snow cap, base at y = 0, apex at y = 1. */
 export function peakGeometry(): THREE.BufferGeometry {
   const rock = new THREE.ConeGeometry(1, 1, 5, 1, true).translate(0, 0.5, 0);
-  const snow = new THREE.ConeGeometry(0.4, 0.38, 5, 1, true).translate(0, 0.81, 0);
+  const snow = new THREE.ConeGeometry(0.3, 0.29, 5, 1, true).translate(0, 0.86, 0);
   const geometry = new THREE.BufferGeometry();
   const merged = [rock, snow];
   const positions: number[] = [];
@@ -233,31 +233,43 @@ export function equatorRing(): THREE.Mesh {
   return ring;
 }
 
-/** A hand-lettered ocean name: ink italics with a cream halo so it reads over sea and land. */
-export function labelSprite(text: string): THREE.Sprite {
+const LABEL_STYLES = {
+  /** Ink italics with a cream halo, like sea names on an old map. */
+  ocean: { font: "italic 600 64px", spacing: "0px", fill: THEME.ink, halo: THEME.cream, height: 0.11 },
+  /** Chunky cream capitals with an ink edge, sitting on the land. */
+  land: { font: "700 72px", spacing: "10px", fill: THEME.cream, halo: THEME.ink, height: 0.13 },
+} as const;
+
+export function labelSprite(text: string, kind: keyof typeof LABEL_STYLES): THREE.Sprite {
+  const style = LABEL_STYLES[kind];
   const canvas = document.createElement("canvas");
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   const material = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false, depthWrite: false });
   const sprite = new THREE.Sprite(material);
   const draw = () => {
-    const font = `italic 600 64px Fredoka, Nunito, ui-rounded, system-ui, sans-serif`;
     const ctx = canvas.getContext("2d")!;
-    ctx.font = font;
+    const setFont = () => {
+      ctx.font = `${style.font} Fredoka, Nunito, ui-rounded, system-ui, sans-serif`;
+      ctx.letterSpacing = style.spacing;
+    };
+    setFont();
     const width = Math.ceil(ctx.measureText(text).width) + 48;
+    // A web font arriving late can change the width; a resized canvas needs a fresh GPU texture.
+    if (canvas.width !== width) texture.dispose();
     canvas.width = width;
     canvas.height = 112;
-    ctx.font = font;
+    setFont();
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.lineJoin = "round";
     ctx.lineWidth = 14;
-    ctx.strokeStyle = THEME.cream;
+    ctx.strokeStyle = style.halo;
     ctx.strokeText(text, width / 2, 58);
-    ctx.fillStyle = THEME.ink;
+    ctx.fillStyle = style.fill;
     ctx.fillText(text, width / 2, 58);
     texture.needsUpdate = true;
-    sprite.scale.set((0.11 * width) / canvas.height, 0.11, 1);
+    sprite.scale.set((style.height * width) / canvas.height, style.height, 1);
   };
   draw();
   document.fonts?.ready.then(draw);

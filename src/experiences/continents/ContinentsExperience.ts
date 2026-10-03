@@ -17,7 +17,7 @@ import type {
   TimelineEvent,
   VisualizationFilter,
 } from "../../core/types";
-import { BLOCKS, EVENTS, OCEAN_LABELS, RANGES, type BlockDef } from "./continentsData";
+import { BLOCKS, EVENTS, MAP_LABELS, RANGES, type BlockDef } from "./continentsData";
 import {
   OLDEST_MA,
   continentsStateAt,
@@ -146,6 +146,8 @@ class ContinentsExperienceImpl implements FourDExperience {
     for (const range of RANGES) {
       const block = this.blocks.find((b) => b.def.id === range.block)!;
       for (const p of samplePath(range.path, 0.036)) {
+        // Nudge peaks off the ridge line so a range reads as a cluster, not a string of beads.
+        p.add(new THREE.Vector3(rand() - 0.5, rand() - 0.5, rand() - 0.5).cross(p).setLength(0.012 * rand())).normalize();
         const mesh = new THREE.Mesh(peakGeo, peakMaterials);
         mesh.position.copy(p).multiplyScalar(1 + block.def.height - 0.003);
         mesh.quaternion.setFromUnitVectors(up, p).multiply(new THREE.Quaternion().setFromAxisAngle(up, rand() * Math.PI));
@@ -158,12 +160,12 @@ class ContinentsExperienceImpl implements FourDExperience {
         }
         block.group.add(mesh);
         const size = 0.8 + 0.4 * rand();
-        this.peaks.push({ mesh, range: range.id, width: range.height * size, height: range.height * 0.8 * size });
+        this.peaks.push({ mesh, range: range.id, width: range.height * 0.9 * size, height: range.height * size });
       }
     }
 
-    for (const def of OCEAN_LABELS) {
-      const sprite = labelSprite(def.text);
+    for (const def of MAP_LABELS) {
+      const sprite = labelSprite(def.text, def.kind);
       sprite.renderOrder = 2;
       // Fade names as they turn toward the limb, so none is cut in half by the globe.
       sprite.onBeforeRender = (_renderer, _scene, camera) => {

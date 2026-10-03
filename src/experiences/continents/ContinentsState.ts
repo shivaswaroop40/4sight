@@ -5,7 +5,7 @@
 // time alone. Time is -Ma (millions of years, negative in the past).
 
 import * as THREE from "three";
-import { ANCHORS, BLOCKS, OCEAN_LABELS, RANGES, type LabelAnchor, type Profile } from "./continentsData";
+import { ANCHORS, BLOCKS, MAP_LABELS, RANGES, type LabelAnchor, type Profile } from "./continentsData";
 import type { BlockId } from "./outlines";
 import { AGES, ROTATIONS } from "./reconstruction";
 import { arc, toLonLat, toVec } from "./sphere";
@@ -98,7 +98,7 @@ export function continentsStateAt(time: number): ContinentsState {
       };
     }),
     ranges: Object.fromEntries(RANGES.map((r) => [r.id, profileAt(r.growth, ma)])),
-    labels: OCEAN_LABELS.map((l) => {
+    labels: MAP_LABELS.map((l) => {
       const p = labelPosition(l.anchor, ma);
       return { id: l.id, position: [p.x, p.y, p.z], opacity: profileAt(l.opacity, ma) };
     }),
