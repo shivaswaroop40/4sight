@@ -19,7 +19,7 @@ import type {
   TimelineEvent,
   VisualizationFilter,
 } from "../../core/types";
-import { buildCosmicWeb, mulberry32, type CosmicWeb, type Vec3 } from "./cosmicWeb";
+import { buildCosmicWeb, mulberry32, type Vec3 } from "./cosmicWeb";
 import { UniverseField } from "./UniverseField";
 import { EVENTS, KNOTS, TODAY, formatCosmicTime } from "./universeData";
 import { hoverInfo, type HoverId } from "./universeHover";
@@ -63,9 +63,9 @@ class UniverseExperience implements FourDExperience {
   private ctx: SceneContext | null = null;
   private root: THREE.Group | null = null;
   private lights: THREE.Group | null = null;
-  private web: CosmicWeb | null = null;
   private field: UniverseField | null = null;
   private wash: THREE.Mesh | null = null;
+  private washMaterial: THREE.MeshBasicMaterial | null = null;
   private burst: THREE.Sprite | null = null;
   private whoosh: THREE.Sprite | null = null;
   private starGroup: THREE.Group | null = null;
@@ -87,13 +87,10 @@ class UniverseExperience implements FourDExperience {
     this.lights = addWarmLights(ctx.scene);
 
     const web = buildCosmicWeb();
-    this.web = web;
 
     // The night inside the ball: back faces only, so everything inside draws over it.
-    const wash = new THREE.Mesh(
-      this.track(new THREE.SphereGeometry(1, 96, 64)),
-      this.track(new THREE.MeshBasicMaterial({ color: NIGHT, side: THREE.BackSide, depthWrite: false })),
-    );
+    this.washMaterial = this.track(new THREE.MeshBasicMaterial({ color: NIGHT, side: THREE.BackSide, depthWrite: false }));
+    const wash = new THREE.Mesh(this.track(new THREE.SphereGeometry(1, 96, 64)), this.washMaterial);
     wash.renderOrder = -1;
     const outline = addOutline(wash, 0.012);
     outline.renderOrder = -2;
@@ -114,7 +111,6 @@ class UniverseExperience implements FourDExperience {
 
     const sparkle = this.track(sparkleTexture());
     const rand = mulberry32(100);
-    // Hiding the group, not the sprites, is what turns their hover off.
     this.starGroup = new THREE.Group();
     root.add(this.starGroup);
     for (const index of web.firstStarKnots) {
@@ -126,21 +122,22 @@ class UniverseExperience implements FourDExperience {
       this.stars.push({ sprite, home, size: 0.5 + rand() * 0.35, delay: rand() * 0.5 });
     }
 
+    // Markers live in their own groups: hiding the group is what turns hover off.
     this.milkyWay = this.sprite(this.track(milkyWayTexture()));
     this.milkyWay.renderOrder = 4;
-    root.add(this.milkyWay);
+    root.add(inGroup(this.milkyWay));
 
     this.sun = this.sprite(this.track(sunTexture()), { depthTest: false });
     this.sun.center.set(-1.75, 0.5);
     this.sun.renderOrder = 6;
-    root.add(this.sun);
+    root.add(inGroup(this.sun));
 
     // Constant on screen, so the pin finds the Milky Way from any distance.
     this.pin = this.sprite(this.track(pinTexture()), { depthTest: false, sizeAttenuation: false });
     this.pin.center.set(0.5, 0);
     this.pin.scale.set(0.032, 0.04, 1);
     this.pin.renderOrder = 7;
-    root.add(this.pin);
+    root.add(inGroup(this.pin));
 
     const sphere = this.track(new THREE.SphereGeometry(1, 16, 12));
     const hidden = this.track(new THREE.MeshBasicMaterial({ visible: false }));
@@ -173,12 +170,12 @@ class UniverseExperience implements FourDExperience {
   setTime(time: number): void {
     const s = universeStateAt(time);
     this.current = s;
-    if (!this.field || !this.wash || !this.web) return;
+    if (!this.field || !this.wash) return;
     const R = s.radius;
 
     this.field.update(s);
     this.wash.scale.setScalar(R);
-    (this.wash.material as THREE.MeshBasicMaterial).color.copy(NIGHT_DARK).lerp(NIGHT, s.galaxies);
+    this.washMaterial!.color.copy(NIGHT_DARK).lerp(NIGHT, s.galaxies);
 
     const burst = this.burst!;
     burst.visible = s.flash > 0.001;
@@ -192,7 +189,7 @@ class UniverseExperience implements FourDExperience {
       star.sprite.visible = k > 0.001;
       star.sprite.position.set(star.home[0] * R, star.home[1] * R, star.home[2] * R);
       star.sprite.scale.setScalar(star.size * popIn(k));
-      (star.sprite.material as THREE.SpriteMaterial).opacity = Math.min(1, k * 3);
+      star.sprite.material.opacity = Math.min(1, k * 3);
     }
 
     const whoosh = this.whoosh!;
@@ -202,15 +199,15 @@ class UniverseExperience implements FourDExperience {
     whoosh.material.opacity = 1 - s.flash;
 
     const mw = this.milkyWay!;
-    mw.visible = s.milkyWay > 0.001;
+    mw.parent!.visible = s.milkyWay > 0.001;
     mw.scale.setScalar(0.35 + 0.75 * s.milkyWay);
-    (mw.material as THREE.SpriteMaterial).opacity = Math.min(1, s.milkyWay * 4);
+    mw.material.opacity = Math.min(1, s.milkyWay * 4);
     mw.material.rotation = -0.4 - 1.2 * s.milkyWay;
 
-    this.pin!.visible = s.fog < 0.02;
+    this.pin!.parent!.visible = s.fog < 0.02;
 
     const sun = this.sun!;
-    sun.visible = s.sun > 0.001;
+    sun.parent!.visible = s.sun > 0.001;
     sun.scale.setScalar(0.12 * popIn(s.sun));
 
     for (const proxy of this.proxies) {
@@ -262,8 +259,8 @@ class UniverseExperience implements FourDExperience {
     this.stars = [];
     this.starGroup = null;
     this.field = null;
-    this.web = null;
     this.wash = null;
+    this.washMaterial = null;
     this.burst = null;
     this.whoosh = null;
     this.milkyWay = null;
@@ -328,6 +325,12 @@ class UniverseExperience implements FourDExperience {
     this.disposables.push(resource);
     return resource;
   }
+}
+
+function inGroup(object: THREE.Object3D): THREE.Group {
+  const group = new THREE.Group();
+  group.add(object);
+  return group;
 }
 
 /** 0 to 1 with a little overshoot, like a sticker slapped onto the page. */
