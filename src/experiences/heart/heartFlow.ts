@@ -36,8 +36,8 @@ export function labelBounds(side: Side, t: number): [number, number, number, num
 
 export const PARCELS_PER_SIDE = Math.ceil(labelBounds("right", BEAT_MS)[0] / DQ) + 1;
 
+/** 0 vein, 1 atrium, 2 ventricle, 3 artery. */
 export type RegionIndex = 0 | 1 | 2 | 3;
-export const REGION_NAMES = ["vein", "atrium", "ventricle", "artery"] as const;
 
 export interface Parcel {
   side: Side;

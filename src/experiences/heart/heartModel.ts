@@ -99,7 +99,7 @@ float depolarized(vec2 p, vec2 origin, float spread, float tint, float reach) {
   float travelling = step(0.001, spread) * (1.0 - step(0.999, spread));
   float front = exp(-x * x) * travelling;
   float behind = (1.0 - smoothstep(r - 0.2, r + 0.05, d)) * tint * step(0.001, spread);
-  return max(front, behind * 0.55);
+  return max(front, behind * 0.4);
 }
 `;
 
@@ -128,7 +128,7 @@ function patch<M extends THREE.Material>(material: M, deformUniforms: DeformUnif
           `float atria = smoothstep(${AV_Y - 0.05}, ${AV_Y + 0.15}, vRest.y);
           float g = atria * depolarized(vRest.xy, vec2(${ax}, ${ay}), uAtrialSpread, uAtrialTint, 4.3)
             + (1.0 - atria) * depolarized(vRest.xy, vec2(${vx}, ${vy}), uVentSpread, uVentTint, 3.4);
-          outgoingLight = mix(outgoingLight, vec3(1.0, 0.86, 0.45), clamp(g, 0.0, 1.0) * 0.42);
+          outgoingLight = mix(outgoingLight, vec3(1.0, 0.84, 0.4), clamp(g, 0.0, 1.0) * 0.5);
           #include <opaque_fragment>`,
         );
     }
@@ -228,14 +228,14 @@ export interface HeartBody {
 
 export function buildBody(u: DeformUniforms): HeartBody {
   const shape = new THREE.Shape(splinePoints(BODY_OUTLINE, 220));
-  const depth = 0.4;
-  const bevel = 0.35;
+  const depth = 0.5;
+  const bevel = 0.6;
   const geometry = new THREE.ExtrudeGeometry(shape, {
     depth,
     bevelEnabled: true,
     bevelThickness: bevel,
-    bevelSize: 0.24,
-    bevelSegments: 7,
+    bevelSize: 0.26,
+    bevelSegments: 9,
     curveSegments: 1,
   });
   geometry.translate(0, 0, FRONT_Z - depth - bevel);
@@ -302,7 +302,7 @@ export interface Vessel {
   mesh: THREE.Mesh;
 }
 
-export function buildVessel(def: TubeDef, u: DeformUniforms): THREE.Mesh {
+function buildVessel(def: TubeDef, u: DeformUniforms): THREE.Mesh {
   const curve = new THREE.CatmullRomCurve3(def.points.map((p) => new THREE.Vector3(...p)), false, "centripetal");
   const geometry = new THREE.TubeGeometry(curve, Math.max(24, def.points.length * 20), def.radius, 20, false);
   const color = def.oxygenated ? HEART_COLORS.oxyVessel : HEART_COLORS.deoxyVessel;
@@ -410,7 +410,7 @@ export function buildNode(radius: number): THREE.Mesh {
 }
 
 // ---------------------------------------------------------------------------
-// Blood: one chevron per parcel, light on the dark cavities, with an ink rim.
+// Blood: one light chevron per parcel, pointing the way it flows.
 
 export function chevronGeometry(size: number): THREE.ShapeGeometry {
   const s = new THREE.Shape();
@@ -423,9 +423,39 @@ export function chevronGeometry(size: number): THREE.ShapeGeometry {
 }
 
 // ---------------------------------------------------------------------------
-// Text and paper, drawn once with canvas.
+// Text and paper, painted with canvas at mount.
 
 const FONT = "Fredoka, Nunito, ui-rounded, system-ui, sans-serif";
+/** A font string that resolves once the display web font has loaded. */
+export const DISPLAY_FONT_PROBE = "700 64px Fredoka";
+
+/**
+ * A canvas texture that remembers how to paint itself. The web font may
+ * arrive after mount, so callers repaint every text texture once it has.
+ */
+function painted(width: number, height: number, paint: (ctx: CanvasRenderingContext2D) => void, anisotropy = 4): THREE.CanvasTexture {
+  const c = document.createElement("canvas");
+  c.width = width;
+  c.height = height;
+  const texture = new THREE.CanvasTexture(c);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = anisotropy;
+  const repaint = () => {
+    const ctx = c.getContext("2d")!;
+    ctx.clearRect(0, 0, width, height);
+    ctx.save();
+    paint(ctx);
+    ctx.restore();
+    texture.needsUpdate = true;
+  };
+  repaint();
+  texture.userData.repaint = repaint;
+  return texture;
+}
+
+export function repaint(texture: THREE.Texture): void {
+  (texture.userData.repaint as (() => void) | undefined)?.();
+}
 
 /** Text on a transparent canvas; "\n" starts a new line. */
 export function textTexture(
@@ -436,74 +466,65 @@ export function textTexture(
   const pad = opts.pad ?? size * 0.3;
   const lines = text.split("\n");
   const lineHeight = size * 1.1;
-  const c = document.createElement("canvas");
-  const ctx = c.getContext("2d")!;
   const font = `${opts.weight ?? 700} ${size}px ${FONT}`;
-  ctx.font = font;
-  const w = Math.ceil(Math.max(...lines.map((l) => ctx.measureText(l).width)) + pad * 2);
+  const measure = document.createElement("canvas").getContext("2d")!;
+  measure.font = font;
+  const w = Math.ceil(Math.max(...lines.map((l) => measure.measureText(l).width)) + pad * 2);
   const h = Math.ceil(lineHeight * lines.length + size * 0.2 + pad * 2);
-  c.width = w;
-  c.height = h;
-  ctx.font = font;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  if (opts.pill) {
-    ctx.fillStyle = opts.pill;
-    ctx.strokeStyle = THEME.ink;
-    ctx.lineWidth = 6;
-    ctx.beginPath();
-    ctx.roundRect(3, 3, w - 6, h - 6, h / 2 - 4);
-    ctx.fill();
-    ctx.stroke();
-  }
-  lines.forEach((line, i) => {
-    const y = h / 2 + (i - (lines.length - 1) / 2) * lineHeight + size * 0.05;
-    if (opts.stroke) {
-      ctx.lineJoin = "round";
-      ctx.strokeStyle = opts.stroke;
-      ctx.lineWidth = size * 0.22;
-      ctx.strokeText(line, w / 2, y);
+  const texture = painted(w, h, (ctx) => {
+    ctx.font = font;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    if (opts.pill) {
+      ctx.fillStyle = opts.pill;
+      ctx.strokeStyle = THEME.ink;
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.roundRect(3, 3, w - 6, h - 6, h / 2 - 4);
+      ctx.fill();
+      ctx.stroke();
     }
-    ctx.fillStyle = opts.color ?? THEME.ink;
-    ctx.fillText(line, w / 2, y);
+    lines.forEach((line, i) => {
+      const y = h / 2 + (i - (lines.length - 1) / 2) * lineHeight + size * 0.05;
+      if (opts.stroke) {
+        ctx.lineJoin = "round";
+        ctx.strokeStyle = opts.stroke;
+        ctx.lineWidth = size * 0.22;
+        ctx.strokeText(line, w / 2, y);
+      }
+      ctx.fillStyle = opts.color ?? THEME.ink;
+      ctx.fillText(line, w / 2, y);
+    });
   });
-  const texture = new THREE.CanvasTexture(c);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  texture.anisotropy = 4;
   return { texture, aspect: w / h };
 }
 
 /** A comic "LUB!" or "DUB!" starburst. */
 export function burstTexture(text: string, fill: string): THREE.CanvasTexture {
-  const c = document.createElement("canvas");
-  c.width = c.height = 512;
-  const ctx = c.getContext("2d")!;
-  ctx.translate(256, 256);
-  const spikes = 11;
-  ctx.beginPath();
-  for (let i = 0; i < spikes * 2; i++) {
-    const r = i % 2 === 0 ? 240 : 170;
-    const a = (i / (spikes * 2)) * Math.PI * 2 - Math.PI / 2;
-    ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r * 0.82);
-  }
-  ctx.closePath();
-  ctx.fillStyle = fill;
-  ctx.fill();
-  ctx.lineJoin = "round";
-  ctx.lineWidth = 14;
-  ctx.strokeStyle = THEME.ink;
-  ctx.stroke();
-  ctx.font = `700 130px ${FONT}`;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.lineWidth = 22;
-  ctx.strokeStyle = THEME.ink;
-  ctx.strokeText(text, 0, 8);
-  ctx.fillStyle = THEME.cream;
-  ctx.fillText(text, 0, 8);
-  const tex = new THREE.CanvasTexture(c);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  return tex;
+  return painted(512, 512, (ctx) => {
+    ctx.translate(256, 256);
+    const spikes = 11;
+    ctx.beginPath();
+    for (let i = 0; i < spikes * 2; i++) {
+      const r = i % 2 === 0 ? 240 : 170;
+      const a = (i / (spikes * 2)) * Math.PI * 2 - Math.PI / 2;
+      ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r * 0.82);
+    }
+    ctx.closePath();
+    ctx.fillStyle = fill;
+    ctx.fill();
+    ctx.lineJoin = "round";
+    ctx.lineWidth = 14;
+    ctx.strokeStyle = THEME.ink;
+    ctx.stroke();
+    ctx.font = `700 130px ${FONT}`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.lineWidth = 22;
+    ctx.strokeText(text, 0, 8);
+    ctx.fillStyle = THEME.cream;
+    ctx.fillText(text, 0, 8);
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -516,52 +537,51 @@ export const ECG_PLOT = { left: -2.95, right: 2.95, baseline: -0.25, mvScale: 0.
 export function ecgPaperTexture(): THREE.CanvasTexture {
   const w = 1600;
   const h = Math.round((w * ECG_PANEL.height) / ECG_PANEL.width);
-  const c = document.createElement("canvas");
-  c.width = w;
-  c.height = h;
-  const ctx = c.getContext("2d")!;
-  ctx.fillStyle = "#FFF7EC";
-  ctx.fillRect(0, 0, w, h);
   const px = (x: number) => ((x + ECG_PANEL.width / 2) / ECG_PANEL.width) * w;
   const py = (y: number) => ((ECG_PANEL.height / 2 - y) / ECG_PANEL.height) * h;
   const ms = (t: number) => ECG_PLOT.left + (t / 800) * (ECG_PLOT.right - ECG_PLOT.left);
-  // ECG paper: small squares 40 ms, big squares 200 ms.
-  const small = (ms(40) - ms(0)) * (w / ECG_PANEL.width);
-  for (let i = 0, x = px(ECG_PLOT.left); x <= px(ECG_PLOT.right) + 1; i++, x += small) {
-    ctx.strokeStyle = i % 5 === 0 ? "rgba(224,122,95,0.7)" : "rgba(224,122,95,0.3)";
-    ctx.lineWidth = i % 5 === 0 ? 2.5 : 1.2;
-    ctx.beginPath();
-    ctx.moveTo(x, py(0.62));
-    ctx.lineTo(x, py(-0.62));
-    ctx.stroke();
-  }
-  for (let i = -6, y = py(ECG_PLOT.baseline) + 6 * small; i <= 6; i++, y -= small) {
-    if (y < py(0.62) - 1 || y > py(-0.62) + 1) continue;
-    ctx.strokeStyle = i % 5 === 0 ? "rgba(224,122,95,0.7)" : "rgba(224,122,95,0.3)";
-    ctx.lineWidth = i % 5 === 0 ? 2.5 : 1.2;
-    ctx.beginPath();
-    ctx.moveTo(px(ECG_PLOT.left), y);
-    ctx.lineTo(px(ECG_PLOT.right), y);
-    ctx.stroke();
-  }
-  ctx.font = `700 46px ${FONT}`;
-  ctx.fillStyle = THEME.inkSoft;
-  ctx.textBaseline = "middle";
-  ctx.textAlign = "left";
-  ctx.fillText("ECG", px(ECG_PLOT.left), py(0.78));
-  ctx.textAlign = "right";
-  ctx.fillText("one beat · 800 ms", px(ECG_PLOT.right), py(0.78));
-  // Time axis.
-  ctx.font = `600 34px ${FONT}`;
-  ctx.textAlign = "center";
-  ctx.textAlign = "left";
-  ctx.fillText("0 ms", px(ECG_PLOT.left), py(-0.8));
-  ctx.textAlign = "right";
-  ctx.fillText("800 ms", px(ECG_PLOT.right), py(-0.8));
-  const tex = new THREE.CanvasTexture(c);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  tex.anisotropy = 8;
-  return tex;
+  return painted(
+    w,
+    h,
+    (ctx) => {
+      ctx.fillStyle = "#FFF7EC";
+      ctx.fillRect(0, 0, w, h);
+      // ECG paper: small squares 40 ms, big squares 200 ms.
+      const small = (ms(40) - ms(0)) * (w / ECG_PANEL.width);
+      const rule = (i: number) => {
+        ctx.strokeStyle = i % 5 === 0 ? "rgba(224,122,95,0.7)" : "rgba(224,122,95,0.3)";
+        ctx.lineWidth = i % 5 === 0 ? 2.5 : 1.2;
+      };
+      for (let i = 0, x = px(ECG_PLOT.left); x <= px(ECG_PLOT.right) + 1; i++, x += small) {
+        rule(i);
+        ctx.beginPath();
+        ctx.moveTo(x, py(0.62));
+        ctx.lineTo(x, py(-0.62));
+        ctx.stroke();
+      }
+      for (let i = -6, y = py(ECG_PLOT.baseline) + 6 * small; i <= 6; i++, y -= small) {
+        if (y < py(0.62) - 1 || y > py(-0.62) + 1) continue;
+        rule(i);
+        ctx.beginPath();
+        ctx.moveTo(px(ECG_PLOT.left), y);
+        ctx.lineTo(px(ECG_PLOT.right), y);
+        ctx.stroke();
+      }
+      ctx.fillStyle = THEME.inkSoft;
+      ctx.textBaseline = "middle";
+      ctx.font = `700 46px ${FONT}`;
+      ctx.textAlign = "left";
+      ctx.fillText("ECG", px(ECG_PLOT.left), py(0.78));
+      ctx.textAlign = "right";
+      ctx.fillText("one beat · 800 ms", px(ECG_PLOT.right), py(0.78));
+      ctx.font = `600 34px ${FONT}`;
+      ctx.textAlign = "left";
+      ctx.fillText("0 ms", px(ECG_PLOT.left), py(-0.8));
+      ctx.textAlign = "right";
+      ctx.fillText("800 ms", px(ECG_PLOT.right), py(-0.8));
+    },
+    8,
+  );
 }
 
 /** A ribbon along the ECG polyline; drawing the first k samples shows the trace up to sample k. */

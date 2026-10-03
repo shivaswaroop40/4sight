@@ -15,18 +15,14 @@ import { smoothstep, window as windowFn } from "../../core/interpolate";
 
 export const BEAT_MS = 800;
 
-/** Milliseconds within the beat. Sources: Wiggers diagram timings at 75 bpm. */
+/**
+ * Milliseconds within the beat, after the Wiggers diagram at 75 bpm. The
+ * P wave runs 0 to 90, QRS 160 to 240, T 380 to 540, ejection 260 to 540.
+ */
 export const TIMING = {
-  saFire: 0,
-  pWave: [0, 90],
   atrialSystole: [50, 150],
-  avDelay: [90, 160],
-  qrs: [160, 240],
   lub: 210,
-  ejection: [260, 540],
-  tWave: [380, 540],
   dub: 540,
-  rapidFilling: [620, 720],
 } as const;
 
 export type PhaseId =
@@ -41,18 +37,17 @@ export interface Phase {
   id: PhaseId;
   start: number;
   end: number;
-  name: string;
 }
 
 /** The mechanical cycle. Contiguous, covering [0, BEAT_MS]. */
 export const PHASES: Phase[] = [
-  { id: "diastasis", start: 0, end: 50, name: "Slow filling" },
-  { id: "atrialSystole", start: 50, end: 210, name: "Atrial kick" },
-  { id: "isovolumetricContraction", start: 210, end: 260, name: "Squeezing, all valves shut" },
-  { id: "ejection", start: 260, end: 540, name: "Ejection" },
-  { id: "isovolumetricRelaxation", start: 540, end: 620, name: "Relaxing, all valves shut" },
-  { id: "rapidFilling", start: 620, end: 720, name: "Rapid filling" },
-  { id: "diastasis", start: 720, end: BEAT_MS, name: "Slow filling" },
+  { id: "diastasis", start: 0, end: 50 },
+  { id: "atrialSystole", start: 50, end: 210 },
+  { id: "isovolumetricContraction", start: 210, end: 260 },
+  { id: "ejection", start: 260, end: 540 },
+  { id: "isovolumetricRelaxation", start: 540, end: 620 },
+  { id: "rapidFilling", start: 620, end: 720 },
+  { id: "diastasis", start: 720, end: BEAT_MS },
 ];
 
 export function phaseAt(t: number): Phase {
@@ -120,7 +115,6 @@ export type Side = "right" | "left";
 
 /** Boundaries along one side, upstream to downstream. */
 export type Boundary = "veinIn" | "avValve" | "semilunar" | "arteryOut";
-export const BOUNDARIES: Boundary[] = ["veinIn", "avValve", "semilunar", "arteryOut"];
 
 /** Stroke volume: what each ventricle pumps per beat. Both sides match. */
 export const STROKE_ML = 70;
@@ -162,13 +156,6 @@ const START_ML: Record<ChamberId, number> = {
   rightVentricle: 108,
   leftAtrium: 40,
   leftVentricle: 98,
-};
-
-export const CHAMBER_SIDE: Record<ChamberId, Side> = {
-  rightAtrium: "right",
-  rightVentricle: "right",
-  leftAtrium: "left",
-  leftVentricle: "left",
 };
 
 export function chamberVolume(chamber: ChamberId, t: number): number {
@@ -321,8 +308,8 @@ export function atrialFill(t: number): number {
 /** Heart sounds: a short, loud lub and a crisper dub. 0..1. */
 export function heartSound(t: number): { lub: number; dub: number } {
   return {
-    lub: windowFn(t, TIMING.lub, TIMING.lub + 8) * (1 - windowFn(t, TIMING.lub + 30, TIMING.lub + 110)),
-    dub: windowFn(t, TIMING.dub, TIMING.dub + 6) * (1 - windowFn(t, TIMING.dub + 25, TIMING.dub + 100)),
+    lub: windowFn(t, TIMING.lub, TIMING.lub + 8) * (1 - windowFn(t, TIMING.lub + 25, TIMING.lub + 75)),
+    dub: windowFn(t, TIMING.dub, TIMING.dub + 6) * (1 - windowFn(t, TIMING.dub + 20, TIMING.dub + 65)),
   };
 }
 

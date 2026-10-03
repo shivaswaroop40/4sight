@@ -64,7 +64,10 @@ describe("heart cycle", () => {
 
   it("reports live readouts in the hover cards", () => {
     heart.setTime(580);
-    expect(heart.getHoveredObject("leftVentricle")!.properties!["Volume now"]).toBe("50 mL");
+    const lv = heart.getHoveredObject("leftVentricle")!.properties!;
+    expect(lv["Volume now"]).toBe("50 mL");
+    // The hover card shows the first three properties, so live values lead.
+    expect(Object.keys(lv).slice(0, 2)).toEqual(["Volume now", "Pressure now"]);
     expect(heart.getHoveredObject("aortic")!.properties!["Right now"]).toBe("Shut");
     heart.setTime(400);
     expect(heart.getHoveredObject("aortic")!.properties!["Right now"]).toBe("Open");

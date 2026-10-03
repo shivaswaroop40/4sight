@@ -187,7 +187,7 @@ interface HoverCard {
   description: string;
   category: string;
   properties: Record<string, string | number>;
-  /** Live readouts at time t, merged after the fixed properties. */
+  /** Live readouts at time t, listed before the fixed properties (the card shows three). */
   live?: (t: number) => Record<string, string>;
 }
 
@@ -201,21 +201,21 @@ export const HOVER: Record<HoverId, HoverCard> = {
     name: "Right atrium",
     category: "chamber",
     description: "Collects blue, oxygen-poor blood coming back from the body through the vena cava.",
-    properties: { Pressure: "2 to 6 mmHg", Volume: "about 25 to 70 mL" },
+    properties: { Typical: "2 to 6 mmHg, 25 to 70 mL" },
     live: both("rightAtrium"),
   },
   rightVentricle: {
     name: "Right ventricle",
     category: "chamber",
     description: "Pumps blood to the lungs. The lungs need only gentle pressure, so its wall is thin.",
-    properties: { Pressure: "25 / 4 mmHg", "Full / squeezed": "130 / 60 mL", Wall: "3 to 5 mm" },
+    properties: { Typical: "25 / 4 mmHg, 130 to 60 mL", Wall: "3 to 5 mm" },
     live: both("rightVentricle"),
   },
   leftAtrium: {
     name: "Left atrium",
     category: "chamber",
     description: "Receives red, oxygen-rich blood from the lungs through the pulmonary veins.",
-    properties: { Pressure: "6 to 15 mmHg", Volume: "about 20 to 70 mL" },
+    properties: { Typical: "6 to 15 mmHg, 20 to 70 mL" },
     live: both("leftAtrium"),
   },
   leftVentricle: {
@@ -223,35 +223,35 @@ export const HOVER: Record<HoverId, HoverCard> = {
     category: "chamber",
     description:
       "The strongest chamber. It pumps blood around the whole body, so its wall is about three times thicker than the right's.",
-    properties: { Pressure: "120 / 8 mmHg", "Full / squeezed": "120 / 50 mL", "Pumped out": "58% each beat" },
+    properties: { Typical: "120 / 8 mmHg, 120 to 50 mL", "Pumped out": "58% each beat" },
     live: both("leftVentricle"),
   },
   tricuspid: {
     name: "Tricuspid valve",
     category: "valve",
     description: "Three flaps between the right atrium and right ventricle. It snaps shut at the lub.",
-    properties: { Flaps: 3, Opening: "about 7 cm²", Shuts: "210 ms (lub)", Opens: "620 ms" },
+    properties: { Flaps: 3, Shut: "210 ms (lub) to 620 ms", Opening: "about 7 cm²" },
     live: state("tricuspid"),
   },
   mitral: {
     name: "Mitral valve",
     category: "valve",
     description: "Two flaps between the left atrium and left ventricle, also called the bicuspid valve. It snaps shut at the lub.",
-    properties: { Flaps: 2, Opening: "4 to 6 cm²", Shuts: "210 ms (lub)", Opens: "620 ms" },
+    properties: { Flaps: 2, Shut: "210 ms (lub) to 620 ms", Opening: "4 to 6 cm²" },
     live: state("mitral"),
   },
   pulmonary: {
     name: "Pulmonary valve",
     category: "valve",
     description: "Three pocket-shaped cusps at the exit of the right ventricle. It snaps shut at the dub.",
-    properties: { Cusps: 3, Opening: "about 2 cm²", Opens: "260 ms", Shuts: "540 ms (dub)" },
+    properties: { Cusps: 3, Open: "260 ms to 540 ms (dub)", Opening: "about 2 cm²" },
     live: state("pulmonary"),
   },
   aortic: {
     name: "Aortic valve",
     category: "valve",
     description: "Three pocket-shaped cusps at the exit of the left ventricle. It snaps shut at the dub.",
-    properties: { Cusps: 3, Opening: "3 to 4 cm²", Opens: "260 ms", Shuts: "540 ms (dub)" },
+    properties: { Cusps: 3, Open: "260 ms to 540 ms (dub)", Opening: "3 to 4 cm²" },
     live: state("aortic"),
   },
   saNode: {
@@ -271,7 +271,7 @@ export const HOVER: Record<HoverId, HoverCard> = {
     name: "Aorta",
     category: "vessel",
     description: "The body's main artery. It carries red, oxygen-rich blood from the left ventricle to everywhere but the lungs.",
-    properties: { Pressure: "120 / 80 mmHg", Width: "about 2.5 to 3 cm" },
+    properties: { Typical: "120 / 80 mmHg", Width: "about 2.5 to 3 cm" },
     live: mmHg("aorta"),
   },
   pulmonaryArtery: {
@@ -279,7 +279,7 @@ export const HOVER: Record<HoverId, HoverCard> = {
     category: "vessel",
     description:
       "Carries blue, oxygen-poor blood from the right ventricle to both lungs. It is the only artery that carries oxygen-poor blood.",
-    properties: { Pressure: "25 / 10 mmHg", Branches: "one to each lung" },
+    properties: { Typical: "25 / 10 mmHg", Branches: "one to each lung" },
     live: mmHg("pulmonaryArtery"),
   },
   venaCava: {
@@ -318,7 +318,7 @@ export function hoverCard(id: string, t: number) {
     name: card.name,
     description: card.description,
     category: card.category,
-    properties: { ...card.properties, ...card.live?.(t) },
+    properties: { ...card.live?.(t), ...card.properties },
   };
 }
 

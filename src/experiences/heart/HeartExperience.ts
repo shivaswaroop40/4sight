@@ -69,7 +69,9 @@ import {
   ecgPanelMesh,
   ecgTraceGeometry,
   glowTexture,
+  repaint,
   textTexture,
+  DISPLAY_FONT_PROBE,
   type DeformUniforms,
   type HeartBody,
   type Pool,
@@ -96,7 +98,6 @@ interface Label {
   mesh: THREE.Mesh;
   /** Experience time at which the label pops in. */
   at: number;
-  size: number;
 }
 
 class HeartExperience implements FourDExperience {
@@ -163,13 +164,13 @@ class HeartExperience implements FourDExperience {
       this.hover(vessel.mesh, vessel.vessel);
     }
 
-    CHAMBER_IDS.forEach((id, layer) => {
-      const pool = buildPool(id, POOLS[id], u, layer === 1 ? 1 : 0);
+    for (const id of CHAMBER_IDS) {
+      const pool = buildPool(id, POOLS[id], u, POOLS[id].band === "ventricle" ? 1 : 0);
       this.pools.push(pool);
       heart.add(pool.group);
       this.hover(pool.fill, id);
       const { texture, aspect } = textTexture(POOLS[id].label.text, { size: 64, color: THEME.cream, stroke: THEME.ink });
-      const height = 0.62;
+      const height = 0.7;
       const label = new THREE.Mesh(
         new THREE.PlaneGeometry(height * aspect, height),
         new THREE.MeshBasicMaterial({ map: this.track(texture), transparent: true, depthWrite: false }),
@@ -178,7 +179,7 @@ class HeartExperience implements FourDExperience {
       label.renderOrder = 3;
       heart.add(label);
       this.chamberLabels.push({ mesh: label, pool: id });
-    });
+    }
 
     for (const id of VALVE_IDS) {
       const def = VALVES[id];
@@ -230,6 +231,12 @@ class HeartExperience implements FourDExperience {
     this.buildEcg(root);
     this.buildBursts(heart);
     this.installBillboard(ctx.scene);
+    document.fonts
+      ?.load(DISPLAY_FONT_PROBE)
+      .then(() => {
+        if (this.root === root) this.textures.forEach(repaint);
+      })
+      .catch(() => {});
 
     this.setTime(0);
   }
@@ -293,7 +300,7 @@ class HeartExperience implements FourDExperience {
       mesh.position.set(x, y, 0.02);
       mesh.raycast = () => {};
       group.add(mesh);
-      this.ecgLabels.push({ mesh, at, size });
+      this.ecgLabels.push({ mesh, at });
     };
     label("P", 45, ecgX(45), ecgY(45) + 0.24, 0.36, { color: THEME.plum });
     label("QRS", 190, ecgX(190) - 0.48, ecgY(190) - 0.12, 0.36, { color: THEME.plum });
@@ -323,8 +330,8 @@ class HeartExperience implements FourDExperience {
    * from the scene's render hook rather than in setTime.
    */
   private installBillboard(scene: THREE.Scene): void {
-    this.previousSceneHook = scene.onBeforeRender;
     const previous = scene.onBeforeRender;
+    this.previousSceneHook = previous;
     scene.onBeforeRender = (...args) => {
       if (this.ecgGroup) {
         this.ecgGroup.quaternion.copy(args[2].quaternion);
