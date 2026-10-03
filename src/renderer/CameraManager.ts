@@ -2,10 +2,19 @@
 //
 // Orbit controls plus animated camera presets. The render loop calls
 // update(dt) every frame; applyPreset and overview tween position and
-// target over PRESET_MS with an ease-in-out curve. After a preset, the
-// camera stays anchored to it until the viewer drags or zooms: it eases
-// along the preset's line of sight to follow the experience's distance scale
-// for the current time and the viewport's aspect ratio.
+// target over PRESET_MS with an ease-in-out curve. What the camera does
+// between tweens is its framing:
+//
+//   free       the viewer's camera; nothing moves it.
+//   anchored   after a preset, until the viewer drags or zooms: it eases
+//              along the preset's line of sight to follow the experience's
+//              distance scale for the current time and the viewport's
+//              aspect ratio.
+//   following  after a click on an object: the orbit target glides onto the
+//              object over PRESET_MS, then rides with it every frame, and
+//              the camera moves by the same amount, so the viewer keeps
+//              their angle and distance and can still orbit and zoom.
+//              A preset, Overview or stopFollowing ends it.
 
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
@@ -13,6 +22,13 @@ import { easeInOutCubic } from "../core/interpolate";
 import type { CameraPreset } from "../core/types";
 
 const PRESET_MS = 600;
+
+export type Framing =
+  | { kind: "free" }
+  | { kind: "anchored"; preset: CameraPreset }
+  | { kind: "following"; object: THREE.Object3D; id: string; from: THREE.Vector3; elapsed: number };
+
+const FREE: Framing = { kind: "free" };
 
 interface Tween {
   fromPos: THREE.Vector3;
@@ -26,7 +42,7 @@ interface Tween {
 export class CameraManager {
   readonly controls: OrbitControls;
   private tween: Tween | null = null;
-  private anchor: CameraPreset | null = null;
+  private framingState: Framing = FREE;
   private distanceScale = 1;
   private readonly camera: THREE.PerspectiveCamera;
 
@@ -45,12 +61,30 @@ export class CameraManager {
    */
   viewerMoved(): void {
     this.tween = null;
-    this.anchor = null;
+    if (this.framingState.kind === "anchored") this.setFraming(FREE);
+  }
+
+  get framing(): Framing {
+    return this.framingState;
   }
 
   applyPreset(preset: CameraPreset, animate = true): void {
-    this.anchor = preset;
-    this.moveTo(this.anchoredPosition(), new THREE.Vector3(...preset.target), animate);
+    this.setFraming({ kind: "anchored", preset });
+    this.moveTo(this.anchoredPosition(preset), new THREE.Vector3(...preset.target), animate);
+  }
+
+  /** Keeps `object` at the orbit target from now on. Following the object already followed changes nothing. */
+  follow(object: THREE.Object3D, id: string): void {
+    const f = this.framingState;
+    if (f.kind === "following" && f.object === object) return;
+    this.tween = null;
+    const elapsed = prefersReducedMotion() ? PRESET_MS : 0;
+    this.setFraming({ kind: "following", object, id, from: this.controls.target.clone(), elapsed });
+  }
+
+  /** The camera stays where it is. */
+  stopFollowing(): void {
+    if (this.framingState.kind === "following") this.setFraming(FREE);
   }
 
   /** Frames the bounding sphere of everything visible in `root`, keeping the current viewing direction. */
@@ -71,7 +105,7 @@ export class CameraManager {
     let dir = this.camera.position.clone().sub(this.controls.target);
     if (dir.lengthSq() < 1e-9) dir = new THREE.Vector3(0.6, 0.45, 1);
     dir.normalize();
-    this.anchor = null;
+    this.setFraming(FREE);
     this.moveTo(sphere.center.clone().addScaledVector(dir, distance), sphere.center.clone(), animate);
   }
 
@@ -81,14 +115,22 @@ export class CameraManager {
 
   update(dtSeconds: number): void {
     const t = this.tween;
+    const f = this.framingState;
     if (t) {
       t.elapsed += dtSeconds * 1000;
       const s = easeInOutCubic(Math.min(1, t.elapsed / t.duration));
       this.camera.position.lerpVectors(t.fromPos, t.toPos, s);
       this.controls.target.lerpVectors(t.fromTarget, t.toTarget, s);
       if (s >= 1) this.tween = null;
-    } else if (this.anchor) {
-      this.camera.position.lerp(this.anchoredPosition(), 1 - Math.exp(-dtSeconds * 5));
+    } else if (f.kind === "anchored") {
+      this.camera.position.lerp(this.anchoredPosition(f.preset), 1 - Math.exp(-dtSeconds * 5));
+    } else if (f.kind === "following") {
+      f.elapsed += dtSeconds * 1000;
+      // getWorldPosition refreshes the matrix, so this frame's setTime counts, not last frame's.
+      const goal = f.object.getWorldPosition(new THREE.Vector3());
+      const next = f.from.clone().lerp(goal, easeInOutCubic(Math.min(1, f.elapsed / PRESET_MS)));
+      this.camera.position.add(next.clone().sub(this.controls.target));
+      this.controls.target.copy(next);
     }
     this.controls.update();
   }
@@ -98,9 +140,9 @@ export class CameraManager {
    * horizontal field of view shrinks, so the camera backs off along the same
    * line of sight to keep the framing.
    */
-  private anchoredPosition(): THREE.Vector3 {
-    const target = new THREE.Vector3(...this.anchor!.target);
-    const offset = new THREE.Vector3(...this.anchor!.position).sub(target);
+  private anchoredPosition(preset: CameraPreset): THREE.Vector3 {
+    const target = new THREE.Vector3(...preset.target);
+    const offset = new THREE.Vector3(...preset.position).sub(target);
     const aspect = this.camera.aspect;
     const portrait = aspect < 1.2 ? Math.min(2.4, Math.pow(1.2 / aspect, 0.85)) : 1;
     return target.addScaledVector(offset, portrait * this.distanceScale);
@@ -110,9 +152,14 @@ export class CameraManager {
     this.controls.dispose();
   }
 
+  /** Panning would pull the target off a followed object, so it is off while following. */
+  private setFraming(framing: Framing): void {
+    this.framingState = framing;
+    this.controls.enablePan = framing.kind !== "following";
+  }
+
   private moveTo(position: THREE.Vector3, target: THREE.Vector3, animate: boolean): void {
-    const reduced = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (!animate || reduced) {
+    if (!animate || prefersReducedMotion()) {
       this.tween = null;
       this.camera.position.copy(position);
       this.controls.target.copy(target);
@@ -128,4 +175,8 @@ export class CameraManager {
       duration: PRESET_MS,
     };
   }
+}
+
+function prefersReducedMotion(): boolean {
+  return typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 }

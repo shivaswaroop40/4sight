@@ -604,6 +604,43 @@ button {
   height: 15px;
 }
 
+/* Follow: the object the camera keeps centred, with a stop button. */
+
+.follow {
+  flex-wrap: nowrap;
+  gap: 8px;
+  padding: 4px 4px 4px 12px;
+  background: var(--mustard);
+}
+
+.follow > svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+}
+
+.follow__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 700;
+}
+
+.follow__label b {
+  font-weight: 800;
+}
+
+.follow__hidden {
+  flex: none;
+  padding: 1px 8px;
+  border: 2px solid var(--ink);
+  border-radius: var(--r-pill);
+  background: var(--cream);
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
 /* Guided tour: where it is, with Next and Exit. */
 
 .tourbar {
@@ -1703,7 +1740,8 @@ button {
     right: 12px;
     width: auto;
     bottom: calc(var(--transport-h, 176px) + 22px);
-    max-height: 44vh;
+    /* Stops short of the status rail, however many chips it holds. */
+    max-height: min(44vh, calc(100% - var(--transport-h, 176px) - 22px - var(--rail-bottom, 0px) - 12px));
     border-radius: var(--r-lg);
   }
   .info__head {

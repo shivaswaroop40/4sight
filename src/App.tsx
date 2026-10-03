@@ -36,6 +36,7 @@ function App() {
     const manager = new SceneManager(container, controller);
     runtime.manager = manager;
     manager.setHoverListener((hoveredId) => setUi({ hoveredId }));
+    manager.setCameraListener((camera) => setUi({ camera }));
     manager.start();
     const urlSync = startUrlSync(controller, currentMoment, () => getUi().tour.phase === "travelling");
     runtime.urlSync = urlSync;

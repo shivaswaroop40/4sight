@@ -3,8 +3,8 @@
 // App-wide singletons and a tiny store for the UI state that lives outside
 // the TimeController: the mounted experience, the state of the latest
 // experience request, the filters it renders under, the hovered object,
-// whether the gallery is open, the toast in the status rail, and the guided
-// tour's state.
+// what the camera is following, whether the gallery is open, the toast in
+// the status rail, and the guided tour's state.
 // Components subscribe to exactly the fields they render.
 
 import { useSyncExternalStore } from "react";
@@ -13,7 +13,7 @@ import { formatMoment, type Moment } from "../core/moment";
 import { TimeController } from "../core/TimeController";
 import type { ExperienceId, FilterState, FourDExperience, TimeState } from "../core/types";
 import { loadExperience } from "../experiences/index";
-import type { SceneManager } from "../renderer/SceneManager";
+import type { CameraView, SceneManager } from "../renderer/SceneManager";
 import { TOUR_IDLE, type TourState } from "./tour/tourMachine";
 import type { UrlSync } from "./urlSync";
 
@@ -36,6 +36,8 @@ interface UiState {
   /** The filter state the mounted experience renders under. Reset to its defaults on every switch. */
   filters: FilterState;
   hoveredId: string | null;
+  /** Camera state, not time state: scrubbing, playback and the tour leave it alone. */
+  camera: CameraView;
   galleryOpen: boolean;
   toast: Toast | null;
   tour: TourState;
@@ -46,6 +48,7 @@ let ui: UiState = {
   load: { status: "ready" },
   filters: {},
   hoveredId: null,
+  camera: { mode: "orbit" },
   galleryOpen: false,
   toast: null,
   tour: TOUR_IDLE,

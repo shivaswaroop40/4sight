@@ -4,12 +4,28 @@
 // requestAnimationFrame loop. Experiences are swapped in and out; the
 // manager never knows which one is mounted beyond calling the FourDExperience
 // interface. The renderer is created once and never recreated.
+//
+// It also turns canvas input into camera framing: a drag or a wheel zoom
+// lets go of a preset, and a click on a hoverable follows it. The UI learns
+// what the camera is doing through the camera listener, which reports a
+// CameraView whenever it changes.
 
 import * as THREE from "three";
-import type { FilterState, FourDExperience, SceneContext, TimeController } from "../core/types";
+import type { CameraMode, FilterState, FourDExperience, SceneContext, TimeController } from "../core/types";
 import { disposeObject } from "../core/theme";
 import { CameraManager } from "./CameraManager";
 import { NO_PRESS, stepPress, type Press, type PressInput } from "./pointerGesture";
+
+/**
+ * What the UI shows about the camera. `shown` is false while the followed
+ * object is hidden at the current time; the camera keeps riding its
+ * position, so scrubbing back to when it is on screen finds it centred.
+ */
+export type CameraView =
+  | { mode: Extract<CameraMode, "orbit"> }
+  | { mode: Extract<CameraMode, "follow">; id: string; shown: boolean };
+
+const ORBIT: CameraView = { mode: "orbit" };
 
 export class SceneManager {
   readonly scene: THREE.Scene;
@@ -29,6 +45,8 @@ export class SceneManager {
   private press: Press = NO_PRESS;
   private hoveredId: string | null = null;
   private onHoverChange?: (id: string | null) => void;
+  private cameraView: CameraView = ORBIT;
+  private onCameraChange?: (view: CameraView) => void;
 
   private lastFrameTime = 0;
   private frameId = 0;
@@ -83,6 +101,10 @@ export class SceneManager {
     this.onHoverChange = listener;
   }
 
+  setCameraListener(listener: (view: CameraView) => void): void {
+    this.onCameraChange = listener;
+  }
+
   /**
    * Disposes the current experience, mounts the next under `filters`, resets
    * u to 0 (paused), and frames its first preset. The filters are stored
@@ -105,6 +127,7 @@ export class SceneManager {
 
   unmount(): void {
     if (!this.experience) return;
+    this.cameras.stopFollowing();
     this.experience.dispose();
     this.hoverables.clear();
     this.setHovered(null);
@@ -155,6 +178,10 @@ export class SceneManager {
     this.cameras.overview(this.scene);
   }
 
+  stopFollowing(): void {
+    this.cameras.stopFollowing();
+  }
+
   start(): void {
     if (this.running) return;
     this.running = true;
@@ -166,6 +193,7 @@ export class SceneManager {
       this.timeController.tick(dt);
       this.cameras.setDistanceScale(this.experience?.cameraDistanceScale?.(this.timeController.state.time) ?? 1);
       this.cameras.update(dt);
+      this.updateCameraView();
       this.updateHover();
       this.renderer.render(this.scene, this.camera);
       this.frameId = requestAnimationFrame(loop);
@@ -205,9 +233,7 @@ export class SceneManager {
   };
 
   private handlePointerMove = (event: PointerEvent): void => {
-    const rect = this.renderer.domElement.getBoundingClientRect();
-    this.pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-    this.pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+    this.setPointer(event);
     this.pointerInside = true;
     this.stepPress("move", event);
   };
@@ -228,6 +254,18 @@ export class SceneManager {
     const { press, outcome } = stepPress(this.press, { type, x: event.clientX, y: event.clientY });
     this.press = press;
     if (outcome === "drag") this.cameras.viewerMoved();
+    // Picks at the up position: a tap has no hover before it.
+    if (outcome === "click" && event.button === 0) {
+      this.setPointer(event);
+      const hit = this.pick();
+      if (hit) this.cameras.follow(hit.object, hit.id);
+    }
+  }
+
+  private setPointer(event: PointerEvent): void {
+    const rect = this.renderer.domElement.getBoundingClientRect();
+    this.pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    this.pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
   }
 
   private handlePointerLeave = (): void => {
@@ -237,29 +275,39 @@ export class SceneManager {
   private setHovered(id: string | null): void {
     if (id === this.hoveredId) return;
     this.hoveredId = id;
+    this.renderer.domElement.style.cursor = id ? "pointer" : "";
     this.onHoverChange?.(id);
   }
 
   private updateHover(): void {
-    if (this.hoverables.size === 0 || !this.pointerInside) {
-      this.setHovered(null);
-      return;
-    }
+    this.setHovered(this.hoverables.size > 0 && this.pointerInside ? (this.pick()?.id ?? null) : null);
+  }
+
+  /** The hoverable under the pointer, if any. */
+  private pick(): { object: THREE.Object3D; id: string } | null {
     this.raycaster.setFromCamera(this.pointer, this.camera);
     const hits = this.raycaster.intersectObjects(Array.from(this.hoverables.keys()), true);
-
-    let id: string | null = null;
     for (const hit of hits) {
       let obj: THREE.Object3D | null = hit.object;
       while (obj && !this.hoverables.has(obj)) obj = obj.parent;
       // A hoverable may itself be invisible (a proxy volume), but one inside
       // a hidden group is not on screen and must not be hoverable.
-      if (obj && isShown(obj.parent)) {
-        id = this.hoverables.get(obj)!;
-        break;
-      }
+      if (obj && isShown(obj.parent)) return { object: obj, id: this.hoverables.get(obj)! };
     }
-    this.setHovered(id);
+    return null;
+  }
+
+  private updateCameraView(): void {
+    const f = this.cameras.framing;
+    const view: CameraView = f.kind === "following" ? { mode: "follow", id: f.id, shown: isShown(f.object) } : ORBIT;
+    const prev = this.cameraView;
+    const same =
+      view.mode === "orbit"
+        ? prev.mode === "orbit"
+        : prev.mode === "follow" && prev.id === view.id && prev.shown === view.shown;
+    if (same) return;
+    this.cameraView = view;
+    this.onCameraChange?.(view);
   }
 
   private handleResize(): void {

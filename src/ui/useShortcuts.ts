@@ -4,7 +4,7 @@
 // G opens the gallery, T starts or ends the guided tour. Esc closes the
 // top-most thing: the gallery (a native modal dialog that closes itself),
 // then an open menu or popover (which claims the key with preventDefault),
-// then the tour.
+// then the tour, then following an object.
 //
 // Ignored while a modal dialog is open (its own keys win) and, except Esc,
 // while typing in a form control; Space on a focused button is left to the
@@ -13,7 +13,7 @@
 // is named in its button's title.
 
 import { useEffect } from "react";
-import { controller, getUi, setUi } from "./runtime";
+import { controller, getUi, runtime, setUi } from "./runtime";
 import { isTouring } from "./tour/tourMachine";
 import { dispatchTour } from "./tour/tourRunner";
 
@@ -33,7 +33,9 @@ export function useShortcuts(): void {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       if (document.querySelector("dialog[open]")) return;
       if (e.key === "Escape") {
-        if (!e.defaultPrevented) dispatchTour({ type: "exit" });
+        if (e.defaultPrevented) return;
+        if (getUi().tour.phase !== "idle") dispatchTour({ type: "exit" });
+        else runtime.manager?.stopFollowing();
         return;
       }
       if (isFormControl(e.target)) return;

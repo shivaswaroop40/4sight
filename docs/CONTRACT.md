@@ -175,7 +175,7 @@ export interface FourDExperience {
   /**
    * Optional multiplier on the preset camera's distance at time t, for scenes
    * that shrink or grow over time. 1 keeps the authored framing. It applies
-   * until the viewer moves the camera.
+   * after a preset, until the viewer drags, zooms, or follows an object.
    */
   cameraDistanceScale?(time: number): number;
 

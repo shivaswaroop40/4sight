@@ -1,9 +1,9 @@
 // src/ui/StatusRail.tsx
 //
-// Transient chips under the top bar, centered: the guided tour's bar, a
-// failed experience load with Retry, and the result of Copy link. "Link
-// copied" fades on its own; a failed copy stays, with the link selectable,
-// until dismissed. The tour bar shows where the tour is (one dot per event)
+// Transient chips under the top bar, centered: the guided tour's bar, the
+// object the camera follows with a stop button, a failed experience load
+// with Retry, and the result of Copy link. "Link copied" fades on its own;
+// a failed copy stays, with the link selectable, until dismissed. The tour bar shows where the tour is (one dot per event)
 // with Next and Exit, then "Tour complete" for a moment. While the tour
 // holds on an event, Next fills up over the hold, so the viewer can see
 // when it moves on.
@@ -11,11 +11,11 @@
 // StageNotice covers the one case the rail cannot: nothing is mounted yet,
 // so the first load's progress or failure takes the stage.
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import type { FourDExperience } from "../core/types";
 import { entryFor } from "../experiences/index";
-import { CloseIcon, LinkIcon, NextIcon, ResetIcon, TourIcon } from "./icons";
-import { getUi, setUi, showExperience, useUi } from "./runtime";
+import { CloseIcon, FollowIcon, LinkIcon, NextIcon, ResetIcon, TourIcon } from "./icons";
+import { getUi, runtime, setUi, showExperience, useUi } from "./runtime";
 import { holdMs } from "./tour/tourMachine";
 import { dispatchTour } from "./tour/tourRunner";
 
@@ -26,6 +26,7 @@ export function StatusRail() {
   const mounted = useUi((s) => s.experience !== null);
   const failed = mounted && load.status === "failed" ? load : null;
   const toast = useUi((s) => s.toast);
+  const ref = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (toast?.kind !== "copied") return;
@@ -35,9 +36,21 @@ export function StatusRail() {
     return () => window.clearTimeout(timer);
   }, [toast]);
 
+  // The mobile info sheet stops short of the rail, whatever chips it holds.
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() =>
+      document.documentElement.style.setProperty("--rail-bottom", `${el.getBoundingClientRect().bottom}px`),
+    );
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   return (
-    <div className="rail" role="status">
+    <div className="rail" role="status" ref={ref}>
       <TourBar />
+      <FollowChip />
       {failed && (
         <div className="sticker toast toast--error">
           <span>Couldn't load {entryFor(failed.id)?.name ?? failed.id}</span>
@@ -76,6 +89,31 @@ export function StatusRail() {
           </button>
         </div>
       )}
+    </div>
+  );
+}
+
+function FollowChip() {
+  const camera = useUi((s) => s.camera);
+  const experience = useUi((s) => s.experience);
+  if (camera.mode !== "follow" || !experience) return null;
+  const name = experience.getHoveredObject(camera.id)?.name ?? camera.id;
+  return (
+    <div className="sticker toast follow">
+      <FollowIcon />
+      <span className="follow__label">
+        Following <b>{name}</b>
+      </span>
+      {!camera.shown && <span className="follow__hidden">Hidden now</span>}
+      <button
+        type="button"
+        className="toast__dismiss"
+        aria-label={`Stop following ${name}`}
+        title="Stop following (Esc)"
+        onClick={() => runtime.manager?.stopFollowing()}
+      >
+        <CloseIcon />
+      </button>
     </div>
   );
 }
