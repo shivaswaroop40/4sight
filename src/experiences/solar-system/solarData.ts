@@ -11,12 +11,12 @@ import type { SliderKnot } from "./solarMapping";
 
 export const KNOTS: SliderKnot[] = [
   { u: 0.0, time: 0, label: "Nebula" },
-  { u: 0.12, time: 1e5, label: "Protosun" },
-  { u: 0.25, time: 1e6, label: "Disk" },
-  { u: 0.42, time: 1e7, label: "Giants" },
-  { u: 0.55, time: 5e7, label: "Sun ignites" },
-  { u: 0.7, time: 1e8, label: "Earth & Moon" },
-  { u: 0.82, time: 7e8, label: "Bombardment" },
+  { u: 0.12, time: 1e5, label: "100k yrs" },
+  { u: 0.25, time: 1e6, label: "1M yrs" },
+  { u: 0.42, time: 1e7, label: "10M yrs" },
+  { u: 0.55, time: 5e7, label: "50M yrs" },
+  { u: 0.7, time: 1e8, label: "100M yrs" },
+  { u: 0.82, time: 7e8, label: "700M yrs" },
   { u: 1.0, time: 4.6e9, label: "Today" },
 ];
 
@@ -354,7 +354,7 @@ export const EVENTS: TimelineEvent[] = [
     id: "nebula",
     time: 0,
     title: "The solar nebula",
-    when: "4.6 billion years ago",
+    when: "Year 0 · 4.6 billion years ago",
     description:
       "A cold, slowly turning cloud of hydrogen, helium, and dust, light-years across. A nearby supernova may have given it the push to collapse.",
     keyPoints: ["98% hydrogen and helium", "2% dust and ice from older stars", "Collapse starts under its own gravity"],

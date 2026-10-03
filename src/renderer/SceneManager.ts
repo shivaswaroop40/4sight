@@ -86,6 +86,7 @@ export class SceneManager {
     this.timeController.attach(experience);
     this.scene.updateMatrixWorld(true);
     this.warmUp();
+    this.cameras.setDistanceScale(experience.cameraDistanceScale?.(this.timeController.state.time) ?? 1);
     const [first] = experience.getCameraPresets();
     if (first) this.cameras.applyPreset(first, animateCamera);
     else this.cameras.overview(this.scene, animateCamera);
@@ -145,6 +146,7 @@ export class SceneManager {
       const dt = Math.min(Math.max((now - this.lastFrameTime) / 1000, 0), 0.1);
       this.lastFrameTime = now;
       this.timeController.tick(dt);
+      this.cameras.setDistanceScale(this.experience?.cameraDistanceScale?.(this.timeController.state.time) ?? 1);
       this.cameras.update(dt);
       this.updateHover();
       this.renderer.render(this.scene, this.camera);

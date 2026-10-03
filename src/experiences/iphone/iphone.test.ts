@@ -59,9 +59,19 @@ describe("iPhone wake-up", () => {
 describe("iPhone events and presets", () => {
   it("has 8 sorted events and returns the last one at or before t", () => {
     const times = iphoneExperience.events.map((e) => e.time);
-    expect(times).toEqual([0, 0.04, 0.12, 0.22, 0.46, 0.62, 0.76, 0.92]);
+    expect(times).toEqual([0, 0.04, 0.12, 0.22, 0.46, 0.62, 0.76, 0.95]);
     expect(iphoneExperience.getCurrentEvent(0.5)?.id).toBe("cameras");
     expect(iphoneExperience.getCurrentEvent(1)?.title).toBe("It's alive!");
+  });
+
+  it("lands the It's alive! flag on a visible face", () => {
+    const wake = iphoneExperience.events.at(-1)!;
+    expect(faceOpacity(wake.time)).toBe(1);
+  });
+
+  it("pulls the camera in as the phone assembles", () => {
+    expect(iphoneExperience.cameraDistanceScale!(0)).toBeCloseTo(1.3, 6);
+    expect(iphoneExperience.cameraDistanceScale!(1)).toBe(1);
   });
 
   it("offers four camera presets with three-quarter first", () => {

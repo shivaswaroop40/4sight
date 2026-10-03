@@ -2,7 +2,10 @@
 //
 // Orbit controls plus animated camera presets. The render loop calls
 // update(dt) every frame; applyPreset and overview tween position and
-// target over PRESET_MS with an ease-in-out curve.
+// target over PRESET_MS with an ease-in-out curve. After a preset, the
+// camera stays anchored to it until the viewer moves the camera: it eases
+// along the preset's line of sight to follow the experience's distance scale
+// for the current time and the viewport's aspect ratio.
 
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
@@ -23,6 +26,8 @@ interface Tween {
 export class CameraManager {
   readonly controls: OrbitControls;
   private tween: Tween | null = null;
+  private anchor: CameraPreset | null = null;
+  private distanceScale = 1;
   private readonly camera: THREE.PerspectiveCamera;
 
   constructor(camera: THREE.PerspectiveCamera, domElement: HTMLElement) {
@@ -32,23 +37,16 @@ export class CameraManager {
     this.controls.dampingFactor = 0.08;
     this.controls.enablePan = true;
     this.controls.screenSpacePanning = true;
-    // A user drag cancels any preset in flight.
+    // A user drag cancels any preset in flight and releases the anchor.
     this.controls.addEventListener("start", () => {
       this.tween = null;
+      this.anchor = null;
     });
   }
 
-  /**
-   * Presets are authored for a landscape viewport. On a portrait screen the
-   * horizontal field of view shrinks, so the camera backs off along the same
-   * line of sight to keep the framing.
-   */
   applyPreset(preset: CameraPreset, animate = true): void {
-    const target = new THREE.Vector3(...preset.target);
-    const offset = new THREE.Vector3(...preset.position).sub(target);
-    const aspect = this.camera.aspect;
-    if (aspect < 1.2) offset.multiplyScalar(Math.min(2.4, Math.pow(1.2 / aspect, 0.85)));
-    this.moveTo(target.clone().add(offset), target, animate);
+    this.anchor = preset;
+    this.moveTo(this.anchoredPosition(), new THREE.Vector3(...preset.target), animate);
   }
 
   /** Frames the bounding sphere of everything visible in `root`, keeping the current viewing direction. */
@@ -69,7 +67,12 @@ export class CameraManager {
     let dir = this.camera.position.clone().sub(this.controls.target);
     if (dir.lengthSq() < 1e-9) dir = new THREE.Vector3(0.6, 0.45, 1);
     dir.normalize();
+    this.anchor = null;
     this.moveTo(sphere.center.clone().addScaledVector(dir, distance), sphere.center.clone(), animate);
+  }
+
+  setDistanceScale(scale: number): void {
+    this.distanceScale = scale;
   }
 
   update(dtSeconds: number): void {
@@ -80,8 +83,23 @@ export class CameraManager {
       this.camera.position.lerpVectors(t.fromPos, t.toPos, s);
       this.controls.target.lerpVectors(t.fromTarget, t.toTarget, s);
       if (s >= 1) this.tween = null;
+    } else if (this.anchor) {
+      this.camera.position.lerp(this.anchoredPosition(), 1 - Math.exp(-dtSeconds * 5));
     }
     this.controls.update();
+  }
+
+  /**
+   * Presets are authored for a landscape viewport. On a portrait screen the
+   * horizontal field of view shrinks, so the camera backs off along the same
+   * line of sight to keep the framing.
+   */
+  private anchoredPosition(): THREE.Vector3 {
+    const target = new THREE.Vector3(...this.anchor!.target);
+    const offset = new THREE.Vector3(...this.anchor!.position).sub(target);
+    const aspect = this.camera.aspect;
+    const portrait = aspect < 1.2 ? Math.min(2.4, Math.pow(1.2 / aspect, 0.85)) : 1;
+    return target.addScaledVector(offset, portrait * this.distanceScale);
   }
 
   dispose(): void {

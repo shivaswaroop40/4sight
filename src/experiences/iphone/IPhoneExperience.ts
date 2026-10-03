@@ -17,6 +17,7 @@ import type {
   VisualizationFilter,
 } from "../../core/types";
 import {
+  cameraDistanceScale,
   componentAssembledFraction,
   componentPose,
   eyeOpenness,
@@ -184,6 +185,10 @@ class IPhoneExperienceImpl implements FourDExperience {
 
   getCameraPresets(): CameraPreset[] {
     return CAMERA_PRESETS;
+  }
+
+  cameraDistanceScale(time: number): number {
+    return cameraDistanceScale(time);
   }
 
   reset(): void {

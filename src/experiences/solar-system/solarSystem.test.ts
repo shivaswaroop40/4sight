@@ -24,6 +24,16 @@ describe("solar mapping", () => {
     }
   });
 
+  it("labels interior ticks with times, leaving story beats to the event flags", () => {
+    expect(mapping.ticks().map((t) => t.label)).toEqual([
+      "Nebula", "100k yrs", "1M yrs", "10M yrs", "50M yrs", "100M yrs", "700M yrs", "Today",
+    ]);
+  });
+
+  it("states the start in elapsed time, like the readout", () => {
+    expect(EVENTS[0].when).toBe("Year 0 · 4.6 billion years ago");
+  });
+
   it("keeps events sorted and inside the range", () => {
     for (let i = 1; i < EVENTS.length; i++) expect(EVENTS[i].time).toBeGreaterThan(EVENTS[i - 1].time);
     expect(EVENTS[0].time).toBe(solarSystemExperience.minTime);
@@ -59,6 +69,17 @@ describe("solar state", () => {
     const moon = body(0.9, "moon");
     const d = Math.hypot(moon.position[0] - earth.position[0], moon.position[2] - earth.position[2]);
     expect(d).toBeCloseTo(0.45, 6);
+  });
+
+  it("never calls the Sun molten", () => {
+    for (const u of [0.3, 0.55, 1]) {
+      solarSystemExperience.setTime(mapping.toTime(u));
+      expect(solarSystemExperience.getHoveredObject("sun")!.description).not.toMatch(/molten/i);
+    }
+  });
+
+  it("offers named camera views, none duplicating the Overview button", () => {
+    expect(solarSystemExperience.getCameraPresets().map((p) => p.name)).toEqual(["Tilted", "Top", "Edge-on"]);
   });
 
   it("is a pure function of time", () => {

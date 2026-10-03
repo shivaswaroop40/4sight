@@ -4,7 +4,9 @@
 // variable written from a controller subscription, so playback never
 // re-renders React. Tick labels come from mapping.ticks() and thin out when
 // the track is narrow; event flags sit at mapping.toParam(event.time) and
-// jump there on click.
+// jump there on click. The flags are siblings of the slider, not children:
+// a slider's children are presentational, which hides them from assistive
+// tech.
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { FourDExperience, TimeTick } from "../core/types";
@@ -13,6 +15,7 @@ import { controller } from "./runtime";
 const NUDGE = 0.01;
 
 export function Timeline({ experience }: { experience: FourDExperience }) {
+  const rootRef = useRef<HTMLDivElement | null>(null);
   const railRef = useRef<HTMLDivElement | null>(null);
   const [width, setWidth] = useState(0);
 
@@ -30,7 +33,7 @@ export function Timeline({ experience }: { experience: FourDExperience }) {
   useEffect(() => {
     const rail = railRef.current;
     if (!rail) return;
-    const flags = Array.from(rail.querySelectorAll<HTMLElement>("[data-u]"));
+    const flags = Array.from(rootRef.current!.querySelectorAll<HTMLElement>("[data-u]"));
     const apply = () => {
       const { param, time } = controller.state;
       rail.style.setProperty("--u", String(param));
@@ -92,7 +95,7 @@ export function Timeline({ experience }: { experience: FourDExperience }) {
   };
 
   return (
-    <div className="timeline">
+    <div className="timeline" ref={rootRef}>
       <div
         className="timeline__rail"
         ref={railRef}
@@ -114,25 +117,26 @@ export function Timeline({ experience }: { experience: FourDExperience }) {
               <span key={`n${t.u}`} className="timeline__notch" style={{ left: `${t.u * 100}%` }} />
             ))}
           </div>
-          {markers.map(({ event, u }, i) => (
-            <button
-              key={event.id}
-              type="button"
-              className="flag"
-              data-u={u}
-              data-color={i % 3}
-              data-edge={u < 0.04 ? "start" : u > 0.96 ? "end" : undefined}
-              style={{ left: `${u * 100}%` }}
-              title={`${event.title} · ${event.when}`}
-              aria-label={`Jump to ${event.title}`}
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={() => controller.jumpToEvent(event.id)}
-            >
-              <span className="flag__tip">{event.title}</span>
-            </button>
-          ))}
           <div className="timeline__thumb" />
         </div>
+      </div>
+      <div className="timeline__flags" role="group" aria-label="Events">
+        {markers.map(({ event, u }, i) => (
+          <button
+            key={event.id}
+            type="button"
+            className="flag"
+            data-u={u}
+            data-color={i % 3}
+            data-edge={u < 0.04 ? "start" : u > 0.96 ? "end" : undefined}
+            style={{ left: `${u * 100}%` }}
+            title={`${event.title} · ${event.when}`}
+            aria-label={`Jump to ${event.title}`}
+            onClick={() => controller.jumpToEvent(event.id)}
+          >
+            <span className="flag__tip">{event.title}</span>
+          </button>
+        ))}
       </div>
       <div className="timeline__ticks" aria-hidden="true">
         {shown.map((t) => (
