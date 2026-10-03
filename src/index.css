@@ -1885,8 +1885,9 @@ button {
     grid-column: 2;
     grid-row: 1;
     justify-self: stretch;
-    padding: 7px 10px 7px 14px;
-    font-size: 16px;
+    gap: 6px;
+    padding: 7px 8px 7px 12px;
+    font-size: 15px;
   }
   .picker__span {
     display: none;
@@ -1970,9 +1971,9 @@ button {
     min-width: 0;
     padding: 6px 2px;
   }
-  /* Shrinks with the readout so "100 thousand years" fits beside the buttons on a phone. */
+  /* Shrinks with the readout so "125 million years ago" fits beside the buttons on a phone. */
   .readout__time {
-    font-size: clamp(17px, 10.6cqi, 24px);
+    font-size: clamp(15px, 9.6cqi, 24px);
   }
   .readout__analogy {
     font-size: 12px;
