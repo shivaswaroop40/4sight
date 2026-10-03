@@ -381,7 +381,7 @@ class TreeExperienceImpl implements FourDExperience {
     leaves.visible = leafShow > 0.001 && t > STORY.shoot;
     this.leafInk!.visible = leaves.visible;
     if (!leaves.visible) return;
-    const leafSize = 0.05 + 0.04 * smoothstep(0.6, 4, t);
+    const leafSize = 0.06 + 0.03 * smoothstep(0.6, 4, t);
     SKELETON.leaves.forEach((site, i) => {
       const axis = SKELETON.axes[site.axis];
       const len = axisLength(axis, t);

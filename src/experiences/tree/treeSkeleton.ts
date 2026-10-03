@@ -517,7 +517,7 @@ export function generateSkeleton(seed = 1759): Skeleton {
       leaves.push({
         axis: axis.id,
         s,
-        rotation: [1.2 + jitter(0.25), turn, jitter(0.4)],
+        rotation: [0.85 + jitter(0.25), turn, jitter(0.5)],
         size: 0.85 + rand() * 0.3,
       });
     }
