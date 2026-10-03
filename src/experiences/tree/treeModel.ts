@@ -296,7 +296,7 @@ export function foliageAt(phase: number, age: number): Foliage {
 /** 0..1: how many acorns this tree can make at its age. None before 40, peak from about 80. */
 export function acornCapacity(age: number): number {
   if (age < STORY.firstAcorns) return 0;
-  return 0.12 + 0.88 * smoothstep(STORY.firstAcorns, 90, age);
+  return 0.3 + 0.7 * smoothstep(STORY.firstAcorns, 90, age);
 }
 
 /** Mast years come every few years: most years are lean, some are huge. */

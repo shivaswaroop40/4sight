@@ -450,7 +450,7 @@ class TreeExperienceImpl implements FourDExperience {
       const axis = SKELETON.axes[clump.axis];
       const { position, radius } = clumpPose(SKELETON, clump, t);
       // Only on clumps that have grown: an unborn twig's site sits where it will one day reach.
-      const shown = site.rank < crop.onTree && radius > 0.5 * clump.maxRadius && !(axis.lost && t > STORY.storm);
+      const shown = site.rank < crop.onTree && radius > 0.3 * clump.maxRadius && !(axis.lost && t > STORY.storm);
       nuts.setColorAt(i, tmpC);
       if (!shown) {
         nuts.setMatrixAt(i, ZERO);

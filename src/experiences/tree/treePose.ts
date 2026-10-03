@@ -70,7 +70,7 @@ export function clumpPose(skel: Skeleton, site: ClumpSite, t: number): { positio
   const axis = skel.axes[site.axis];
   const len = axisLength(axis, growthTime(axis, t));
   // Big limbs carry their leaves on side branches, so their own tip clump stays modest while young.
-  const reach = axis.kind === "trunk" ? 0.14 : axis.juvenile ? 0.45 : axis.depth === 1 ? 0.28 : axis.kind === "twig" ? 0.6 : 0.45;
+  const reach = axis.kind === "trunk" ? 0.14 : axis.juvenile ? 0.45 : axis.depth === 1 ? 0.2 : axis.kind === "twig" ? 0.6 : 0.45;
   const radius = Math.min(site.maxRadius, reach * len) * standing(axis, t);
   const p = pointAlong(axis, site.frac * len);
   return {

@@ -267,7 +267,7 @@ export function generateSkeleton(seed = 1759): Skeleton {
   let az = 30;
   for (let s = 0.16; s < 4.4; s += 0.24 + s * 0.05) {
     az += golden + jitter(18);
-    const death = timeAtHeight(s + 5.5) + jitter(2);
+    const death = timeAtHeight(s + 6.5) + jitter(2);
     const length = 0.75 + 0.5 * s + jitter(0.15);
     const j = addAxis({
       kind: "limb",
@@ -334,7 +334,7 @@ export function generateSkeleton(seed = 1759): Skeleton {
       azimuth: spec.az + jitter(6),
       elevation: spec.el,
       length: spec.L,
-      growth: { law: "exp", tau: 34 },
+      growth: { law: "exp", tau: 24 },
       thick: 0.78,
       segments: 4,
       crook: 16,
@@ -357,7 +357,7 @@ export function generateSkeleton(seed = 1759): Skeleton {
         azimuth: azimuthOf(d) + side * (38 + jitter(14)),
         elevation: Math.min(65, elevationOf(d) + 6 + jitter(10)),
         length: len,
-        growth: { law: "exp", tau: 16 },
+        growth: { law: "exp", tau: 11 },
         thick: 0.45,
         segments: 3,
         crook: 22,
@@ -372,7 +372,7 @@ export function generateSkeleton(seed = 1759): Skeleton {
           azimuth: azimuthOf(d) + side * (10 + jitter(40)),
           elevation: 35 + jitter(20),
           length: len * (0.48 + jitter(0.1)),
-          growth: { law: "exp", tau: 7 },
+          growth: { law: "exp", tau: 5 },
           thick: 0.3,
           segments: 2,
           crook: 28,
