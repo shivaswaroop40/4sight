@@ -44,17 +44,17 @@ The only workflow in `.github/workflows/` is `deploy.yml`. It publishes `main` t
 | `src/core/`, `src/renderer/`, `src/ui/`, `src/app/` | Shiv | message first |
 | `src/experiences/iphone/`, `src/interaction/` | Arjun | read |
 | `src/experiences/solar-system/` | Junaid | read |
-| `src/experiences/index.ts` (the registry) | Shiv | add one import line for your experience |
+| `src/experiences/index.ts` (the registry) | Shiv | add one entry for your experience |
 | `public/data/iphone.json` | Arjun | read |
 | `public/data/solar-system.json` | Junaid | read |
 | `vite.config.ts`, `.github/workflows/` | Shiv | read |
 
-The registry file is the only shared write point. Each lane adds exactly one line to it during Phase 3. Everything else an experience needs lives inside its own folder.
+The registry file is the only shared write point. Each lane adds exactly one entry to it during Phase 3: id, name, a one-line tagline, the span of time it shows in seconds, and a `load()` dynamic import. The file header shows the exact shape. The dynamic import keeps each experience in its own chunk. Everything else an experience needs lives inside its own folder.
 
 ## Staying unblocked
 
 - Shiv ships the mock experience and the contract in the first ten minutes. Arjun and Junaid write their JSON data during that window, then build against the mock's `SceneContext`.
-- Each lane registers its experience with one line in `src/experiences/index.ts` and can see it in the real app immediately. No separate harness.
+- Each lane registers its experience with one entry in `src/experiences/index.ts` and can see it in the real app immediately, in the gallery (press G). No separate harness.
 - Rebase on `origin/main` before every PR. Ten minutes without rebasing is too long.
 
 ## Commits

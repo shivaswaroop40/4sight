@@ -11,6 +11,12 @@ Two experiences, one time engine:
 
 Live site: https://shivaswaroop40.github.io/4sight/
 
+## Features
+
+- **Gallery.** The picker at the top (or G) opens every experience as a ladder of timescales, from seconds to billions of years. Each experience downloads only when you pick it.
+- **Scrub, play, reverse, warp.** Drag the timeline, play either way, and pick a time warp. Event flags jump to the big moments.
+- **Camera views.** Preset views per experience, plus Overview.
+
 ## Status
 
 Core scaffold, time engine, and Pages deploy are live. The iPhone and Solar System experiences are in progress. The visual style is warm, beige, and cartoony, with toon-shaded 3D.

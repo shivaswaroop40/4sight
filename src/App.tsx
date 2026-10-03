@@ -1,22 +1,24 @@
 // src/App.tsx
 //
 // Composition only. The renderer is created once; switching experiences
-// goes through SceneManager.mount, which disposes the old experience,
-// mounts the new one, resets u to 0 (paused), and frames its first preset.
+// goes through showExperience, which loads the experience's chunk and then
+// SceneManager.mount disposes the old experience, mounts the new one,
+// resets u to 0 (paused), and frames its first preset.
 
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import type { ExperienceId } from "./core/types";
-import { experiences, getExperience } from "./experiences/index";
+import { experiences } from "./experiences/index";
 import { SceneManager } from "./renderer/SceneManager";
-import { ExperienceNav } from "./ui/ExperienceNav";
+import { ExperiencePicker, Gallery } from "./ui/Gallery";
 import { InfoPanel } from "./ui/InfoPanel";
 import { ObjectInfo } from "./ui/ObjectInfo";
 import { PerspectiveControls } from "./ui/PerspectiveControls";
+import { StageNotice, StatusRail } from "./ui/StatusRail";
 import { TimeControls, TimeReadout } from "./ui/TimeControls";
 import { TimeWarp } from "./ui/TimeWarp";
 import { Timeline } from "./ui/Timeline";
 import { Mark } from "./ui/icons";
-import { controller, runtime, setUi, useUi } from "./ui/runtime";
+import { controller, runtime, setUi, showExperience, useUi } from "./ui/runtime";
 import { useShortcuts } from "./ui/useShortcuts";
 
 function idFromUrl(): ExperienceId {
@@ -31,13 +33,10 @@ function writeUrl(id: ExperienceId): void {
   window.history.replaceState(null, "", url);
 }
 
-setUi({ experienceId: idFromUrl() });
-
 function App() {
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const transportRef = useRef<HTMLElement | null>(null);
-  const experienceId = useUi((s) => s.experienceId);
-  const experience = experienceId ? getExperience(experienceId) : undefined;
+  const experience = useUi((s) => s.experience);
   useShortcuts();
 
   useEffect(() => {
@@ -46,16 +45,17 @@ function App() {
     const manager = new SceneManager(container, controller);
     runtime.manager = manager;
     manager.setHoverListener((hoveredId) => setUi({ hoveredId }));
-    const initial = getExperience(idFromUrl())!;
-    manager.mount(initial);
-    setUi({ experienceId: initial.id });
-    writeUrl(initial.id);
     manager.start();
+    void showExperience(idFromUrl());
     return () => {
       manager.dispose();
       runtime.manager = null;
     };
   }, []);
+
+  useEffect(() => {
+    if (experience) writeUrl(experience.id);
+  }, [experience]);
 
   // The mobile bottom sheet sits just above the transport bar, whatever its height.
   useEffect(() => {
@@ -68,28 +68,24 @@ function App() {
     return () => ro.disconnect();
   }, [experience]);
 
-  const switchTo = useCallback((id: ExperienceId) => {
-    const next = getExperience(id);
-    const manager = runtime.manager;
-    if (!next || !manager || manager.current === next) return;
-    manager.mount(next, true);
-    setUi({ experienceId: id, hoveredId: null });
-    writeUrl(id);
-  }, []);
-
   return (
     <div className="app">
       <div className="stage" ref={viewportRef} />
       <div className="vignette" aria-hidden="true" />
 
       <header className="topbar">
-        <div className="brand sticker">
-          <Mark />
-          <span className="brand__word">4sight</span>
+        <div className="topbar__start">
+          <div className="brand sticker">
+            <Mark />
+            <span className="brand__word">4sight</span>
+          </div>
         </div>
-        <ExperienceNav experiences={experiences} onSelect={switchTo} />
+        <ExperiencePicker />
         <PerspectiveControls />
+        <StatusRail />
       </header>
+
+      <StageNotice />
 
       {experience && (
         <>
@@ -105,6 +101,8 @@ function App() {
           </footer>
         </>
       )}
+
+      <Gallery />
     </div>
   );
 }

@@ -235,3 +235,31 @@ Exit checks for Phase 1, all three developers watching:
 4. Drag while playing. Release. Playback continues from where you released.
 5. The "What's happening?" panel reads "At A", "At B", "At C" as you pass the events.
 6. Hover the cube. A tooltip appears near the cursor reading "Cube".
+
+## Registering an experience
+
+`src/experiences/index.ts` holds one light entry per experience. The entry carries what the gallery shows without loading the experience, and a dynamic import that loads it on demand, so each experience is its own chunk.
+
+```ts
+export interface ExperienceEntry {
+  id: ExperienceId;
+  name: string;
+  /** One line for the gallery card, under ~60 characters. */
+  tagline: string;
+  /** Length of the span of time the experience shows, in real seconds. Orders the gallery. */
+  spanSeconds: number;
+  /** Dynamic import, so each experience is its own chunk. */
+  load: () => Promise<FourDExperience>;
+}
+
+// Example:
+{
+  id: "solarSystem",
+  name: "Solar System",
+  tagline: "A cloud of dust becomes the Sun and eight planets",
+  spanSeconds: 4.6e9 * YEAR_SECONDS,
+  load: () => import("./solar-system/SolarSystemExperience").then((m) => m.solarSystemExperience),
+}
+```
+
+Never import an experience module statically from shell code. A static import pulls it into the main chunk.

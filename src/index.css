@@ -145,6 +145,14 @@ button {
   pointer-events: auto;
 }
 
+.topbar__start {
+  grid-column: 1;
+  justify-self: start;
+  display: flex;
+  align-items: center;
+  gap: var(--s4);
+}
+
 .brand {
   justify-self: start;
   display: inline-flex;
@@ -162,55 +170,10 @@ button {
   line-height: 1;
 }
 
-/* Experience tabs */
-
-.tabs {
-  position: relative;
-  display: inline-flex;
-  padding: 5px;
-  gap: 2px;
-  background: var(--cream);
-  border: var(--outline);
-  border-radius: var(--r-pill);
-  box-shadow: var(--shadow);
-}
-
-.tabs__indicator {
-  position: absolute;
-  top: 5px;
-  bottom: 5px;
-  left: 0;
-  border-radius: var(--r-pill);
-  background: var(--mustard);
-  border: var(--outline);
-  transition:
-    transform 320ms var(--bounce),
-    width 320ms var(--bounce);
-}
-
-.tabs__tab {
-  position: relative;
-  z-index: 1;
-  border: 0;
-  background: none;
-  padding: 8px 18px;
-  border-radius: var(--r-pill);
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 15px;
-  white-space: nowrap;
-  color: var(--ink-soft);
-  transition: color var(--t-fast) var(--ease);
-}
-
-.tabs__tab:hover,
-.tabs__tab[aria-selected="true"] {
-  color: var(--ink);
-}
-
 /* Camera views */
 
 .views {
+  grid-column: 3;
   justify-self: end;
   display: inline-flex;
   align-items: center;
@@ -269,6 +232,405 @@ button {
 
 .chip--accent:hover {
   background: #8fc0a8;
+}
+
+/* Experience picker */
+
+.picker {
+  grid-column: 2;
+  justify-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  max-width: 100%;
+  padding: 8px 12px 8px 20px;
+  background: var(--cream);
+  border: var(--outline);
+  border-radius: var(--r-pill);
+  box-shadow: var(--shadow);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 1.2;
+  transition:
+    transform var(--t-fast) var(--bounce),
+    box-shadow var(--t-fast) var(--bounce),
+    background var(--t-fast) var(--ease);
+}
+
+.picker:hover {
+  background: #fff;
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+
+.picker:active {
+  transform: translate(3px, 3px);
+  box-shadow: 1px 1px 0 var(--ink);
+}
+
+.picker__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.picker__span {
+  padding: 2px 9px;
+  border: 2px solid var(--ink);
+  border-radius: var(--r-pill);
+  background: var(--mustard);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.spinner {
+  flex: none;
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin: 0 3px;
+  border: 2.5px solid var(--ink);
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 700ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    rotate: 1turn;
+  }
+}
+
+/* Status rail: transient chips under the top bar. */
+
+.rail {
+  grid-column: 1 / -1;
+  justify-self: center;
+  display: grid;
+  justify-items: center;
+  gap: var(--s2);
+  pointer-events: none;
+}
+
+.rail > * {
+  pointer-events: auto;
+}
+
+.toast {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  max-width: calc(100vw - 24px);
+  padding: 6px 6px 6px 16px;
+  font-size: 14px;
+  font-weight: 800;
+  box-shadow: var(--shadow-sm);
+  animation: pop-in var(--t) var(--bounce);
+}
+
+.toast--error {
+  background: #f8d9cc;
+}
+
+.toast__dismiss {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--ink-soft);
+}
+
+.toast__dismiss:hover {
+  color: var(--ink);
+  background: rgba(59, 47, 42, 0.08);
+}
+
+.toast .chip svg,
+.notice .chip svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* First load: the stage has nothing to show yet. */
+
+.notice {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  width: max-content;
+  max-width: min(360px, calc(100vw - 32px));
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 20px 26px;
+  text-align: center;
+  animation: pop-in var(--t) var(--ease);
+}
+
+.notice:not(.notice--error) {
+  grid-auto-flow: column;
+  align-items: center;
+  padding: 14px 22px;
+}
+
+.notice__title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 20px;
+}
+
+.notice__detail {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink-soft);
+  overflow-wrap: anywhere;
+}
+
+.notice__actions {
+  display: flex;
+  gap: var(--s2);
+  margin-top: 4px;
+}
+
+/* ---------- Gallery ---------- */
+
+.gallery {
+  width: min(880px, calc(100vw - 48px));
+  max-width: none;
+  max-height: calc(100dvh - 48px);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  overflow: visible;
+}
+
+.gallery[open] {
+  animation: gallery-in 260ms var(--bounce);
+}
+
+.gallery::backdrop {
+  background: rgba(59, 47, 42, 0.32);
+  backdrop-filter: blur(3px);
+}
+
+@keyframes gallery-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
+  }
+}
+
+.gallery__sheet {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - 48px);
+  padding: 24px 24px 0;
+  box-shadow: var(--shadow-lg);
+}
+
+.gallery__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s4);
+  padding: 0 4px 18px;
+}
+
+.gallery__title {
+  margin: 4px 0 4px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 30px;
+  line-height: 1.1;
+}
+
+.gallery__lede {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #4b3e37;
+}
+
+.gallery__close {
+  flex: none;
+  width: 42px;
+  height: 42px;
+}
+
+.gallery__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 18px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* Room for focus rings and card shadows inside the scroller. */
+  margin: 0 -8px;
+  padding: 6px 12px 28px 8px;
+}
+
+.gcard {
+  --tint: var(--terracotta);
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 16px 18px 14px;
+  border: var(--outline);
+  border-radius: var(--r);
+  background: var(--cream);
+  box-shadow: var(--shadow-sm);
+  text-align: left;
+  overflow: hidden;
+  transition:
+    transform var(--t-fast) var(--bounce),
+    box-shadow var(--t-fast) var(--bounce),
+    background var(--t-fast) var(--ease);
+}
+
+.gcard[data-color="1"] {
+  --tint: var(--mustard);
+}
+
+.gcard[data-color="2"] {
+  --tint: var(--sage);
+}
+
+.gcard[data-color="3"] {
+  --tint: var(--plum);
+}
+
+/* A strip of the card's colour along the top, like a sticker's tab. */
+.gcard::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 8px;
+  border-bottom: 2px solid var(--ink);
+  background: var(--tint);
+}
+
+.gcard:hover,
+.gcard:focus-visible {
+  background: #fff;
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow);
+}
+
+.gcard:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 var(--ink);
+}
+
+.gcard[aria-current="true"] {
+  background: #fff8ea;
+  box-shadow: var(--shadow);
+}
+
+.gcard__top {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+  min-height: 26px;
+}
+
+.gcard__now,
+.gcard__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.gcard__now::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: var(--sage);
+}
+
+.gcard__status .spinner {
+  width: 13px;
+  height: 13px;
+  margin: 0;
+  border-width: 2px;
+}
+
+.gcard__status--error {
+  color: var(--terracotta-deep);
+}
+
+.gcard__name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 1.1;
+}
+
+.gcard__tagline {
+  font-size: 15px;
+  line-height: 1.45;
+  color: #4b3e37;
+}
+
+/* Where the span sits between one second and the age of the universe. */
+.rung {
+  display: grid;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.rung__track {
+  position: relative;
+  height: 10px;
+  margin: 0 6px;
+  border: 2px solid var(--ink);
+  border-radius: var(--r-pill);
+  background:
+    repeating-linear-gradient(90deg, transparent 0 calc(100% / 6 - 2px), rgba(59, 47, 42, 0.25) 0 calc(100% / 6))
+    var(--paper);
+}
+
+.rung__dot {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--x) * 100%);
+  width: 16px;
+  height: 16px;
+  translate: -50% -50%;
+  border: 2.5px solid var(--ink);
+  border-radius: 50%;
+  background: var(--tint);
+}
+
+.rung__ends {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
 }
 
 /* ---------- Info panel ---------- */
@@ -863,15 +1225,14 @@ button {
 /* ---------- Responsive ---------- */
 
 @media (max-width: 1100px) {
-  .topbar {
-    grid-template-columns: auto 1fr;
-  }
   .views {
     grid-column: 1 / -1;
+    grid-row: 2;
     justify-self: start;
   }
-  .tabs {
-    justify-self: end;
+  /* Centered, the rail would run into the info panel here. */
+  .rail {
+    justify-self: start;
   }
   .info {
     top: 150px;
@@ -885,22 +1246,40 @@ button {
   }
   .topbar {
     top: 12px;
-    grid-template-columns: auto 1fr;
+    grid-template-columns: auto minmax(0, 1fr) auto;
     gap: 10px;
   }
+  /* Brand, picker and actions share row 1; the picker takes the slack. */
+  .topbar__start {
+    display: contents;
+  }
   .brand {
+    grid-column: 1;
+    grid-row: 1;
     padding: 5px 12px 5px 6px;
   }
   .brand__word {
     font-size: 20px;
   }
-  .tabs__tab {
-    padding: 7px 12px;
-    font-size: 14px;
+  .picker {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: stretch;
+    padding: 7px 10px 7px 14px;
+    font-size: 16px;
+  }
+  .picker__span {
+    display: none;
+  }
+  .rail {
+    justify-self: center;
   }
   .views {
+    max-width: 100%;
     padding: 4px;
     gap: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
   }
   .views__label {
     display: none;
@@ -970,6 +1349,42 @@ button {
 @media (max-width: 599px) {
   .flag::after {
     width: 9px;
+  }
+  .brand {
+    padding: 5px 6px;
+  }
+  .brand__word {
+    display: none;
+  }
+  .views .chip {
+    padding: 5px 9px;
+  }
+  .views .chip--accent svg {
+    display: none;
+  }
+
+  /* The gallery becomes a full-height sheet with one column. */
+  .gallery {
+    width: 100%;
+    max-width: none;
+    height: calc(100dvh - 12px);
+    max-height: none;
+    margin: 12px 0 0;
+  }
+  .gallery__sheet {
+    height: 100%;
+    max-height: none;
+    border-bottom: 0;
+    border-radius: var(--r-lg) var(--r-lg) 0 0;
+    box-shadow: none;
+    padding: 18px 14px 0;
+  }
+  .gallery__title {
+    font-size: 24px;
+  }
+  .gallery__grid {
+    grid-template-columns: 1fr;
+    padding-bottom: 24px;
   }
 }
 

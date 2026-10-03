@@ -72,6 +72,12 @@ export const ChevronIcon = ({ up }: { up: boolean }) => (
   </Icon>
 );
 
+export const CloseIcon = () => (
+  <Icon width="20" height="20">
+    <path d="M6.5 6.5l11 11M17.5 6.5l-11 11" />
+  </Icon>
+);
+
 /** The 4sight mark: a clock face whose hand sweeps through four ticks. */
 export const Mark = () => (
   <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true">

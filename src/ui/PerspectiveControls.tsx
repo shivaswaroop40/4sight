@@ -3,13 +3,13 @@
 // Camera presets of the active experience plus an Overview that frames the
 // scene's bounding sphere. Presets animate over ~600 ms.
 
-import { getExperience } from "../experiences/index";
 import { CameraIcon, OverviewIcon } from "./icons";
 import { runtime, useUi } from "./runtime";
 
 export function PerspectiveControls() {
-  const id = useUi((s) => s.experienceId);
-  const presets = id ? (getExperience(id)?.getCameraPresets() ?? []) : [];
+  const experience = useUi((s) => s.experience);
+  if (!experience) return null;
+  const presets = experience.getCameraPresets();
 
   return (
     <div className="views" role="group" aria-label="Camera views">
