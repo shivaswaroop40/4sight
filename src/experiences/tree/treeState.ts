@@ -32,7 +32,7 @@ export interface TreeState {
   wildlife: Wildlife[];
 }
 
-export function stageAt(t: number): Stage {
+function stageAt(t: number): Stage {
   if (t < STORY.radicle) return "acorn";
   if (t < STORY.shoot) return "germinating";
   if (t < 3) return "seedling";
@@ -42,7 +42,7 @@ export function stageAt(t: number): Stage {
   return "veteran";
 }
 
-export function limbStateAt(t: number): LimbState {
+function limbStateAt(t: number): LimbState {
   if (t < STORY.storm) return "attached";
   if (t < STORY.stormLanded) return "falling";
   return "fallen";
@@ -61,7 +61,7 @@ export function acornsAt(t: number): { onTree: number; onGround: number; ripe: n
 /** The displayed year of the mast-year event is always a mast year. */
 const MAST_YEAR = Math.floor(seasonClockAt(STORY.mast));
 
-export function wildlifeAt(t: number): Wildlife[] {
+function wildlifeAt(t: number): Wildlife[] {
   const out: Wildlife[] = [];
   for (const [id, [a, b]] of Object.entries(WILDLIFE_WINDOWS) as [Wildlife, [number, number]][]) {
     if (t >= a && t <= b) out.push(id);

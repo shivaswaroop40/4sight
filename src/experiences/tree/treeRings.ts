@@ -15,7 +15,7 @@ import { PALETTE } from "./treeMaterials";
 const YEARS = Math.ceil(STORY.end) + 1;
 
 /** Cumulative ring radius after each year, normalised so the 150-year slice has radius 1. */
-export function ringRadii(): number[] {
+function ringRadii(): number[] {
   const r = [0];
   for (let y = 1; y <= YEARS; y++) r.push(r[y - 1] + ringWidth(y));
   const scale = r[Math.floor(STORY.end)];
@@ -101,7 +101,6 @@ void main() {
   float rays = smoothstep(0.985, 1.0, cos(theta * 28.0 + 3.0 * hash(vec2(floor(theta * 4.4), 1.0))));
   col = mix(col, ${rgb("#F7E8C8")}, rays * step(0.06, rho) * 0.7);
 
-  // Pith.
   col = mix(${rgb("#6E4A2E")}, col, smoothstep(0.015, 0.03, rho));
 
   gl_FragColor = vec4(mix(col, bark, inBark), 1.0);

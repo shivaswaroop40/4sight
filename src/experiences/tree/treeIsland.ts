@@ -11,7 +11,7 @@ import { PALETTE, oakLeafGeometry, strataMaterial } from "./treeMaterials";
 import { NOTCH_AZIMUTH, NOTCH_HALF_ANGLE } from "./treeSkeleton";
 
 export const ISLAND_RADIUS = 15;
-export const ISLAND_DOME = 0.7;
+const ISLAND_DOME = 0.7;
 
 /** Ground height at distance r from the trunk. */
 export function groundY(r: number): number {

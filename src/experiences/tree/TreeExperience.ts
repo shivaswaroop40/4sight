@@ -214,7 +214,7 @@ class TreeExperienceImpl implements FourDExperience {
     if (!this.root || !this.sets || !this.tree) return;
     this.root.position.y = -viewCenter(t);
     // The gale pushes the crown over a little while it blows.
-    const gale = smoothstep(STORY.storm - 1, STORY.storm, t) * (1 - smoothstep(STORY.storm, STORY.stormLanded + 0.6, t));
+    const gale = smoothstep(STORY.storm - 1, STORY.storm, t) * (1 - smoothstep(STORY.storm, STORY.stormLanded, t));
     this.tree.rotation.set(0.05 * gale, 0, -0.03 * gale);
 
     const lostMatrix = fallMatrix(t, new THREE.Matrix4());
@@ -258,6 +258,10 @@ class TreeExperienceImpl implements FourDExperience {
 
   dispose(): void {
     if (this.ctx) for (const o of this.hoverables) this.ctx.unregisterHoverable(o);
+    // disposeObject frees geometry and materials; instance buffers need the mesh itself disposed.
+    this.root?.traverse((o) => {
+      if (o instanceof THREE.InstancedMesh) o.dispose();
+    });
     if (this.root) disposeObject(this.root);
     if (this.lights) disposeObject(this.lights);
     this.hoverables = [];
@@ -366,7 +370,7 @@ class TreeExperienceImpl implements FourDExperience {
         return;
       }
       tmpP.set(...position);
-      tmpQ.setFromEuler(tmpE.set(0, site.tint * 6.28, 0));
+      tmpQ.setFromEuler(tmpE.set(0, site.tint * 6.28, 0, "XYZ"));
       tmpS.setScalar(r);
       tmpM.compose(tmpP, tmpQ, tmpS);
       if (axis.lost) tmpM.premultiply(lostMatrix);
@@ -441,7 +445,8 @@ class TreeExperienceImpl implements FourDExperience {
   private poseAcorns(t: number, lostMatrix: THREE.Matrix4): void {
     const nuts = this.nuts!;
     const crop = acornsAt(t);
-    const size = 0.026 * THREE.MathUtils.clamp(frameSize(t) / 4, 1, 4.5);
+    // Drawn larger than life on a big tree, or a mast crop would be invisible from the default view.
+    const size = 0.026 * THREE.MathUtils.clamp(frameSize(t) / 2.2, 1, 8);
     tmpC.copy(C.acornGreen).lerp(C.acornRipe, crop.ripe);
     const sites = SKELETON.acorns;
     for (let i = 0; i < MAX_TREE_ACORNS; i++) {
@@ -450,14 +455,14 @@ class TreeExperienceImpl implements FourDExperience {
       const axis = SKELETON.axes[clump.axis];
       const { position, radius } = clumpPose(SKELETON, clump, t);
       // Only on clumps that have grown: an unborn twig's site sits where it will one day reach.
-      const shown = site.rank < crop.onTree && radius > 0.3 * clump.maxRadius && !(axis.lost && t > STORY.storm);
+      const shown = i / MAX_TREE_ACORNS < crop.onTree && radius > 0.3 * clump.maxRadius && !(axis.lost && t > STORY.storm);
       nuts.setColorAt(i, tmpC);
       if (!shown) {
         nuts.setMatrixAt(i, ZERO);
         continue;
       }
-      tmpP.set(...position).addScaledVector(tmpS.set(...site.offset), radius * 0.92);
-      tmpQ.setFromEuler(tmpE.set(Math.PI, site.rank * 40, 0.3));
+      tmpP.set(...position).addScaledVector(tmpS.set(...site.offset), radius);
+      tmpQ.setFromEuler(tmpE.set(Math.PI, site.rank * 40, 0.3, "XYZ"));
       tmpM.compose(tmpP, tmpQ, tmpS.setScalar(size));
       if (axis.lost) tmpM.premultiply(lostMatrix);
       nuts.setMatrixAt(i, tmpM);
@@ -470,7 +475,7 @@ class TreeExperienceImpl implements FourDExperience {
         return;
       }
       tmpP.copy(g.position).setY(g.position.y + size * 0.3);
-      tmpQ.setFromEuler(tmpE.set(Math.PI / 2, g.spin, 0));
+      tmpQ.setFromEuler(tmpE.set(Math.PI / 2, g.spin, 0, "XYZ"));
       tmpM.compose(tmpP, tmpQ, tmpS.setScalar(size));
       nuts.setMatrixAt(i, tmpM);
     });

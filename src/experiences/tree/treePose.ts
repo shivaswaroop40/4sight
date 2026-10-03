@@ -17,7 +17,7 @@ import { axisLength, axisRadius, pointAlong, type Axis, type ClumpSite, type Seg
 export const DRAWN_THICKNESS = 1.35;
 
 /** Time an axis has grown to: lost wood stops at the storm. */
-export function growthTime(axis: Axis, t: number): number {
+function growthTime(axis: Axis, t: number): number {
   return axis.lost ? Math.min(t, STORY.storm) : t;
 }
 
@@ -57,7 +57,7 @@ export function segmentPose(skel: Skeleton, seg: Segment, t: number): SegmentPos
  * Wood of the fallen limb rots on the ground: twigs first, then side
  * branches. The main limb stays as a log, which is good news for beetles.
  */
-export function fallenDecay(axis: Axis, t: number): number {
+function fallenDecay(axis: Axis, t: number): number {
   if (!axis.lost || t < STORY.stormLanded) return 1;
   const years = t - STORY.stormLanded;
   if (axis.kind === "twig") return 1 - smoothstep(2, 5, years);

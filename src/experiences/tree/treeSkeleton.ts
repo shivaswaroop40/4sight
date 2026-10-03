@@ -92,7 +92,7 @@ export interface Skeleton {
 
 export const NOTCH_AZIMUTH = 45;
 export const NOTCH_HALF_ANGLE = 38;
-export const TRUNK_LENGTH = 13;
+const TRUNK_LENGTH = 13;
 /** The buried acorn's centre, where the root leaves it, and where the shoot does. */
 export const SEED_CENTER: Vec3 = [0.006, -0.022, 0.006];
 const SEED_ROOT: Vec3 = [0.006, -0.036, 0.006];
@@ -531,8 +531,10 @@ export function generateSkeleton(seed = 1759): Skeleton {
     const n = 2 + Math.floor(rand() * 3);
     for (let k = 0; k < n; k++) {
       const a = rand() * Math.PI * 2;
-      const e = (rand() - 0.65) * Math.PI * 0.8;
-      acorns.push({ clump: i, offset: [Math.cos(a) * Math.cos(e), Math.sin(e), Math.sin(a) * Math.cos(e)], rank: rand() });
+      const e = (rand() - 0.5) * Math.PI * 0.6;
+      // On the surface of the clump, which is flattened underneath like the blob geometry.
+      const y = Math.sin(e) * (e < 0 ? 0.78 : 1);
+      acorns.push({ clump: i, offset: [Math.cos(a) * Math.cos(e) * 1.04, y * 1.04, Math.sin(a) * Math.cos(e) * 1.04], rank: rand() });
     }
   });
   acorns.sort((a, b) => a.rank - b.rank);

@@ -98,7 +98,7 @@ export function timeAtHeight(h: number): number {
  */
 export const TRUNK_RATE = 0.004;
 /** Girth is measured at chest height, 1.3 m above the ground. */
-export const CHEST_HEIGHT = 1.3;
+const CHEST_HEIGHT = 1.3;
 
 /** Trunk radius at height s: the wood there has been growing since the tip passed it. */
 export function trunkRadiusAt(s: number, t: number): number {
@@ -109,6 +109,15 @@ export function trunkRadiusAt(s: number, t: number): number {
 /** Girth at chest height in metres, 0 while the tree is shorter than that. */
 export function girthAt(t: number): number {
   return 2 * Math.PI * trunkRadiusAt(CHEST_HEIGHT, t);
+}
+
+/**
+ * Rings laid down at the base, counting the one forming: it grows from
+ * late April to September and is complete each October, when t is whole.
+ */
+export function ringAge(t: number): number {
+  const year = Math.floor(t);
+  return year + smoothstep(0.5, 0.95, t - year);
 }
 
 /** Complete growth rings at the base: one finishes each autumn. */
@@ -166,7 +175,7 @@ export function cameraScale(t: number): number {
 // fixed table over the slider position:
 //
 //  1. It follows the real calendar while a year spans enough of the slider
-//     (the first two years, where the acorn becomes a seedling).
+//     (the first year and a half, where the acorn becomes a seedling).
 //  2. Everywhere else it is capped at SEASON_CAP cycles per unit of slider,
 //     so a cycle always covers at least about 1/SEASON_CAP of the slider:
 //     two seconds at 1x, half a second at the fastest 4x warp, whatever
@@ -178,11 +187,11 @@ export function cameraScale(t: number): number {
 // It is a pure function of t: t maps to u, u indexes the table.
 
 /** Year fraction of the day the acorn fell (0 = 1 January). Mid October. */
-export const ACORN_FALL_PHASE = 0.79;
+const ACORN_FALL_PHASE = 0.79;
 export const SEASON_CAP = 22;
 const SEASON_SAMPLES = 4096;
 /** The clock is calendar-true up to here. */
-const CALENDAR_UNTIL = 2;
+const CALENDAR_UNTIL = 1.55;
 
 /** Story beats and the time of year each should show. */
 const SEASON_ANCHORS: [number, number][] = [
@@ -325,7 +334,7 @@ export function acornSeason(phase: number): AcornSeason {
 
 // -------------------------------------------------------------------------
 
-export function hash01(x: number): number {
+function hash01(x: number): number {
   const s = Math.sin(x * 127.1 + 311.7) * 43758.5453;
   return s - Math.floor(s);
 }

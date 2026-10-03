@@ -11,6 +11,7 @@ import {
   girthAt,
   heightAt,
   mapping,
+  ringAge,
   ringCount,
   seasonClockAt,
   seasonName,
@@ -20,6 +21,16 @@ import { drawnHeight, segmentPose } from "./treePose";
 import { SKELETON, generateSkeleton } from "./treeSkeleton";
 import { acornsAt, treeStateAt } from "./treeState";
 import { treeExperience } from "./TreeExperience";
+
+function fakeContext(): SceneContext {
+  return {
+    scene: new THREE.Scene(),
+    camera: new THREE.PerspectiveCamera(),
+    renderer: {} as THREE.WebGLRenderer,
+    registerHoverable: () => {},
+    unregisterHoverable: () => {},
+  };
+}
 
 describe("oak time axis", () => {
   it("hits every knot exactly and round-trips inside segments", () => {
@@ -202,9 +213,7 @@ describe("oak hover and camera", () => {
   it("has hover text for every part it registers, and unregisters them all", () => {
     const registered = new Map<THREE.Object3D, string>();
     const context: SceneContext = {
-      scene: new THREE.Scene(),
-      camera: new THREE.PerspectiveCamera(),
-      renderer: {} as THREE.WebGLRenderer,
+      ...fakeContext(),
       registerHoverable: (object, id) => registered.set(object, id),
       unregisterHoverable: (object) => registered.delete(object),
     };
@@ -219,6 +228,55 @@ describe("oak hover and camera", () => {
     treeExperience.dispose();
     expect(registered.size).toBe(0);
     expect(context.scene.children.length).toBe(0);
+  });
+
+  it("draws the same instances at t whatever was drawn before", () => {
+    const scene = new THREE.Scene();
+    treeExperience.mount({ ...fakeContext(), scene });
+    const shown = (o: THREE.Object3D | null): boolean => !o || (o.visible && shown(o.parent));
+    const buffers = () =>
+      scene.children
+        .flatMap((c) => c.getObjectsByProperty("isInstancedMesh", true) as THREE.InstancedMesh[])
+        .filter(shown)
+        .map((m) => `${m.name}:${Array.from(m.instanceMatrix.array).join(",")}`)
+        .join("|");
+    // Acorns lying on the grass with none left on the tree, revisited after the leafy sapling years.
+    let t = STORY.mast;
+    while (!(acornsAt(t).onGround > 0.3 && acornsAt(t).onTree === 0)) t += 0.01;
+    treeExperience.setTime(t);
+    const direct = buffers();
+    treeExperience.setTime(4);
+    treeExperience.setTime(t);
+    expect(buffers()).toBe(direct);
+    treeExperience.dispose();
+  });
+
+  it("hangs far more acorns on the tree in a mast year than a lean one", () => {
+    const scene = new THREE.Scene();
+    treeExperience.mount({ ...fakeContext(), scene });
+    const nuts = scene.getObjectByName("acorns") as THREE.InstancedMesh;
+    const drawn = (t: number) => {
+      treeExperience.setTime(t);
+      let n = 0;
+      for (let i = 0; i < 520; i++) {
+        const m = new THREE.Matrix4();
+        nuts.getMatrixAt(i, m);
+        if (m.elements[0] !== 0) n++;
+      }
+      return n;
+    };
+    let leanTime = 100;
+    while (!(acornsAt(leanTime).onTree > 0.2 && !acornsAt(leanTime).mast)) leanTime += 0.05;
+    const lean = drawn(leanTime);
+    expect(lean).toBeGreaterThan(0);
+    expect(drawn(STORY.mast)).toBeGreaterThan(1.5 * lean);
+    treeExperience.dispose();
+  });
+
+  it("completes the slice's rings when the ring count ticks over", () => {
+    expect(ringAge(150)).toBe(150);
+    expect(ringAge(42.3)).toBe(42);
+    expect(ringAge(42.96)).toBe(43);
   });
 
   it("offers three named views", () => {

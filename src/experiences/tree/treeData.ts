@@ -99,7 +99,7 @@ export const EVENTS: TimelineEvent[] = [
     title: "A mast year",
     when: `Year ${Math.floor(STORY.mast)}`,
     description:
-      "Every few years oaks across a whole region make a huge crop at once. In a mast year a big oak can drop tens of thousands of acorns.",
+      "Every so often oaks across a whole region make a huge crop at once. In a mast year one big oak can drop thousands of acorns.",
     keyPoints: [
       "Jays, squirrels and mice cannot eat them all, so some survive to grow.",
       "In between, most years bring only a light crop.",

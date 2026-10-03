@@ -11,7 +11,7 @@ import { smoothstep } from "../../core/interpolate";
 import { THEME, addOutline, makeToonMaterial } from "../../core/theme";
 import { groundY } from "./treeIsland";
 import { PALETTE } from "./treeMaterials";
-import { STORY, frameSize, heightAt, viewCenter } from "./treeModel";
+import { STORY, frameSize, heightAt, ringAge, viewCenter } from "./treeModel";
 import { DRAWN_THICKNESS } from "./treePose";
 import { buildRingCookie } from "./treeRings";
 import { SEED_CENTER, SKELETON, WOODPECKER_HOLE, axisRadius, pointAlong, timeAtLength } from "./treeSkeleton";
@@ -29,7 +29,7 @@ const Y_AXIS = new THREE.Vector3(0, 1, 0);
 const Z_AXIS = new THREE.Vector3(0, 0, 1);
 
 /** Larger-than-life factor for small things on a big tree. */
-export function propScale(t: number): number {
+function propScale(t: number): number {
   return THREE.MathUtils.clamp(frameSize(t) / 5, 1, 4.2);
 }
 
@@ -297,7 +297,7 @@ function buildSquirrel(): Prop {
 const stormLimb = SKELETON.axes[SKELETON.stormLimb];
 const stormBase = new THREE.Vector3(...stormLimb.points[0]);
 const stormDir = new THREE.Vector3(...stormLimb.points[1]).sub(stormBase).normalize();
-export const STORM_AZIMUTH = THREE.MathUtils.radToDeg(Math.atan2(stormDir.z, stormDir.x));
+const STORM_AZIMUTH = THREE.MathUtils.radToDeg(Math.atan2(stormDir.z, stormDir.x));
 const stormS = stormBase.y;
 /** Limb radius when it broke: the wound is a little wider than the limb. */
 const woundWidth = 2.4 * DRAWN_THICKNESS * axisRadius(stormLimb, stormLimb.birth, STORY.storm);
@@ -540,7 +540,8 @@ function buildFlare(): Prop {
 /**
  * The slice floats out from the trunk along COOKIE_DIRECTION, from the
  * point the camera presets look at, and faces back along it. The "Trunk and
- * rings" preset sits further out on the same line, so it sees the slice face
+ * rings" preset sits further out, a little to the side of that line, so it
+ * sees the slice nearly face
  * on with the trunk behind it.
  */
 const COOKIE_DIRECTION = new THREE.Vector3(
@@ -549,7 +550,7 @@ const COOKIE_DIRECTION = new THREE.Vector3(
   Math.sin(THREE.MathUtils.degToRad(18)),
 ).normalize();
 const COOKIE_DISTANCE = 0.62;
-export const COOKIE_RADIUS = 0.085;
+const COOKIE_RADIUS = 0.085;
 
 function buildCookie(): Prop {
   const cookie = buildRingCookie();
@@ -567,7 +568,7 @@ function buildCookie(): Prop {
     object: g,
     hover: { id: "rings", target: cookie.disc },
     pose(t) {
-      cookie.material.uniforms.uAge.value = Math.max(0, t - STORY.shoot);
+      cookie.material.uniforms.uAge.value = ringAge(t);
       const S = frameSize(t);
       const k = smoothstep(1.0, 1.4, t);
       g.visible = k > 0.001;
