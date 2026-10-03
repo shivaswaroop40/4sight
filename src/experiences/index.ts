@@ -12,10 +12,12 @@ import { mockExperience } from "./mock/mockExperience";
 import { mockLogExperience } from "./mock/mockLogExperience";
 import { iphoneExperience } from "./iphone/IPhoneExperience";
 import { solarSystemExperience } from "./solar-system/SolarSystemExperience";
+import { heartExperience } from "./heart/HeartExperience";
 
 const real: FourDExperience[] = [
   iphoneExperience,
   solarSystemExperience,
+  heartExperience,
 ];
 
 const mocks: FourDExperience[] = [mockExperience, mockLogExperience];
