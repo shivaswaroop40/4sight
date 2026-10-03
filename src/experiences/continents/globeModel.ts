@@ -220,6 +220,43 @@ export function samplePath(path: LonLat[], spacing: number): THREE.Vector3[] {
   return points;
 }
 
+/**
+ * Today's coastlines as dashed ink lines floating just above the tallest
+ * land, so they read over both the ocean and the drifting blocks.
+ */
+export function coastlineGhosts(outlines: readonly Polygon[]): THREE.Group {
+  const group = new THREE.Group();
+  group.name = "today-coastlines";
+  const material = new THREE.LineDashedMaterial({
+    color: THEME.ink,
+    dashSize: 0.024,
+    gapSize: 0.016,
+    transparent: true,
+    opacity: 0.9,
+    depthWrite: false,
+  });
+  // Lines above the surface peek over the horizon from the far side; fade them out toward the limb.
+  material.onBeforeCompile = (shader) => {
+    shader.vertexShader = shader.vertexShader
+      .replace("void main() {", "varying float vFacing;\nvoid main() {")
+      .replace(
+        "#include <project_vertex>",
+        "#include <project_vertex>\nvec3 world = (modelMatrix * vec4(position, 1.0)).xyz;\nvFacing = dot(normalize(world), normalize(cameraPosition - world));",
+      );
+    shader.fragmentShader = shader.fragmentShader
+      .replace("void main() {", "varying float vFacing;\nvoid main() {")
+      .replace("#include <opaque_fragment>", "diffuseColor.a *= smoothstep(0.05, 0.3, vFacing);\n#include <opaque_fragment>");
+  };
+  for (const [coast] of outlines) {
+    const points = samplePath([...coast, coast[0]], 0.01).map((p) => p.multiplyScalar(1.03));
+    const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), material);
+    line.computeLineDistances();
+    line.raycast = () => {};
+    group.add(line);
+  }
+  return group;
+}
+
 export function oceanMesh(): THREE.Mesh {
   const ocean = new THREE.Mesh(new THREE.SphereGeometry(1, 96, 64), makeToonMaterial("#8FC6C6"));
   ocean.name = "ocean";

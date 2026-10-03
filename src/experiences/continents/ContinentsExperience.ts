@@ -3,15 +3,19 @@
 // Continental drift on a cartoon globe, from Pangaea 250 million years ago
 // to today. Every block is built once from its present-day outline; setTime
 // only turns each block to its reconstructed orientation, grows or wears
-// down the mountains, freezes the poles, and moves the ocean names.
+// down the mountains, freezes the poles, and moves the ocean names. A
+// filter overlays today's coastlines, so you can see how far each block has
+// still to go.
 
 import * as THREE from "three";
+import { defaultFilterState } from "../../core/filters";
 import { linearMapping } from "../../core/mappings";
 import { YEAR_SECONDS } from "../../core/timescale";
 import { THEME, addOutline, disposeObject, makeToonMaterial } from "../../core/theme";
 import { eventAt } from "../../core/Timeline";
 import type {
   CameraPreset,
+  FilterState,
   FourDExperience,
   ObjectMetadata,
   SceneContext,
@@ -31,7 +35,16 @@ import {
   rotationAt,
   type ContinentsState,
 } from "./ContinentsState";
-import { equatorRing, inkMaterial, labelSprite, landGeometry, oceanMesh, peakGeometry, samplePath } from "./globeModel";
+import {
+  coastlineGhosts,
+  equatorRing,
+  inkMaterial,
+  labelSprite,
+  landGeometry,
+  oceanMesh,
+  peakGeometry,
+  samplePath,
+} from "./globeModel";
 import { GREATER_INDIA, OUTLINES } from "./outlines";
 import { toVec } from "./sphere";
 
@@ -53,6 +66,15 @@ export const CAMERA_PRESETS: CameraPreset[] = [
   view("indian", "Indian Ocean", 72, -12),
   view("pacific", "Pacific", -160, 8),
   view("south-pole", "South Pole", 30, -78),
+];
+
+const FILTERS: VisualizationFilter[] = [
+  {
+    id: "today-coastlines",
+    name: "Today's coastlines",
+    defaultOn: false,
+    description: "Dashed outlines of where the continents sit today",
+  },
 ];
 
 const toward = new THREE.Vector3();
@@ -99,10 +121,13 @@ class ContinentsExperienceImpl implements FourDExperience {
   private blocks: BlockView[] = [];
   private peaks: Peak[] = [];
   private labelSprites = new Map<string, THREE.Sprite>();
+  private ghosts: THREE.Group | null = null;
+  private filters: FilterState = defaultFilterState(FILTERS);
   private time = -OLDEST_MA;
 
   mount(ctx: SceneContext): void {
     this.ctx = ctx;
+    this.filters = defaultFilterState(FILTERS);
     const root = new THREE.Group();
     root.name = "continents";
     this.root = root;
@@ -181,6 +206,9 @@ class ContinentsExperienceImpl implements FourDExperience {
       this.labelSprites.set(def.id, sprite);
     }
 
+    this.ghosts = coastlineGhosts(BLOCKS.flatMap((b) => OUTLINES[b.id]));
+    root.add(this.ghosts);
+
     ctx.scene.add(root);
     this.setTime(this.time);
   }
@@ -190,6 +218,7 @@ class ContinentsExperienceImpl implements FourDExperience {
     if (!this.root) return;
     // Writes straight into scene objects so playback allocates nothing; getState builds the same values as plain data.
     const ma = maAt(time);
+    if (this.ghosts) this.ghosts.visible = this.filters["today-coastlines"];
     for (const view of this.blocks) {
       rotationAt(view.def.id, ma, view.group.quaternion);
       const ice = view.def.ice ? profileAt(view.def.ice, ma) : 0;
@@ -245,7 +274,11 @@ class ContinentsExperienceImpl implements FourDExperience {
   }
 
   getAvailableFilters(): VisualizationFilter[] {
-    return [];
+    return FILTERS;
+  }
+
+  setFilters(state: FilterState): void {
+    this.filters = state;
   }
 
   getCameraPresets(): CameraPreset[] {
@@ -271,6 +304,7 @@ class ContinentsExperienceImpl implements FourDExperience {
     this.blocks = [];
     this.peaks = [];
     this.labelSprites.clear();
+    this.ghosts = null;
     this.root = null;
     this.ocean = null;
     this.light = null;

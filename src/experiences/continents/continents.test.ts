@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { fakeSceneContext } from "../../renderer/fakeSceneContext";
 import { spanClock } from "../../core/analogy";
 import { YEAR_SECONDS } from "../../core/timescale";
 import { EVENTS } from "./continentsData";
@@ -123,9 +124,24 @@ describe("continents hover and views", () => {
     expect(exp.getHoveredObject("nowhere")).toBeNull();
   });
 
-  it("offers the four ocean views and no filters", () => {
+  it("offers the four ocean views and a today's-coastlines overlay, off by default", () => {
     expect(exp.getCameraPresets().map((p) => p.name)).toEqual(["Atlantic", "Indian Ocean", "Pacific", "South Pole"]);
-    expect(exp.getAvailableFilters()).toEqual([]);
+    expect(exp.getAvailableFilters().map((f) => [f.id, f.name, f.defaultOn])).toEqual([
+      ["today-coastlines", "Today's coastlines", false],
+    ]);
+  });
+
+  it("draws today's coastline of every block when the overlay is on", () => {
+    const ctx = fakeSceneContext();
+    exp.mount(ctx);
+    const ghosts = ctx.scene.getObjectByName("today-coastlines")!;
+    exp.setTime(-150);
+    expect(ghosts.visible).toBe(false);
+    exp.setFilters!({ "today-coastlines": true });
+    exp.setTime(-150);
+    expect(ghosts.visible).toBe(true);
+    expect(ghosts.children).toHaveLength(Object.values(OUTLINES).flat().length);
+    exp.dispose();
   });
 });
 
