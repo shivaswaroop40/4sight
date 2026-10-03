@@ -193,12 +193,13 @@ export function strataMaterial(radius: number, dome: number): THREE.MeshToonMate
         if (depth > 0.6 + 0.08 * wob) col = ${c(PALETTE.subsoil)};
         if (depth > 2.4 + 0.3 * wob) col = ${c(PALETTE.clay)};
         if (depth > 4.4 + 0.4 * wob) col = ${c(PALETTE.rock)};
-        if (depth > 0.05) {
-          vec3 ink = ${c("#4A3528")};
-          col = stone(col, vStrata, 0.035, 0.6, col * 0.84, col * 0.84);
-          col = stone(col, vStrata + 3.1, 0.06, 0.84, ${c(PALETTE.rock)}, ink);
-          if (depth > 0.6) col = stone(col, vStrata + 7.7, 0.7, 0.86, ${c("#D8C8AE")}, ink);
-        }
+        // stone() takes fwidth, which is undefined inside a branch some pixels
+        // of a quad skip, so every layer is computed and the depth picks one.
+        vec3 ink = ${c("#4A3528")};
+        vec3 pebbled = stone(col, vStrata, 0.035, 0.6, col * 0.84, col * 0.84);
+        pebbled = stone(pebbled, vStrata + 3.1, 0.06, 0.84, ${c(PALETTE.rock)}, ink);
+        vec3 boulders = stone(pebbled, vStrata + 7.7, 0.7, 0.86, ${c("#D8C8AE")}, ink);
+        if (depth > 0.05) col = depth > 0.6 ? boulders : pebbled;
         vec4 diffuseColor = vec4(col, opacity);`,
       );
   };
