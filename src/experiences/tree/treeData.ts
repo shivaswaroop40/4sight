@@ -6,7 +6,7 @@
 
 import type { ObjectMetadata, TimelineEvent } from "../../core/types";
 import { STORY, formatAge, girthAt, heightAt, ringCount, trunkRadiusAt } from "./treeModel";
-import { WILDLIFE_WINDOWS, treeStateAt } from "./treeState";
+import { treeStateAt } from "./treeState";
 
 export const EVENTS: TimelineEvent[] = [
   {
@@ -37,21 +37,14 @@ export const EVENTS: TimelineEvent[] = [
     category: "seed",
   },
   {
-    id: "shoot",
-    time: STORY.shoot,
-    title: "A shoot breaks the soil",
-    when: "Year 1 · April",
-    description: "In spring a shoot pushes up out of the buried acorn. The empty-looking shell stays below, still feeding it.",
-    keyPoints: ["By now the root is several times longer than the shoot."],
-    category: "seedling",
-  },
-  {
     id: "first-leaves",
-    time: STORY.firstLeaves,
-    title: "First true leaves",
-    when: "Year 1 · May",
-    description: "The first lobed leaves unfold. From now on the seedling feeds itself on sunlight.",
+    time: STORY.shoot,
+    title: "Shoot up, first true leaves",
+    when: "Year 1 · April and May",
+    description:
+      "In spring a shoot pushes up out of the buried acorn and unfolds the first lobed leaves. From now on the seedling feeds itself on sunlight.",
     keyPoints: [
+      "The acorn stays below ground, still feeding the seedling.",
       "English oak leaves have four or five pairs of rounded lobes and almost no stalk.",
       "A first-year seedling is usually 10 to 20 cm tall.",
     ],
@@ -67,24 +60,13 @@ export const EVENTS: TimelineEvent[] = [
     category: "seedling",
   },
   {
-    id: "rabbit",
-    time: WILDLIFE_WINDOWS.rabbit[0],
-    title: "Hungry visitors",
-    when: "Year 2",
-    description: "Rabbits and deer love tender oak shoots and bark. For the next few years, being eaten is the biggest danger.",
-    keyPoints: [
-      "Below ground the root system is already bigger than the shoot.",
-      "A browsed seedling can resprout from its root, if it is not eaten too often.",
-    ],
-    category: "seedling",
-  },
-  {
     id: "sapling",
     time: STORY.sapling,
     title: "Sapling",
     when: `Year ${Math.floor(STORY.sapling)}`,
     description: `About ${heightAt(STORY.sapling).toFixed(1)} m tall, with leafy branches all the way down the stem.`,
     keyPoints: [
+      "Rabbits and deer nibbling shoots and bark are the big danger now.",
       "In good light it grows 30 to 50 cm a year.",
       "Oak needs light: seedlings in deep shade rarely make it.",
     ],

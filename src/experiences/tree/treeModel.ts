@@ -16,8 +16,6 @@ export const STORY = {
   radicle: 0.08,
   /** The shoot breaks the soil in spring, about April. */
   shoot: 0.52,
-  /** First true leaves unfold, May. */
-  firstLeaves: 0.62,
   sapling: 6,
   crownLift: 25,
   firstAcorns: 40,

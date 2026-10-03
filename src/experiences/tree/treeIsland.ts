@@ -119,7 +119,8 @@ export function buildGrass(seed = 7): THREE.InstancedMesh {
   blades.forEach((b) => b.dispose());
 
   const count = 1400;
-  const mesh = new THREE.InstancedMesh(tuft, makeToonMaterial("#ffffff"), count);
+  // A little self-light keeps distant tufts from reading as dark specks.
+  const mesh = new THREE.InstancedMesh(tuft, makeToonMaterial("#ffffff", { emissive: "#2E3A1C" }), count);
   mesh.name = "grass";
   const m = new THREE.Matrix4();
   const q = new THREE.Quaternion();

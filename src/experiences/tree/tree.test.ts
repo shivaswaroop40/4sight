@@ -136,10 +136,8 @@ describe("oak story", () => {
     expect(EVENTS.map((e) => e.id)).toEqual([
       "acorn",
       "radicle",
-      "shoot",
       "first-leaves",
       "marcescence",
-      "rabbit",
       "sapling",
       "crown-lift",
       "first-acorns",

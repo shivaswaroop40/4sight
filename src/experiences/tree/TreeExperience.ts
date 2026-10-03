@@ -355,6 +355,12 @@ class TreeExperienceImpl implements FourDExperience {
       // Leaves on the torn-off limb wilt brown before they shrivel.
       const wilt = axis.lost ? smoothstep(STORY.storm, STORY.stormLanded + 0.3, t) : 0;
       const r = radius * Math.pow(leaf.amount * leafy(axis, t), 0.6) * clumpShow;
+      // Deeper green low in the crown, lighter on top: cheap depth.
+      const lift = THREE.MathUtils.clamp(position[1] / Math.max(1, S), 0, 1);
+      tmpC.copy(leafColor).lerp(C.summerDeep, (1 - lift) * 0.4 * (1 - leaf.turn));
+      tmpC.offsetHSL((site.tint - 0.5) * 0.03, 0, (site.tint - 0.5) * 0.07);
+      if (wilt > 0) tmpC.lerp(C.dead, wilt);
+      clumps.setColorAt(i, tmpC);
       if (r < 0.004) {
         clumps.setMatrixAt(i, ZERO);
         return;
@@ -365,12 +371,6 @@ class TreeExperienceImpl implements FourDExperience {
       tmpM.compose(tmpP, tmpQ, tmpS);
       if (axis.lost) tmpM.premultiply(lostMatrix);
       clumps.setMatrixAt(i, tmpM);
-      // Deeper green low in the crown, lighter on top: cheap depth.
-      const lift = THREE.MathUtils.clamp(position[1] / Math.max(1, S), 0, 1);
-      tmpC.copy(leafColor).lerp(C.summerDeep, (1 - lift) * 0.4 * (1 - leaf.turn));
-      tmpC.offsetHSL((site.tint - 0.5) * 0.03, 0, (site.tint - 0.5) * 0.07);
-      if (wilt > 0) tmpC.lerp(C.dead, wilt);
-      clumps.setColorAt(i, tmpC);
     });
     clumps.instanceMatrix.needsUpdate = true;
     clumps.instanceColor!.needsUpdate = true;
@@ -390,6 +390,8 @@ class TreeExperienceImpl implements FourDExperience {
       const onShoot = site.s <= len && site.s >= shootStart - 0.02;
       const grow = smoothstep(0, 0.03, len - site.s);
       const k = onShoot ? leaf.amount * leafy(axis, t) * standing(axis, t) * leafShow * grow : 0;
+      tmpC.copy(leafColor).offsetHSL(0, 0, (site.size - 1) * 0.15);
+      leaves.setColorAt(i, tmpC);
       if (k < 0.01) {
         leaves.setMatrixAt(i, ZERO);
         return;
@@ -399,8 +401,6 @@ class TreeExperienceImpl implements FourDExperience {
       tmpS.setScalar(leafSize * site.size * k);
       tmpM.compose(tmpP, tmpQ, tmpS);
       leaves.setMatrixAt(i, tmpM);
-      tmpC.copy(leafColor).offsetHSL(0, 0, (site.size - 1) * 0.15);
-      leaves.setColorAt(i, tmpC);
     });
     leaves.instanceMatrix.needsUpdate = true;
     leaves.instanceColor!.needsUpdate = true;
@@ -451,6 +451,7 @@ class TreeExperienceImpl implements FourDExperience {
       const { position, radius } = clumpPose(SKELETON, clump, t);
       // Only on clumps that have grown: an unborn twig's site sits where it will one day reach.
       const shown = site.rank < crop.onTree && radius > 0.5 * clump.maxRadius && !(axis.lost && t > STORY.storm);
+      nuts.setColorAt(i, tmpC);
       if (!shown) {
         nuts.setMatrixAt(i, ZERO);
         continue;
@@ -460,10 +461,10 @@ class TreeExperienceImpl implements FourDExperience {
       tmpM.compose(tmpP, tmpQ, tmpS.setScalar(size));
       if (axis.lost) tmpM.premultiply(lostMatrix);
       nuts.setMatrixAt(i, tmpM);
-      nuts.setColorAt(i, tmpC);
     }
     this.groundAcorns.forEach((g, j) => {
       const i = MAX_TREE_ACORNS + j;
+      nuts.setColorAt(i, C.acornRipe);
       if (g.rank >= crop.onGround) {
         nuts.setMatrixAt(i, ZERO);
         return;
@@ -472,7 +473,6 @@ class TreeExperienceImpl implements FourDExperience {
       tmpQ.setFromEuler(tmpE.set(Math.PI / 2, g.spin, 0));
       tmpM.compose(tmpP, tmpQ, tmpS.setScalar(size));
       nuts.setMatrixAt(i, tmpM);
-      nuts.setColorAt(i, C.acornRipe);
     });
     nuts.instanceMatrix.needsUpdate = true;
     nuts.instanceColor!.needsUpdate = true;
