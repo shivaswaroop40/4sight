@@ -253,6 +253,7 @@ function ClusterFlag({
         style={{ left: `${cluster.u * 100}%` }}
         title={cluster.items.map((m) => `${m.event.title} · ${m.event.when}`).join("\n")}
         aria-label={`${cluster.items.length} events: ${cluster.items.map((m) => m.event.title).join("; ")}`}
+        aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={open ? listId : undefined}
         onClick={() => setOpenId(open ? null : first.event.id)}
@@ -277,19 +278,27 @@ function ClusterFlag({
           ref={listRef}
           id={listId}
           className="card flaglist"
-          role="group"
+          role="menu"
           aria-label="Events here"
           onKeyDown={(e) => {
             if (e.key === "Escape") {
               e.preventDefault();
               close();
+              return;
             }
+            const items = Array.from(e.currentTarget.querySelectorAll<HTMLButtonElement>('[role="menuitem"]'));
+            const i = items.indexOf(document.activeElement as HTMLButtonElement);
+            const next = { ArrowDown: i + 1, ArrowRight: i + 1, ArrowUp: i - 1, ArrowLeft: i - 1, Home: 0, End: -1 }[e.key];
+            if (next === undefined) return;
+            e.preventDefault();
+            items.at(next % items.length)?.focus();
           }}
         >
           {cluster.items.map((m) => (
             <button
               key={m.event.id}
               type="button"
+              role="menuitem"
               className="flaglist__item"
               data-u={m.u}
               data-color={m.color}
