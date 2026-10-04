@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { describe, expect, it } from "vitest";
 import { spanClock } from "../../core/analogy";
-import { fakeSceneContext } from "../../renderer/fakeSceneContext";
+import { fakeSceneContext } from "../../test/fakeSceneContext";
 import { YEAR_SECONDS } from "../../core/timescale";
 import { knotMapping } from "../../core/mappings";
 import { buildCosmicWeb } from "./cosmicWeb";

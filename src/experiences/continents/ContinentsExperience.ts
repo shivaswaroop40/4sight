@@ -8,13 +8,14 @@
 // still to go.
 
 import * as THREE from "three";
-import { defaultFilterState } from "../../core/filters";
+import { isFilterOn } from "../../core/filters";
 import { linearMapping } from "../../core/mappings";
 import { YEAR_SECONDS } from "../../core/timescale";
 import { THEME, addOutline, disposeObject, makeToonMaterial } from "../../core/theme";
 import { eventAt } from "../../core/Timeline";
 import type {
   CameraPreset,
+  ExperienceFilters,
   FilterState,
   FourDExperience,
   ObjectMetadata,
@@ -122,12 +123,18 @@ class ContinentsExperienceImpl implements FourDExperience {
   private peaks: Peak[] = [];
   private labelSprites = new Map<string, THREE.Sprite>();
   private ghosts: THREE.Group | null = null;
-  private filters: FilterState = defaultFilterState(FILTERS);
+  private filterState: FilterState = {};
+
+  filters: ExperienceFilters = {
+    options: FILTERS,
+    set: (state: FilterState) => {
+      this.filterState = state;
+    },
+  };
   private time = -OLDEST_MA;
 
   mount(ctx: SceneContext): void {
     this.ctx = ctx;
-    this.filters = defaultFilterState(FILTERS);
     const root = new THREE.Group();
     root.name = "continents";
     this.root = root;
@@ -218,7 +225,7 @@ class ContinentsExperienceImpl implements FourDExperience {
     if (!this.root) return;
     // Writes straight into scene objects so playback allocates nothing; getState builds the same values as plain data.
     const ma = maAt(time);
-    if (this.ghosts) this.ghosts.visible = this.filters["today-coastlines"];
+    if (this.ghosts) this.ghosts.visible = isFilterOn(FILTERS, this.filterState, "today-coastlines");
     for (const view of this.blocks) {
       rotationAt(view.def.id, ma, view.group.quaternion);
       const ice = view.def.ice ? profileAt(view.def.ice, ma) : 0;
@@ -273,14 +280,6 @@ class ContinentsExperienceImpl implements FourDExperience {
       category: "plate",
       properties: { "Centre latitude": formatLatitude(block.centre.lat), Speed: formatSpeed(block.speed) },
     };
-  }
-
-  getAvailableFilters(): VisualizationFilter[] {
-    return FILTERS;
-  }
-
-  setFilters(state: FilterState): void {
-    this.filters = state;
   }
 
   getCameraPresets(): CameraPreset[] {

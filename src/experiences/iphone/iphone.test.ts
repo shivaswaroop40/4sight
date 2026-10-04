@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { describe, expect, it } from "vitest";
-import { fakeSceneContext } from "../../renderer/fakeSceneContext";
+import { fakeSceneContext } from "../../test/fakeSceneContext";
 import { IPHONE_DATA_FALLBACK } from "./iphoneData";
 import { componentPose, eyeOpenness, faceOpacity, hopPose, iphoneState, screenOpacity } from "./IPhoneState";
 import { iphoneExperience } from "./IPhoneExperience";
@@ -92,7 +92,7 @@ describe("iPhone events and presets", () => {
 
 describe("iPhone X-ray", () => {
   it("offers one X-ray switch, off by default", () => {
-    expect(iphoneExperience.getAvailableFilters().map((f) => [f.id, f.name, f.group, f.defaultOn])).toEqual([
+    expect(iphoneExperience.filters!.options.map((f) => [f.id, f.name, f.group, f.defaultOn])).toEqual([
       ["xray", "X-ray", undefined, false],
     ]);
   });
@@ -104,17 +104,17 @@ describe("iPhone X-ray", () => {
     const front: [THREE.Vector3Tuple, THREE.Vector3Tuple] = [[0, 0, 15], [0, 0, 0]];
     const back: [THREE.Vector3Tuple, THREE.Vector3Tuple] = [[0, 0, -15], [0, 0, 0]];
 
-    iphoneExperience.setFilters!({ xray: false });
+    iphoneExperience.filters!.set({ xray: false });
     iphoneExperience.setTime(1);
     expect([glass.opacity, glass.transparent]).toEqual([1, false]);
     expect([ctx.hoverAt(...front), ctx.hoverAt(...back)]).toEqual(["display", "back-glass"]);
 
-    iphoneExperience.setFilters!({ xray: true });
+    iphoneExperience.filters!.set({ xray: true });
     iphoneExperience.setTime(1);
     expect([glass.opacity, glass.transparent]).toEqual([0.16, true]);
     expect([ctx.hoverAt(...front), ctx.hoverAt(...back)]).toEqual(["battery", "battery"]);
 
-    iphoneExperience.setFilters!({ xray: false });
+    iphoneExperience.filters!.set({ xray: false });
     iphoneExperience.setTime(1);
     expect([glass.opacity, glass.transparent]).toEqual([1, false]);
     expect(ctx.hoverAt(...front)).toBe("display");
@@ -124,7 +124,7 @@ describe("iPhone X-ray", () => {
   it("keeps the frame solid, so the phone keeps its ink silhouette", () => {
     const ctx = fakeSceneContext();
     iphoneExperience.mount(ctx);
-    iphoneExperience.setFilters!({ xray: true });
+    iphoneExperience.filters!.set({ xray: true });
     iphoneExperience.setTime(1);
     const band = ctx.scene.getObjectByName("frame")!.children[0] as THREE.Mesh;
     expect((band.material as THREE.Material).opacity).toBe(1);

@@ -4,7 +4,7 @@ This is the one thing all three developers build together in Phase 1 and then fr
 
 The rule that makes everything else work:
 
-> The scene is a pure function of `(t, filter state)`. `setTime(t)` renders the scene for `t` under the filter state last passed to `setFilters`. Calling it twice with the same `t` and the same filter state produces the same scene. It never reads the previous time, never accumulates, never plays an animation. Scrubbing, reverse, jumping, and warping all fall out of this one rule for free.
+> The scene is a pure function of `(t, filter state)`. `setTime(t)` renders the scene for `t` under the filter state last passed to `filters.set`. Calling it twice with the same `t` and the same filter state produces the same scene. It never reads the previous time, never accumulates, never plays an animation. Scrubbing, reverse, jumping, and warping all fall out of this one rule for free.
 
 ## Time model
 
@@ -112,8 +112,21 @@ export interface VisualizationFilter {
   description?: string;
 }
 
-/** Which filters are on, by id. View state owned by the shell. */
+/** Which filters are on, by id. View state owned by the shell. Read it with isFilterOn (core/filters.ts). */
 export type FilterState = Readonly<Record<string, boolean>>;
+
+/** An experience's filters. Offering filters and taking their state come together. */
+export interface ExperienceFilters {
+  /** Display order. Ids are unique; a group has exactly one option with defaultOn (see filterProblems). */
+  readonly options: readonly VisualizationFilter[];
+  /**
+   * Stores the state. It does not render: the shell calls setTime(t) right
+   * after, and setTime(t) renders the scene for t under the stored state. It
+   * may flip pipeline flags (transparent, depthWrite, raycast) when a value
+   * changes, but must not depend on time.
+   */
+  set(state: FilterState): void;
+}
 
 export type CameraMode = "orbit" | "free" | "follow" | "overview";
 
@@ -164,13 +177,8 @@ export interface FourDExperience {
   getState(time: number): unknown;
   getCurrentEvent(time: number): TimelineEvent | null;
   getHoveredObject(id: string): ObjectMetadata | null;
-  getAvailableFilters(): VisualizationFilter[];
-  /**
-   * Stores the filter state. Required when getAvailableFilters() returns any.
-   * It does not render: the shell calls setTime(t) right after, and setTime(t)
-   * renders the scene for t under the stored filter state.
-   */
-  setFilters?(state: FilterState): void;
+  /** The filters this experience offers and how it takes their state. Leave unset when it has none. */
+  filters?: ExperienceFilters;
   getCameraPresets(): CameraPreset[];
   /**
    * Optional multiplier on the preset camera's distance at time t, for scenes
@@ -195,11 +203,13 @@ export interface FourDExperience {
 
 A filter changes how the scene is drawn, never what happens in it: hide the gas and dust, turn the casing to X-ray. The shell owns which filters are on. The experience declares its filters and renders under whatever state it is handed.
 
-- `getAvailableFilters()` lists them. Return the same array every call. An experience with none returns `[]` and leaves out `setFilters`.
-- Ungrouped filters are switches. Filters that share a `group` are radio options, and the group name is shown as their heading. Exactly one option in a group has `defaultOn: true`.
-- `setFilters(state)` only stores the state. The shell then calls `setTime(t)` with the current time, and `setTime` draws the scene for `t` under that state. Toggling a filter while paused updates the frame at once, and scrubbing keeps it applied.
-- On mount the shell passes the defaults (`defaultFilterState` in `src/core/filters.ts`) before the first `setTime`. Switching experiences resets to the new experience's defaults.
-- Keep it cheap. Flip material flags such as `transparent` and `depthWrite` only when a filter value changes, and set opacity and visibility in `setTime`.
+- `filters` is one optional member, so an experience either offers filters and takes their state, or has neither. Leave it out when there are none.
+- `filters.options` lists them in display order. Keep it the same array for the life of the experience. Ids are unique.
+- Ungrouped filters are switches. Filters that share a `group` are radio options, and the group name is shown as their heading. Exactly one option in a group has `defaultOn: true`. In development the shell refuses to mount an experience that breaks these rules (`filterProblems`), and a test checks every registered experience.
+- `filters.set(state)` only stores the state. The shell then calls `setTime(t)` with the current time, and `setTime` draws the scene for `t` under that state. Toggling a filter while paused updates the frame at once, and scrubbing keeps it applied.
+- `set` may flip pipeline flags such as `transparent`, `depthWrite` or a mesh's `raycast` when a value changes, but must not depend on time. Opacity, visibility and uniforms that vary with `t` are set in `setTime`.
+- Read the state with `isFilterOn(options, state, id)`. A state that leaves a filter out means its default.
+- On mount the shell passes the defaults (`defaultFilterState`) before the first `setTime`. Switching experiences resets to the new experience's defaults.
 
 ```ts
 // src/core/filters.ts
@@ -207,6 +217,10 @@ export function defaultFilterState(filters: readonly VisualizationFilter[]): Fil
 /** Ungrouped: flip. Grouped: select id and clear the rest of its group; picking the selected option keeps it on. */
 export function toggleFilter(filters: readonly VisualizationFilter[], state: FilterState, id: string): FilterState;
 export function isDefaultFilterState(filters: readonly VisualizationFilter[], state: FilterState): boolean;
+/** Whether filter `id` is on. A state that leaves it out means its default. */
+export function isFilterOn(filters: readonly VisualizationFilter[], state: FilterState, id: string): boolean;
+/** What breaks the filter rules, one sentence each. Empty when the filters are valid. */
+export function filterProblems(filters: readonly VisualizationFilter[]): string[];
 ```
 
 ## Helpers Shiv ships alongside the types
@@ -255,7 +269,6 @@ export const mockExperience: FourDExperience = {
   getState(t) { return { position: /* same math */ }; },
   getCurrentEvent(t) { return eventAt(this.events, t); },
   getHoveredObject(id) { return id === "cube" ? { id, name: "Cube", description: "Test object" } : null; },
-  getAvailableFilters() { return []; },
   getCameraPresets() { return []; },
   reset() {},
   dispose() {},

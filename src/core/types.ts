@@ -6,7 +6,7 @@
 // The rule that makes everything else work:
 //
 //   The scene is a pure function of (t, filter state). setTime(t) renders
-//   the scene for t under the filter state last passed to setFilters.
+//   the scene for t under the filter state last passed to filters.set.
 //   Calling it twice with the same t and the same filter state produces the
 //   same scene. It never reads the previous time, never accumulates, never
 //   plays an animation. Scrubbing, reverse, jumping, and warping all fall
@@ -97,8 +97,21 @@ export interface VisualizationFilter {
   description?: string;
 }
 
-/** Which filters are on, by id. View state owned by the shell. */
+/** Which filters are on, by id. View state owned by the shell. Read it with isFilterOn (core/filters.ts). */
 export type FilterState = Readonly<Record<string, boolean>>;
+
+/** An experience's filters. Offering filters and taking their state come together. */
+export interface ExperienceFilters {
+  /** Display order. Ids are unique; a group has exactly one option with defaultOn (see filterProblems). */
+  readonly options: readonly VisualizationFilter[];
+  /**
+   * Stores the state. It does not render: the shell calls setTime(t) right
+   * after, and setTime(t) renders the scene for t under the stored state. It
+   * may flip pipeline flags (transparent, depthWrite, raycast) when a value
+   * changes, but must not depend on time.
+   */
+  set(state: FilterState): void;
+}
 
 export type CameraMode = "orbit" | "free" | "follow" | "overview";
 
@@ -153,13 +166,8 @@ export interface FourDExperience {
   getState(time: number): unknown;
   getCurrentEvent(time: number): TimelineEvent | null;
   getHoveredObject(id: string): ObjectMetadata | null;
-  getAvailableFilters(): VisualizationFilter[];
-  /**
-   * Stores the filter state. Required when getAvailableFilters() returns any.
-   * It does not render: the shell calls setTime(t) right after, and setTime(t)
-   * renders the scene for t under the stored filter state.
-   */
-  setFilters?(state: FilterState): void;
+  /** The filters this experience offers and how it takes their state. Leave unset when it has none. */
+  filters?: ExperienceFilters;
   getCameraPresets(): CameraPreset[];
   /**
    * Optional multiplier on the preset camera's distance at time t, for scenes

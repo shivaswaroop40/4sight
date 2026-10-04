@@ -17,8 +17,9 @@ export function defaultFilterState(filters: readonly VisualizationFilter[]): Fil
 export function toggleFilter(filters: readonly VisualizationFilter[], state: FilterState, id: string): FilterState {
   const target = filters.find((f) => f.id === id);
   if (!target) return state;
-  if (target.group === undefined) return { ...state, [id]: !state[id] };
-  if (state[id]) return state;
+  const on = isFilterOn(filters, state, id);
+  if (target.group === undefined) return { ...state, [id]: !on };
+  if (on) return state;
   const next: Record<string, boolean> = { ...state };
   for (const f of filters) {
     if (f.group === target.group) next[f.id] = f.id === id;
@@ -28,5 +29,26 @@ export function toggleFilter(filters: readonly VisualizationFilter[], state: Fil
 
 /** True when every filter is at its default, so the Filters button needs no "changed" mark. */
 export function isDefaultFilterState(filters: readonly VisualizationFilter[], state: FilterState): boolean {
-  return filters.every((f) => state[f.id] === f.defaultOn);
+  return filters.every((f) => isFilterOn(filters, state, f.id) === f.defaultOn);
+}
+
+/** Whether filter `id` is on. A state that leaves it out means its default. */
+export function isFilterOn(filters: readonly VisualizationFilter[], state: FilterState, id: string): boolean {
+  return state[id] ?? filters.find((f) => f.id === id)?.defaultOn ?? false;
+}
+
+/** What breaks the filter rules, one sentence each: ids are unique and a group has exactly one default. */
+export function filterProblems(filters: readonly VisualizationFilter[]): string[] {
+  const problems: string[] = [];
+  const ids = new Set<string>();
+  const defaults = new Map<string, number>();
+  for (const f of filters) {
+    if (ids.has(f.id)) problems.push(`Filter id "${f.id}" is used twice.`);
+    ids.add(f.id);
+    if (f.group !== undefined) defaults.set(f.group, (defaults.get(f.group) ?? 0) + (f.defaultOn ? 1 : 0));
+  }
+  for (const [group, count] of defaults) {
+    if (count !== 1) problems.push(`Filter group "${group}" has ${count} options on by default, not 1.`);
+  }
+  return problems;
 }

@@ -27,6 +27,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { easeInOutCubic } from "../core/interpolate";
+import { prefersReducedMotion } from "../core/reducedMotion";
 import type { CameraPreset } from "../core/types";
 import { DEFAULT_SUBJECT_ASPECT, REFERENCE_BAND, fitStage, type FreeBand, type StageFit } from "./stageFit";
 
@@ -283,8 +284,4 @@ function visualCentre(object: THREE.Object3D, out: THREE.Vector3): THREE.Vector3
     bounds.union(part.copy(geometry.boundingBox!).applyMatrix4(node.matrixWorld));
   });
   return bounds.isEmpty() ? object.getWorldPosition(out) : bounds.getCenter(out);
-}
-
-function prefersReducedMotion(): boolean {
-  return typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 }

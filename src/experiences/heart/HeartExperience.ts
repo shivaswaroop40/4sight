@@ -8,12 +8,13 @@
 // filters hide the electrical signal and the blood-flow arrows.
 
 import * as THREE from "three";
-import { defaultFilterState } from "../../core/filters";
+import { isFilterOn } from "../../core/filters";
 import { smoothstep, window as windowFn } from "../../core/interpolate";
 import { THEME, addWarmLights, disposeObject } from "../../core/theme";
 import { eventAt } from "../../core/Timeline";
 import type {
   CameraPreset,
+  ExperienceFilters,
   FilterState,
   FourDExperience,
   ObjectMetadata,
@@ -141,7 +142,14 @@ class HeartExperience implements FourDExperience {
   private avHalo: THREE.Sprite | null = null;
   private flow: THREE.InstancedMesh | null = null;
   private electrical: THREE.Group | null = null;
-  private filters: FilterState = defaultFilterState(FILTERS);
+  private filterState: FilterState = {};
+
+  filters: ExperienceFilters = {
+    options: FILTERS,
+    set: (state: FilterState) => {
+      this.filterState = state;
+    },
+  };
   private ecgTrace: THREE.Mesh | null = null;
   private ecgHead: THREE.Mesh | null = null;
   private ecgLabels: Label[] = [];
@@ -156,7 +164,6 @@ class HeartExperience implements FourDExperience {
 
   mount(ctx: SceneContext): void {
     this.ctx = ctx;
-    this.filters = defaultFilterState(FILTERS);
     this.lights = addWarmLights(ctx.scene);
     const root = new THREE.Group();
     root.name = "heartbeat";
@@ -358,9 +365,9 @@ class HeartExperience implements FourDExperience {
     this.deformUniforms.uVentSqueeze.value = params.ventSqueeze;
     this.deformUniforms.uAtrialSqueeze.value = params.atrialSqueeze;
 
-    const electrical = this.filters.electrical;
+    const electrical = isFilterOn(FILTERS, this.filterState, "electrical");
     if (this.electrical) this.electrical.visible = electrical;
-    if (this.flow) this.flow.visible = this.filters["blood-flow"];
+    if (this.flow) this.flow.visible = isFilterOn(FILTERS, this.filterState, "blood-flow");
 
     if (this.body) {
       const a = atrialWave(t);
@@ -487,14 +494,6 @@ class HeartExperience implements FourDExperience {
 
   getHoveredObject(id: string): ObjectMetadata | null {
     return hoverCard(id, this.time);
-  }
-
-  getAvailableFilters(): VisualizationFilter[] {
-    return FILTERS;
-  }
-
-  setFilters(state: FilterState): void {
-    this.filters = state;
   }
 
   getCameraPresets(): CameraPreset[] {

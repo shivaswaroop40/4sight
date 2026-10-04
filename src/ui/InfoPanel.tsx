@@ -4,7 +4,7 @@
 // current event changes. Crossfades between events; collapses to a header.
 // Below 900px it is a bottom sheet (see index.css). While the guided tour
 // holds on an event the card is highlighted and opens, even if collapsed;
-// collapsing it then holds until the next event.
+// collapsing it then holds until the next event or the end of the tour.
 
 import { useId, useState } from "react";
 import type { FourDExperience } from "../core/types";
@@ -16,7 +16,10 @@ export function InfoPanel({ experience }: { experience: FourDExperience }) {
   const event = eventId ? experience.events.find((e) => e.id === eventId) : null;
   const [open, setOpen] = useState(() => !window.matchMedia("(max-width: 899px)").matches);
   const reading = useUi((s) => (s.tour.phase === "reading" ? s.tour.index : null));
+  const touring = useUi((s) => s.tour.phase !== "idle");
   const [closedDuring, setClosedDuring] = useState<number | null>(null);
+  // A collapse holds for one tour: the next tour opens on its first event again.
+  if (!touring && closedDuring !== null) setClosedDuring(null);
   const forced = reading !== null && closedDuring !== reading;
   const shown = open || forced;
   const bodyId = useId();

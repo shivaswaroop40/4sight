@@ -6,13 +6,13 @@
 // The X-ray filter turns the glass translucent so the parts inside show.
 
 import * as THREE from "three";
-import { defaultFilterState } from "../../core/filters";
+import { isFilterOn } from "../../core/filters";
 import { linearMapping } from "../../core/mappings";
 import { addWarmLights, disposeObject } from "../../core/theme";
 import { eventAt } from "../../core/Timeline";
 import type {
   CameraPreset,
-  FilterState,
+  ExperienceFilters,
   FourDExperience,
   ObjectMetadata,
   SceneContext,
@@ -99,7 +99,7 @@ class IPhoneExperienceImpl implements FourDExperience {
 
   mount(context: SceneContext): void {
     this.context = context;
-    this.xray = defaultFilterState(FILTERS).xray;
+    this.xray = isFilterOn(FILTERS, {}, "xray");
     this.lights = addWarmLights(context.scene);
 
     // root pivots at the phone's bottom edge so the hop squashes from the floor.
@@ -215,17 +215,17 @@ class IPhoneExperienceImpl implements FourDExperience {
     };
   }
 
-  getAvailableFilters(): VisualizationFilter[] {
-    return FILTERS;
-  }
+  filters: ExperienceFilters = {
+    options: FILTERS,
+    set: (state) => this.setXray(isFilterOn(FILTERS, state, "xray")),
+  };
 
   /**
    * Flips the casing's blending only when X-ray changes; setTime sets the
    * opacity. The casing also stops catching hover rays, so hovering in X-ray
    * names the part inside.
    */
-  setFilters(state: FilterState): void {
-    const xray = state.xray === true;
+  private setXray(xray: boolean): void {
     if (xray === this.xray) return;
     this.xray = xray;
     for (const m of this.casing.materials) {

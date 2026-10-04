@@ -18,7 +18,6 @@ import type {
   ObjectMetadata,
   SceneContext,
   TimelineEvent,
-  VisualizationFilter,
 } from "../../core/types";
 import { buildCosmicWeb, mulberry32, type Vec3 } from "./cosmicWeb";
 import { UniverseField } from "./UniverseField";
@@ -237,10 +236,6 @@ class UniverseExperience implements FourDExperience {
 
   getHoveredObject(id: string): ObjectMetadata | null {
     return hoverInfo(id, this.current.time);
-  }
-
-  getAvailableFilters(): VisualizationFilter[] {
-    return [];
   }
 
   getCameraPresets(): CameraPreset[] {

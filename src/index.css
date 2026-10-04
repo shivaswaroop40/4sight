@@ -286,6 +286,12 @@ button {
   background: none;
 }
 
+/* Popups sit above the status rail, which shares the top bar's stacking context and wraps under the actions on phones. */
+.menu,
+.filters {
+  z-index: 1;
+}
+
 .menu {
   position: absolute;
   top: calc(100% + 10px);
@@ -320,6 +326,11 @@ button {
 
 .menu__item:focus-visible {
   outline-offset: -3px;
+}
+
+.menu__item[aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: default;
 }
 
 /* Filters popover */

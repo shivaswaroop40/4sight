@@ -19,7 +19,6 @@ import type {
   ObjectMetadata,
   SceneContext,
   TimelineEvent,
-  VisualizationFilter,
 } from "../../core/types";
 import { EVENTS, hoverInfo } from "./treeData";
 import { ISLAND_RADIUS, buildGrass, buildIsland, buildLitter, groundY, inNotch } from "./treeIsland";
@@ -240,10 +239,6 @@ class TreeExperienceImpl implements FourDExperience {
 
   getHoveredObject(id: string): ObjectMetadata | null {
     return hoverInfo(id, this.currentTime);
-  }
-
-  getAvailableFilters(): VisualizationFilter[] {
-    return [];
   }
 
   getCameraPresets(): CameraPreset[] {

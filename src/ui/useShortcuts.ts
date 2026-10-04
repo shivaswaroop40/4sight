@@ -6,9 +6,11 @@
 // then an open menu or popover (which claims the key with preventDefault),
 // then the tour, then following an object.
 //
-// Ignored while a modal dialog is open (its own keys win) and, except Esc,
-// while typing in a form control; Space on a focused button is left to the
-// button so it does not toggle twice. Playing, scrubbing, nudging or
+// Ignored while a modal dialog is open (its own keys win), for any key a
+// control already handled (preventDefault), and, except Esc, while focus is
+// in a form control or inside a menu or popover, whose arrow keys move
+// between its items. Space on a focused button is left to the button so it
+// does not toggle twice. Playing, scrubbing, nudging or
 // resetting during the tour ends it (see tour/tourRunner.ts). Each shortcut
 // is named in its button's title.
 
@@ -19,11 +21,13 @@ import { dispatchTour } from "./tour/tourRunner";
 
 const NUDGE = 0.01;
 
-function isFormControl(target: EventTarget | null): boolean {
+/** Focus is somewhere that has its own keys: a form control, or an item in a menu or popover. */
+function ownsKeys(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;
   return (
     target.isContentEditable ||
-    target.matches("input, textarea, select, [role='slider']")
+    target.matches("input, textarea, select, [role='slider']") ||
+    target.closest("[role='menu'], [role='dialog']") !== null
   );
 }
 
@@ -31,14 +35,13 @@ export function useShortcuts(): void {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
-      if (document.querySelector("dialog[open]")) return;
+      if (document.querySelector("dialog[open]") || e.defaultPrevented) return;
       if (e.key === "Escape") {
-        if (e.defaultPrevented) return;
         if (getUi().tour.phase !== "idle") dispatchTour({ type: "exit" });
         else runtime.manager?.stopFollowing();
         return;
       }
-      if (isFormControl(e.target)) return;
+      if (ownsKeys(e.target)) return;
       const onButton = e.target instanceof HTMLButtonElement;
       switch (e.key) {
         case " ":

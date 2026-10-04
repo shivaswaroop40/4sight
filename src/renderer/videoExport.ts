@@ -1,8 +1,8 @@
 // src/renderer/videoExport.ts
 //
 // Encodes a video export with mediabunny over WebCodecs. It is a dynamic
-// import, and mediabunny with it, so neither is in the main chunk; the More
-// menu loads it when it first asks whether export is supported.
+// import, and mediabunny with it, so neither is in the main chunk; the
+// first export loads it.
 //
 // The caller draws each frame; this module stacks it the way the page does:
 // the paper gradient (.stage in index.css), the transparent WebGL canvas,
@@ -55,7 +55,7 @@ export interface EncodeJob {
   onFrame(encoded: number): void;
 }
 
-/** Resolves with the finished file, or null if the signal aborted first. */
+/** Resolves with the finished file, or null if the signal aborted at any point before it resolves. */
 export async function encodeVideo(job: EncodeJob): Promise<Blob | null> {
   const { plan, codec } = job;
   const frame = makeCanvas(plan.width, plan.height);
@@ -81,6 +81,8 @@ export async function encodeVideo(job: EncodeJob): Promise<Blob | null> {
     }
     if (job.signal.aborted) return null;
     await output.finalize();
+    // Cancel stays live while the file is finished; a cancel then still means no file.
+    if (job.signal.aborted) return null;
     return new Blob([target.buffer!], { type: format.mimeType });
   } finally {
     // Frees the encoder. A failure here must not hide the error that got us here.

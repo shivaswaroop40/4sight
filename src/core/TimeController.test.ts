@@ -25,7 +25,6 @@ function fakeExperience(mapping: TimeMapping, baseDurationSeconds: number, warpP
     getState: () => null,
     getCurrentEvent: () => null,
     getHoveredObject: () => null,
-    getAvailableFilters: () => [],
     getCameraPresets: () => [],
     reset() {},
     dispose() {},

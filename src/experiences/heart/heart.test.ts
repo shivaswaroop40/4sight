@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { describe, expect, it } from "vitest";
-import { fakeSceneContext } from "../../renderer/fakeSceneContext";
+import { fakeSceneContext } from "../../test/fakeSceneContext";
 import {
   atrialSqueeze,
   BEAT_MS,
@@ -214,7 +214,7 @@ describe("ECG strip", () => {
 
 describe("heart filters", () => {
   it("offers the electrical signal and blood flow, both on", () => {
-    expect(heart.getAvailableFilters().map((f) => [f.id, f.name, f.defaultOn])).toEqual([
+    expect(heart.filters!.options.map((f) => [f.id, f.name, f.defaultOn])).toEqual([
       ["electrical", "Electrical signal", true],
       ["blood-flow", "Blood flow", true],
     ]);
@@ -224,10 +224,10 @@ describe("heart filters", () => {
     const ctx = fakeSceneContext();
     heart.mount(ctx);
     const shown = () => [ctx.scene.getObjectByName("electrical")!.visible, ctx.scene.getObjectByName("blood-flow")!.visible];
-    heart.setFilters!({ electrical: false, "blood-flow": false });
+    heart.filters!.set({ electrical: false, "blood-flow": false });
     heart.setTime(150);
     expect(shown()).toEqual([false, false]);
-    heart.setFilters!({ electrical: true, "blood-flow": false });
+    heart.filters!.set({ electrical: true, "blood-flow": false });
     heart.setTime(150);
     expect(shown()).toEqual([true, false]);
     heart.dispose();
@@ -246,7 +246,7 @@ describe("heart filters", () => {
     const wave = () => ["uAtrialSpread", "uAtrialTint", "uVentSpread", "uVentTint"].map((k) => shader.uniforms[k].value);
     heart.setTime(200);
     expect(wave()).toEqual([1, 0.5, 0.5, 1]);
-    heart.setFilters!({ electrical: false, "blood-flow": true });
+    heart.filters!.set({ electrical: false, "blood-flow": true });
     heart.setTime(200);
     expect(wave()).toEqual([0, 0, 0, 0]);
     heart.dispose();

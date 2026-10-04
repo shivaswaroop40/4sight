@@ -1,8 +1,9 @@
 // src/ui/exportRunner.ts
 //
-// Side effects of Export video. The encoder, and mediabunny with it, is a
-// chunk of its own (renderer/videoExport.ts), first loaded when the More
-// menu checks whether this browser can encode a codec export uses.
+// Side effects of Export video. The More menu asks WebCodecs directly
+// whether this browser can encode a codec export uses. The encoder, and
+// mediabunny with it, is a chunk of its own (renderer/videoExport.ts),
+// first loaded when an export starts.
 //
 // startExport ends the tour, pauses, borrows the renderer and drives the
 // TimeController through every frame from u = 0 to u = 1, one setParam per
@@ -20,32 +21,25 @@ const FPS = 30;
 /** Revoking the object URL at once can cancel the download in some browsers. */
 const REVOKE_MS = 60_000;
 
-type Encoder = typeof import("../renderer/videoExport");
-
-let encoder: Promise<Encoder> | null = null;
 let checked = false;
 let abort: AbortController | null = null;
 
-function loadEncoder(): Promise<Encoder> {
-  encoder ??= import("../renderer/videoExport").catch((error: unknown) => {
-    encoder = null;
-    throw error;
-  });
-  return encoder;
-}
-
 /**
- * Sets `exportable` once a codec encodes here at this stage's export size.
- * Browsers without WebCodecs never download the encoder chunk.
+ * H.264 High and VP9 profile 0, both at level 4.0, which covers 1920x1080
+ * either way up. startExport still asks the encoder chunk for the exact
+ * codec; this only decides whether to offer Export video.
  */
+const PROBE_CODECS = ["avc1.640028", "vp09.00.40.08"];
+
+/** Sets `exportable` once WebCodecs says a codec encodes here at this stage's export size. Loads no chunk. */
 export function checkExportSupport(): void {
   const manager = runtime.manager;
   if (checked || !manager || typeof VideoEncoder === "undefined") return;
   checked = true;
   const { width, height } = manager.viewport;
-  loadEncoder()
-    .then((m) => m.pickCodec(exportPlan(1, width / height, FPS)))
-    .then((codec) => setUi({ exportable: codec !== null }))
+  const { width: w, height: h, fps } = exportPlan(1, width / height, FPS);
+  Promise.all(PROBE_CODECS.map((codec) => VideoEncoder.isConfigSupported({ codec, width: w, height: h, framerate: fps })))
+    .then((results) => setUi({ exportable: results.some((r) => r.supported === true) }))
     .catch(() => {
       checked = false;
     });
@@ -53,8 +47,9 @@ export function checkExportSupport(): void {
 
 export async function startExport(): Promise<void> {
   const manager = runtime.manager;
-  const { experience, exporting } = getUi();
-  if (!manager || !experience || exporting.phase !== "idle") return;
+  const { experience, exporting, load } = getUi();
+  // A chunk that lands mid-export would mount into the video.
+  if (!manager || !experience || exporting.phase !== "idle" || load.status === "loading") return;
   dispatchTour({ type: "exit" });
   const before = controller.state;
   controller.pause();
@@ -68,7 +63,7 @@ export async function startExport(): Promise<void> {
   let outcome: ExportState = EXPORT_IDLE;
   let toast: Toast | null = null;
   try {
-    const m = await loadEncoder();
+    const m = await import("../renderer/videoExport");
     const codec = await m.pickCodec(plan);
     if (!codec) throw new Error("This browser can't encode video at this size.");
     if (cancel.signal.aborted) return;

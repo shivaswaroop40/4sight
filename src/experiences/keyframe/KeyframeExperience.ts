@@ -20,7 +20,6 @@ import type {
   SceneContext,
   TimeMapping,
   TimelineEvent,
-  VisualizationFilter,
 } from "../../core/types";
 import { mappingFor } from "./mapping";
 import { parseScene } from "./parse";
@@ -235,10 +234,6 @@ export class KeyframeExperience implements FourDExperience {
     if (hover.category) meta.category = hover.category;
     if (hover.properties) meta.properties = hover.properties;
     return meta;
-  }
-
-  getAvailableFilters(): VisualizationFilter[] {
-    return [];
   }
 
   getCameraPresets(): CameraPreset[] {

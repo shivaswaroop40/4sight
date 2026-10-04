@@ -18,7 +18,6 @@
 // The mocks are shown only while no real experience is registered, so the
 // shell is always testable and the demo never shows them once a lane lands.
 
-import { memoizeLoad } from "../core/memoizeLoad";
 import { byTimescale, YEAR_SECONDS } from "../core/timescale";
 import type { ExperienceId, FourDExperience } from "../core/types";
 
@@ -116,7 +115,8 @@ export function entryFor(id: ExperienceId): ExperienceEntry | undefined {
   return experiences.find((e) => e.id === id);
 }
 
-export const loadExperience = memoizeLoad((id: ExperienceId) => {
+/** The browser's module map already shares one download per chunk, so picking an experience twice fetches it once. */
+export function loadExperience(id: ExperienceId): Promise<FourDExperience> {
   const entry = entryFor(id);
   return entry ? entry.load() : Promise.reject(new Error(`No experience "${id}"`));
-});
+}

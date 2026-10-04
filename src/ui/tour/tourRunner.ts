@@ -5,7 +5,8 @@
 //
 //   reading     lands on the event's exact time, writes the URL, and holds
 //               for a reading time sized to the title and description.
-//   travelling  tweens u forward to the next event, one setParam per frame.
+//   travelling  tweens u forward to the next event, one setParam per frame;
+//               under reduced motion it jumps there on the next frame.
 //   done        shows "Tour complete" for a moment, then goes idle.
 //
 // The runner only drives the TimeController; experiences never know a tour
@@ -17,6 +18,7 @@
 import type { FourDExperience, TimeState, TimelineEvent } from "../../core/types";
 import { controller, getUi, runtime, setUi, subscribeUi } from "../runtime";
 import { easeInOutCubic } from "../../core/interpolate";
+import { prefersReducedMotion } from "../../core/reducedMotion";
 import { DONE_MS, holdMs, isTouring, tourReducer, travelMs, type TourAction, type TourState } from "./tourMachine";
 
 let leavePhase: (() => void) | null = null;
@@ -74,6 +76,11 @@ function after(ms: number, then: () => void): () => void {
 }
 
 function travel(experience: FourDExperience, event: TimelineEvent): () => void {
+  // Arriving lands on the event's exact time, so skipping the glide is the whole jump.
+  if (prefersReducedMotion()) {
+    const frame = requestAnimationFrame(() => dispatchTour({ type: "arrived" }));
+    return () => cancelAnimationFrame(frame);
+  }
   const from = controller.state.param;
   const to = experience.mapping.toParam(event.time);
   const ms = travelMs(from, to);

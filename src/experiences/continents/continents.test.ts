@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fakeSceneContext } from "../../renderer/fakeSceneContext";
+import { fakeSceneContext } from "../../test/fakeSceneContext";
 import { spanClock } from "../../core/analogy";
 import { YEAR_SECONDS } from "../../core/timescale";
 import { ANCHORS, EVENTS } from "./continentsData";
@@ -169,7 +169,7 @@ describe("continents hover and views", () => {
 
   it("offers the four ocean views and a today's-coastlines overlay, off by default", () => {
     expect(exp.getCameraPresets().map((p) => p.name)).toEqual(["Atlantic", "Indian Ocean", "Pacific", "South Pole"]);
-    expect(exp.getAvailableFilters().map((f) => [f.id, f.name, f.defaultOn])).toEqual([
+    expect(exp.filters!.options.map((f) => [f.id, f.name, f.defaultOn])).toEqual([
       ["today-coastlines", "Today's coastlines", false],
     ]);
   });
@@ -180,7 +180,7 @@ describe("continents hover and views", () => {
     const ghosts = ctx.scene.getObjectByName("today-coastlines")!;
     exp.setTime(-150);
     expect(ghosts.visible).toBe(false);
-    exp.setFilters!({ "today-coastlines": true });
+    exp.filters!.set({ "today-coastlines": true });
     exp.setTime(-150);
     expect(ghosts.visible).toBe(true);
     expect(ghosts.children).toHaveLength(Object.values(OUTLINES).flat().length);
