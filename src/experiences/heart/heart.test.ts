@@ -1,6 +1,17 @@
 import { describe, expect, it } from "vitest";
 import { fakeSceneContext } from "../../renderer/fakeSceneContext";
-import { chamberVolume, ecg, valveIsOpen, type ValveId } from "./heartCycle";
+import {
+  atrialSqueeze,
+  BEAT_MS,
+  chamberVolume,
+  ecg,
+  PHASES,
+  phaseAt,
+  pressure,
+  valveIsOpen,
+  type PressureSite,
+  type ValveId,
+} from "./heartCycle";
 import { formatMs } from "./heartData";
 import { parcelsAt } from "./heartFlow";
 import { deform } from "./heartLayout";
@@ -8,6 +19,32 @@ import { heartExperience as heart } from "./HeartExperience";
 
 const VALVES: ValveId[] = ["tricuspid", "mitral", "pulmonary", "aortic"];
 const openValves = (t: number) => VALVES.filter((v) => valveIsOpen(v, t));
+
+/** Upstream and downstream of each valve. */
+const ACROSS: Record<ValveId, [PressureSite, PressureSite]> = {
+  tricuspid: ["rightAtrium", "rightVentricle"],
+  pulmonary: ["rightVentricle", "pulmonaryArtery"],
+  mitral: ["leftAtrium", "leftVentricle"],
+  aortic: ["leftVentricle", "aorta"],
+};
+
+const EVERY_MS = Array.from({ length: BEAT_MS + 1 }, (_, t) => t);
+const isovolumetric = (t: number) => phaseAt(t).id.startsWith("isovolumetric");
+
+/** The ms ranges, as "start-end", on which the predicate holds. */
+function spans(holds: (t: number) => boolean): string[] {
+  const out: string[] = [];
+  let start = -1;
+  for (const t of EVERY_MS) {
+    if (holds(t) && start < 0) start = t;
+    if (!holds(t) && start >= 0) {
+      out.push(`${start}-${t - 1}`);
+      start = -1;
+    }
+  }
+  if (start >= 0) out.push(`${start}-${BEAT_MS}`);
+  return out;
+}
 
 function blood(t: number) {
   return (heart.getState(t) as { blood: Record<string, number> }).blood;
@@ -51,6 +88,43 @@ describe("heart cycle", () => {
     expect(openValves(400)).toEqual(["pulmonary", "aortic"]);
     expect(openValves(580)).toEqual([]);
     expect(openValves(700)).toEqual(["tricuspid", "mitral"]);
+  });
+
+  it("opens each valve once per beat and never inside an isovolumetric phase", () => {
+    expect(spans(isovolumetric)).toEqual(["210-259", "540-619"]);
+    for (const v of ["tricuspid", "mitral"] as const) expect(spans((t) => valveIsOpen(v, t))).toEqual(["0-207", "623-800"]);
+    for (const v of ["pulmonary", "aortic"] as const) expect(spans((t) => valveIsOpen(v, t))).toEqual(["262-536"]);
+    for (const t of EVERY_MS) if (isovolumetric(t)) expect(openValves(t), `${t} ms`).toEqual([]);
+  });
+
+  it("crosses the pressures where the valves move", () => {
+    const above = (a: PressureSite, b: PressureSite) => spans((t) => pressure(a, t) > pressure(b, t));
+    expect(above("leftVentricle", "leftAtrium")).toEqual(["211-619"]);
+    expect(above("rightVentricle", "rightAtrium")).toEqual(["211-619"]);
+    expect(above("leftVentricle", "aorta")).toEqual(["261-539"]);
+    expect(above("rightVentricle", "pulmonaryArtery")).toEqual(["261-539"]);
+  });
+
+  it("pushes blood downhill through every open valve, and holds it back while all four are shut", () => {
+    for (const t of EVERY_MS) {
+      for (const v of VALVES) {
+        const [up, down] = ACROSS[v];
+        if (valveIsOpen(v, t)) expect(pressure(up, t), `${v} at ${t} ms`).toBeGreaterThan(pressure(down, t));
+      }
+      // Both sides are equal at the instant a valve shuts, which starts the phase.
+      if (isovolumetric(t) && t !== phaseAt(t).start) {
+        for (const v of VALVES) {
+          const [up, down] = ACROSS[v];
+          expect(pressure(down, t), `${v} at ${t} ms`).toBeGreaterThan(pressure(up, t));
+        }
+      }
+    }
+  });
+
+  it("squeezes the atria through the whole atrialSystole phase and at no other time", () => {
+    const atrial = PHASES.find((p) => p.id === "atrialSystole")!;
+    expect(spans((t) => atrialSqueeze(t) > 0)).toEqual(["51-209"]);
+    for (const t of EVERY_MS) expect(atrialSqueeze(t) > 0, `${t} ms`).toBe(t > atrial.start && t < atrial.end);
   });
 
   it("fills the left ventricle to 120 mL and pumps out 70 mL", () => {

@@ -17,10 +17,13 @@ export const BEAT_MS = 800;
 
 /**
  * Milliseconds within the beat, after the Wiggers diagram at 75 bpm. The
- * P wave runs 0 to 90, QRS 160 to 240, T 380 to 540, ejection 260 to 540.
+ * P wave runs 0 to 90, QRS 160 to 225, T 380 to 540, ejection 260 to 540.
+ * Atrial systole covers the atria's contraction and their relaxation up to
+ * the lub, the way Wiggers labels it.
  */
 export const TIMING = {
-  atrialSystole: [50, 150],
+  atrialSystole: [50, 210],
+  atrialPeak: 110,
   lub: 210,
   dub: 540,
 } as const;
@@ -57,15 +60,6 @@ export function phaseAt(t: number): Phase {
 
 // ---------------------------------------------------------------------------
 // Shapes
-
-/** sin(pi s), exactly 0 outside the open interval (0, 1). */
-function halfSine(s: number): number {
-  return s <= 0 || s >= 1 ? 0 : Math.sin(Math.PI * s);
-}
-
-function bump(t: number, start: number, end: number): number {
-  return halfSine(windowFn(t, start, end));
-}
 
 function gauss(t: number, center: number, sigma: number): number {
   const d = (t - center) / sigma;
@@ -166,17 +160,23 @@ export function chamberVolume(chamber: ChamberId, t: number): number {
 }
 
 // ---------------------------------------------------------------------------
-// Pressures (mmHg), shaped after the Wiggers diagram
+// Pressures (mmHg), shaped after the Wiggers diagram.
+//
+// A valve opens when its upstream pressure passes its downstream pressure
+// and shuts when that reverses, so the two sides of each valve are keyed
+// equal at the instant it moves (210 and 620 for the AV valves, 260 and
+// 540 for the semilunar) and the upstream side is strictly higher while it
+// is open. heart.test.ts sweeps this every millisecond.
 
 export type PressureSite = ChamberId | "aorta" | "pulmonaryArtery";
 
 const PRESSURE: Record<PressureSite, readonly (readonly [number, number])[]> = {
-  leftVentricle: [[0, 6], [50, 6], [150, 10], [210, 12], [260, 80], [340, 120], [460, 110], [540, 95], [580, 30], [620, 5], [680, 3], [760, 5], [800, 6]],
-  aorta: [[0, 88], [260, 80], [340, 120], [460, 112], [540, 100], [552, 95], [570, 99], [800, 88]],
-  leftAtrium: [[0, 8], [50, 8], [110, 12], [160, 7], [215, 9], [260, 5], [540, 15], [620, 14], [700, 7], [800, 8]],
-  rightVentricle: [[0, 3], [50, 3], [150, 6], [210, 6], [255, 10], [340, 25], [460, 22], [540, 18], [580, 6], [620, 2], [700, 2], [800, 3]],
-  pulmonaryArtery: [[0, 12], [255, 10], [340, 25], [460, 22], [540, 18], [552, 16], [570, 17], [800, 12]],
-  rightAtrium: [[0, 3], [110, 6], [160, 3], [215, 4], [260, 1], [540, 6], [620, 5], [700, 2], [800, 3]],
+  leftVentricle: [[0, 6], [50, 6], [110, 8], [210, 11], [260, 80], [340, 121], [460, 112], [540, 100], [575, 30], [620, 11], [680, 4], [760, 5], [800, 6]],
+  aorta: [[0, 88], [250, 80], [260, 80], [340, 118], [460, 110], [540, 100], [552, 95], [570, 99], [800, 88]],
+  leftAtrium: [[0, 8], [50, 8], [110, 12], [210, 11], [260, 5], [540, 14], [620, 11], [700, 7], [800, 8]],
+  rightVentricle: [[0, 2], [50, 2], [110, 4], [210, 6], [260, 10], [340, 27], [460, 24], [540, 18], [575, 8], [620, 5], [660, 2], [800, 2]],
+  pulmonaryArtery: [[0, 12], [250, 10], [260, 10], [340, 25], [460, 22], [540, 18], [556, 16.5], [574, 17.5], [800, 12]],
+  rightAtrium: [[0, 3], [50, 3], [110, 7], [210, 6], [260, 1], [540, 6], [620, 5], [700, 3], [800, 3]],
 };
 
 export function pressure(site: PressureSite, t: number): number {
@@ -198,8 +198,8 @@ export const VALVE_KIND: Record<ValveId, ValveKind> = {
 };
 
 const VALVE_OPEN: Record<ValveKind, readonly (readonly [number, number])[]> = {
-  av: [[0, 0.6], [50, 0.65], [110, 1], [160, 0.75], [200, 0.7], [210, -0.14], [221, 0.05], [232, 0], [620, 0], [645, 1], [700, 0.95], [760, 0.65], [800, 0.6]],
-  semilunar: [[0, 0], [258, 0], [276, 1], [470, 0.92], [530, 0.45], [540, -0.14], [551, 0.05], [562, 0], [800, 0]],
+  av: [[0, 0.6], [50, 0.65], [110, 1], [160, 0.75], [200, 0.7], [210, -0.14], [232, 0], [620, 0], [645, 1], [700, 0.95], [760, 0.65], [800, 0.6]],
+  semilunar: [[0, 0], [260, 0], [278, 1], [470, 0.92], [530, 0.45], [540, -0.14], [562, 0], [800, 0]],
 };
 
 export function valveOpenness(valve: ValveId, t: number): number {
@@ -292,9 +292,11 @@ export function ventricularSqueeze(t: number): number {
   return (LV_EDV - chamberVolume("leftVentricle", t)) / (LV_EDV - LV_ESV);
 }
 
-/** Active atrial contraction, peaking mid atrial systole. */
+/** Atrial contraction: a quick squeeze to the a-wave peak, then a slower release that ends at the lub. */
 export function atrialSqueeze(t: number): number {
-  return bump(t, TIMING.atrialSystole[0], TIMING.atrialSystole[1] + 10);
+  const [start, end] = TIMING.atrialSystole;
+  const s = t < TIMING.atrialPeak ? windowFn(t, start, TIMING.atrialPeak) : 1 - windowFn(t, TIMING.atrialPeak, end);
+  return Math.sin((Math.PI / 2) * s);
 }
 
 const LA_MIN = 21;
