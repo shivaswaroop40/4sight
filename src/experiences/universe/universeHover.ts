@@ -81,7 +81,7 @@ const HOVERS: Record<HoverId, HoverDef> = {
 };
 
 export function isHoverId(id: string): id is HoverId {
-  return id in HOVERS;
+  return Object.hasOwn(HOVERS, id);
 }
 
 export function hoverInfo(id: string, t: number): ObjectMetadata | null {

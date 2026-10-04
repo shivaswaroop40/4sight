@@ -184,6 +184,8 @@ describe("universe scene data", () => {
     expect(hoverInfo("cmb", 1e9)!.description).toMatch(/oldest light|cosmic microwave background/);
     expect(hoverInfo("sun", 1.38e10)!.description).toMatch(/Solar System experience/);
     expect(hoverInfo("nothing", 0)).toBeNull();
+    expect(hoverInfo("toString", 0)).toBeNull();
+    expect(hoverInfo("constructor", 0)).toBeNull();
   });
 
   it("stops saying the CMB is breaking free once the fog has cleared", () => {
