@@ -23,6 +23,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { easeInOutCubic } from "../core/interpolate";
+import { prefersReducedMotion } from "../core/reducedMotion";
 import type { CameraPreset } from "../core/types";
 
 const PRESET_MS = 600;
@@ -233,8 +234,4 @@ export class CameraManager {
       duration: PRESET_MS,
     };
   }
-}
-
-function prefersReducedMotion(): boolean {
-  return typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
