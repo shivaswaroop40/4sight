@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { fakeSceneContext } from "../../test/fakeSceneContext";
 import { spanClock } from "../../core/analogy";
+import { formatRate } from "../../core/warp";
 import { YEAR_SECONDS } from "../../core/timescale";
 import { ANCHORS, EVENTS } from "./continentsData";
 import { continentsExperience as exp } from "./ContinentsExperience";
@@ -29,8 +30,8 @@ describe("continents time axis", () => {
   });
 
   it("formats playback rates as plain spans", () => {
-    expect(formatMa(6.25)).toBe("6.3 million years");
-    expect(formatMa(25)).toBe("25 million years");
+    expect(formatRate(exp.mapping, 6.25)).toBe("≈ 6.3 million years / s");
+    expect(formatRate(exp.mapping, 25)).toBe("≈ 25 million years / s");
   });
 
   it("runs from Pangaea to today, linearly", () => {

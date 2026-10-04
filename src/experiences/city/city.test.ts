@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { spanClock } from "../../core/analogy";
+import { effectiveRate, formatRate } from "../../core/warp";
 import { cityExperience as exp } from "./CityExperience";
 
 const pose = (year: number, id: string) => exp.getState(year).objects.find((o) => o.id === id)!;
@@ -42,6 +43,11 @@ describe("city timeline", () => {
 
   it("offers three views", () => {
     expect(exp.getCameraPresets().map((p) => p.name)).toEqual(["Aerial", "Street level", "River view"]);
+  });
+
+  it("shows the playback rate in years per second at every warp preset", () => {
+    const rate = (warp: number) => formatRate(exp.mapping, effectiveRate(exp.mapping, exp.baseDurationSeconds, 0.5, warp));
+    expect(exp.warpPresets.map(rate)).toEqual(["≈ 1.4 years / s", "≈ 2.8 years / s", "≈ 5.6 years / s", "≈ 11 years / s", "≈ 22 years / s"]);
   });
 });
 

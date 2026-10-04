@@ -18,6 +18,14 @@ export const TIME_FORMATS = {
 
 export type TimeFormatName = keyof typeof TIME_FORMATS;
 
+/** A length of time, for the playback rate, where it reads differently from a moment: "6.2 years", not "6". */
+export const SPAN_FORMATS: Partial<Record<TimeFormatName, (duration: number) => string>> = {
+  year: (d) => {
+    const years = Number(d.toPrecision(2));
+    return `${years} year${years === 1 ? "" : "s"}`;
+  },
+};
+
 export function isTimeFormatName(name: string): name is TimeFormatName {
   return Object.hasOwn(TIME_FORMATS, name);
 }

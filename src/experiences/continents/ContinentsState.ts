@@ -109,18 +109,16 @@ export function continentsStateAt(time: number): ContinentsState {
   };
 }
 
-/**
- * Moments on the axis are zero or negative ("200 million years ago"). The
- * HUD also passes positive spans through format to show the playback rate,
- * so those read as plain durations ("6 million years").
- */
+/** A moment on the axis, which runs from -250 to 0: "200 million years ago". */
 export function formatMa(time: number): string {
-  if (time > 0) {
-    const span = time < 10 ? Math.round(time * 10) / 10 : Math.round(time);
-    return `${span} million years`;
-  }
   const ma = Math.round(maAt(time));
   return ma === 0 ? "Today" : `${ma} million years ago`;
+}
+
+/** A length of time in millions of years: "6.3 million years". */
+export function formatMaSpan(duration: number): string {
+  const span = duration < 10 ? Math.round(duration * 10) / 10 : Math.round(duration);
+  return `${span} million years`;
 }
 
 export function formatLatitude(lat: number): string {

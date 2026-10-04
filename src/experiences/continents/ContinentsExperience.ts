@@ -30,6 +30,7 @@ import {
   continentsStateAt,
   formatLatitude,
   formatMa,
+  formatMaSpan,
   formatSpeed,
   labelPosition,
   maAt,
@@ -109,7 +110,7 @@ class ContinentsExperienceImpl implements FourDExperience {
 
   minTime = -OLDEST_MA;
   maxTime = 0;
-  mapping = linearMapping(-OLDEST_MA, 0, formatMa, TICKS);
+  mapping = { ...linearMapping(-OLDEST_MA, 0, formatMa, TICKS), formatSpan: formatMaSpan };
   baseDurationSeconds = 40;
   warpPresets = [0.25, 0.5, 1, 2, 4];
   elapsedSpanSeconds = (this.maxTime - this.minTime) * 1e6 * YEAR_SECONDS;

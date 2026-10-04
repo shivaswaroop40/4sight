@@ -4,7 +4,7 @@
 
 import { knotMapping, linearMapping, type SliderKnot } from "../../core/mappings";
 import type { TimeMapping } from "../../core/types";
-import { TIME_FORMATS } from "./timeFormats";
+import { SPAN_FORMATS, TIME_FORMATS } from "./timeFormats";
 import type { SceneDef } from "./types";
 
 const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
@@ -35,7 +35,13 @@ function linearKnotMapping(knots: SliderKnot[], format: (t: number) => string): 
 
 export function mappingFor(def: SceneDef): TimeMapping {
   const format = TIME_FORMATS[def.timeFormat];
+  const formatSpan = SPAN_FORMATS[def.timeFormat];
   const m = def.mapping;
-  if (m.kind === "linear") return linearMapping(def.minTime, def.maxTime, format, m.ticks);
-  return m.interpolate === "linear" ? linearKnotMapping(m.knots, format) : knotMapping(m.knots, format);
+  const mapping =
+    m.kind === "linear"
+      ? linearMapping(def.minTime, def.maxTime, format, m.ticks)
+      : m.interpolate === "linear"
+        ? linearKnotMapping(m.knots, format)
+        : knotMapping(m.knots, format);
+  return formatSpan ? { ...mapping, formatSpan } : mapping;
 }

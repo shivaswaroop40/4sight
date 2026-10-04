@@ -48,6 +48,12 @@ export interface TimeMapping {
   ticks(): TimeTick[];
   /** Human readable time for the HUD, e.g. "0.42", "380,000 years", "9.2 billion years". */
   format(time: number): string;
+  /**
+   * A length of experience time, for the playback rate ("≈ 6 years / s").
+   * Needed when a moment does not read as a length: the year 1923, or
+   * "200 million years ago". Leave unset when format already reads as one.
+   */
+  formatSpan?(duration: number): string;
 }
 
 export interface TimeState {
