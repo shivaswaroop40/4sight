@@ -658,7 +658,7 @@ for (let i = 0; i < 10; i++) {
 
 const range = (from: number, text: string) => ({ from, text });
 
-const scene = {
+export const cityScene = {
   id: "city",
   name: "River City",
   minTime: START,
@@ -676,6 +676,7 @@ const scene = {
     ],
   },
   timeFormat: "year",
+  secondsPerUnit: 31_557_600,
   labels: { start: "Village", end: "Today" },
   baseDurationSeconds: 60,
   warpPresets: [0.25, 0.5, 1, 2, 4],
@@ -1014,4 +1015,6 @@ const scene = {
   objects,
 };
 
-writeScene("src/experiences/city/city.scene.json", scene);
+export const CITY_SCENE_PATH = "src/experiences/city/city.scene.json";
+
+if (import.meta.main) writeScene(CITY_SCENE_PATH, cityScene);

@@ -372,7 +372,7 @@ for (const side of [-1, 1]) {
 
 const minutes = (m: number) => `${m} min`;
 
-const scene = {
+export const mitosisScene = {
   id: "mitosis",
   name: "Mitosis",
   minTime: T.start,
@@ -390,6 +390,7 @@ const scene = {
     ],
   },
   timeFormat: "minutes",
+  secondsPerUnit: 60,
   labels: { start: "One cell", end: "Two cells" },
   baseDurationSeconds: 45,
   warpPresets: [0.25, 0.5, 1, 2, 4],
@@ -566,4 +567,6 @@ const scene = {
   objects,
 };
 
-writeScene("src/experiences/mitosis/mitosis.scene.json", scene);
+export const MITOSIS_SCENE_PATH = "src/experiences/mitosis/mitosis.scene.json";
+
+if (import.meta.main) writeScene(MITOSIS_SCENE_PATH, mitosisScene);

@@ -4,7 +4,8 @@
 // gen-city.ts). They build keyframe JSON for src/experiences/keyframe and
 // write it in a stable, diff-friendly layout. Run a generator with
 // `node scripts/gen-<name>.ts`; add `--check` to fail instead of writing
-// when the committed JSON is out of date.
+// when the committed JSON is out of date. generators.test.ts makes the
+// same comparison under `npm test`.
 
 import { readFileSync, writeFileSync } from "node:fs";
 
