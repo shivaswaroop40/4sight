@@ -1,3 +1,4 @@
+import type * as THREE from "three";
 import { describe, expect, it } from "vitest";
 import { fakeSceneContext } from "../../test/fakeSceneContext";
 import { EVENTS, KNOTS } from "./solarData";
@@ -113,24 +114,38 @@ describe("solar filters", () => {
   it("hides the gas and dust and the orbit lines at the same t only while their filters are off", () => {
     const ctx = fakeSceneContext();
     solarSystemExperience.mount(ctx);
-    const gas = ctx.scene.getObjectByName("gas-and-dust")!;
+    const particles = ctx.scene.getObjectByName("accretion") as THREE.Points;
+    const gasAndDust = () => (particles.material as THREE.ShaderMaterial).uniforms.uGasAndDust.value;
     const orbits = () => ctx.scene.getObjectsByProperty("name", "orbit").map((o) => o.visible);
     const today = mapping.toTime(1);
 
     solarSystemExperience.filters!.set({ "gas-and-dust": true, orbits: true });
     solarSystemExperience.setTime(today);
-    expect(gas.visible).toBe(true);
+    expect([particles.visible, gasAndDust()]).toEqual([true, 1]);
     expect(orbits()).toEqual(Array(8).fill(true));
 
     solarSystemExperience.filters!.set({ "gas-and-dust": false, orbits: false });
     solarSystemExperience.setTime(today);
-    expect(gas.visible).toBe(false);
+    expect([particles.visible, gasAndDust()]).toEqual([true, 0]);
     expect(orbits()).toEqual(Array(8).fill(false));
 
     solarSystemExperience.filters!.set({ "gas-and-dust": true, orbits: true });
     solarSystemExperience.setTime(today);
-    expect(gas.visible).toBe(true);
+    expect([particles.visible, gasAndDust()]).toEqual([true, 1]);
     expect(orbits()).toEqual(Array(8).fill(true));
+    solarSystemExperience.dispose();
+  });
+
+  it("keeps the particle cloud drawn with gas and dust off, so forming planets and the belts stay", () => {
+    const ctx = fakeSceneContext();
+    solarSystemExperience.mount(ctx);
+    const particles = ctx.scene.getObjectByName("accretion")!;
+    solarSystemExperience.filters!.set({ "gas-and-dust": false, orbits: true });
+    const shown = [0, 0.5, 1].map((u) => {
+      solarSystemExperience.setTime(mapping.toTime(u));
+      return particles.visible;
+    });
+    expect(shown).toEqual([true, true, true]);
     solarSystemExperience.dispose();
   });
 
