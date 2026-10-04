@@ -30,6 +30,7 @@ import { easeInOutCubic } from "../core/interpolate";
 import { prefersReducedMotion } from "../core/reducedMotion";
 import type { CameraPreset } from "../core/types";
 import { DEFAULT_SUBJECT_ASPECT, REFERENCE_BAND, fitStage, type FreeBand, type StageFit } from "./stageFit";
+import { worldBounds } from "./worldBounds";
 
 const PRESET_MS = 600;
 
@@ -110,14 +111,7 @@ export class CameraManager {
 
   /** Frames the bounding sphere of everything visible in `root`, keeping the current viewing direction. */
   overview(root: THREE.Object3D, animate = true): void {
-    const box = new THREE.Box3();
-    root.traverseVisible((node) => {
-      const mesh = node as THREE.Mesh;
-      if (!mesh.geometry || node.name === "outline") return;
-      if (!mesh.geometry.boundingBox) mesh.geometry.computeBoundingBox();
-      const b = mesh.geometry.boundingBox!.clone().applyMatrix4(node.matrixWorld);
-      box.union(b);
-    });
+    const box = worldBounds(root);
     if (box.isEmpty()) return;
     const sphere = box.getBoundingSphere(new THREE.Sphere());
     const fov = THREE.MathUtils.degToRad(this.camera.fov);
@@ -266,22 +260,12 @@ export class CameraManager {
 }
 
 const bounds = new THREE.Box3();
-const part = new THREE.Box3();
 
 /**
- * The centre of an object's meshes in world space. A hoverable is often a
- * group placed at its parent's origin, like a continent that turns about the
- * globe's centre, so its position is not where it is on screen. Refreshes
- * the matrices, so this frame's setTime counts, not last frame's.
+ * Where an object is on screen: the centre of what it draws. A hoverable is
+ * often placed at its parent's origin, like a continent that turns about the
+ * globe's centre or a set of instances, so its position is not where it is.
  */
 function visualCentre(object: THREE.Object3D, out: THREE.Vector3): THREE.Vector3 {
-  object.updateWorldMatrix(true, true);
-  bounds.makeEmpty();
-  object.traverse((node) => {
-    const geometry = (node as THREE.Mesh).geometry;
-    if (!geometry || node.name === "outline") return;
-    if (!geometry.boundingBox) geometry.computeBoundingBox();
-    bounds.union(part.copy(geometry.boundingBox!).applyMatrix4(node.matrixWorld));
-  });
-  return bounds.isEmpty() ? object.getWorldPosition(out) : bounds.getCenter(out);
+  return worldBounds(object, bounds).isEmpty() ? object.getWorldPosition(out) : bounds.getCenter(out);
 }
