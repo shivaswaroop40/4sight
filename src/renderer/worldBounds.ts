@@ -8,6 +8,7 @@ import * as THREE from "three";
 
 const part = new THREE.Box3();
 const instance = new THREE.Matrix4();
+const centre = new THREE.Vector3();
 
 /**
  * The world-space bounds of what `root` draws: its own geometry plus that of
@@ -41,16 +42,28 @@ function draws(node: THREE.Object3D): boolean {
 function addOwn(node: THREE.Object3D, out: THREE.Box3): void {
   const geometry = (node as THREE.Mesh).geometry;
   if (!geometry) return;
-  if (!geometry.boundingBox) geometry.computeBoundingBox();
   if (!(node instanceof THREE.InstancedMesh)) {
+    if (!geometry.boundingBox) geometry.computeBoundingBox();
     out.union(part.copy(geometry.boundingBox!).applyMatrix4(node.matrixWorld));
     return;
   }
+  addInstanceCentresPaddedByLargestInstance(node, out);
+}
+
+function addInstanceCentresPaddedByLargestInstance(node: THREE.InstancedMesh, out: THREE.Box3): void {
+  const geometry = node.geometry;
+  if (!geometry.boundingSphere) geometry.computeBoundingSphere();
+  const sphere = geometry.boundingSphere!;
   const matrices = node.instanceMatrix.array;
+  let scale = 0;
+  part.makeEmpty();
   for (let i = 0; i < node.count; i++) {
     instance.fromArray(matrices, i * 16);
     // A zero-scale instance is hidden; counting it would pull the box to the mesh's origin.
     if (instance.determinant() === 0) continue;
-    out.union(part.copy(geometry.boundingBox!).applyMatrix4(instance.premultiply(node.matrixWorld)));
+    part.expandByPoint(centre.copy(sphere.center).applyMatrix4(instance));
+    scale = Math.max(scale, instance.getMaxScaleOnAxis());
   }
+  if (part.isEmpty()) return;
+  out.union(part.expandByScalar(sphere.radius * scale).applyMatrix4(node.matrixWorld));
 }
