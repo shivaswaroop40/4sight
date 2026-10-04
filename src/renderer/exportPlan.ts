@@ -6,7 +6,7 @@
 
 export interface ExportPlan {
   fps: number;
-  /** Frame i shows u = i / (frames - 1), so the first frame is u = 0 and the last is u = 1. */
+  /** Frame i is at t = i / fps and shows u = i / (frames - 1), so u = t / baseDurationSeconds and the last frame is u = 1. */
   frames: number;
   width: number;
   height: number;
@@ -16,7 +16,7 @@ const LONG_SIDE = 1920;
 const SHORT_SIDE = 1080;
 
 export function exportPlan(baseDurationSeconds: number, aspect: number, fps = 30): ExportPlan {
-  const frames = Math.max(2, Math.round(baseDurationSeconds * fps));
+  const frames = Math.max(2, Math.round(baseDurationSeconds * fps) + 1);
   const [boxW, boxH] = aspect >= 1 ? [LONG_SIDE, SHORT_SIDE] : [SHORT_SIDE, LONG_SIDE];
   const fitsWidth = aspect >= boxW / boxH;
   const width = fitsWidth ? boxW : even(boxH * aspect, boxW);
