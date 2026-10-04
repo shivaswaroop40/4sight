@@ -13,7 +13,7 @@ export function PerspectiveControls() {
   const presets = experience.getCameraPresets();
 
   return (
-    <div className="views" role="group" aria-label="Camera views">
+    <div className="views" role="group" aria-label="Camera views" data-hud-edge="top">
       <span className="views__label">
         <CameraIcon />
         <span>View</span>

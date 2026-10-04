@@ -28,6 +28,7 @@ export function ExperiencePicker() {
       type="button"
       id={PICKER_ID}
       className="picker"
+      data-hud-edge="top"
       aria-haspopup="dialog"
       aria-expanded={open}
       title="All experiences (G)"

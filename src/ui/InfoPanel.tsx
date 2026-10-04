@@ -2,7 +2,7 @@
 //
 // "What's happening?" card for the current event. Re-renders only when the
 // current event changes. Crossfades between events; collapses to a header.
-// Below 900px it is a bottom sheet (see index.css). While the guided tour
+// Below 900px it is a bottom sheet (see InfoPanel.css). While the guided tour
 // holds on an event the card is highlighted and opens, even if collapsed;
 // collapsing it then holds until the next event or the end of the tour.
 
@@ -34,6 +34,7 @@ export function InfoPanel({ experience }: { experience: FourDExperience }) {
   return (
     <aside
       className="card info"
+      data-hud-edge="bottom"
       data-open={shown ? "1" : "0"}
       data-reading={reading !== null ? "1" : undefined}
       aria-label="What's happening"
@@ -41,6 +42,7 @@ export function InfoPanel({ experience }: { experience: FourDExperience }) {
       <button
         type="button"
         className="info__head"
+        data-hud-rest
         onClick={toggle}
         aria-expanded={shown}
         aria-controls={bodyId}

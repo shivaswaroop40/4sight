@@ -8,10 +8,10 @@ import { useEffect, useRef } from "react";
 import { parseMoment } from "./core/moment";
 import { experiences } from "./experiences/index";
 import { SceneManager } from "./renderer/SceneManager";
-import type { FreeBand } from "./renderer/stageFit";
 import { Actions } from "./ui/Actions";
 import { ExportDialog } from "./ui/ExportDialog";
 import { ExperiencePicker, Gallery } from "./ui/Gallery";
+import { freeBand, hudElements, measureHud } from "./ui/hudBand";
 import { InfoPanel } from "./ui/InfoPanel";
 import { ObjectInfo } from "./ui/ObjectInfo";
 import { PerspectiveControls } from "./ui/PerspectiveControls";
@@ -27,7 +27,7 @@ import { useShortcuts } from "./ui/useShortcuts";
 function App() {
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const transportRef = useRef<HTMLElement | null>(null);
-  const topbarRef = useRef<HTMLElement | null>(null);
+  const appRef = useRef<HTMLDivElement | null>(null);
   const experience = useUi((s) => s.experience);
   useShortcuts();
 
@@ -65,26 +65,26 @@ function App() {
   // The mobile bottom sheet sits just above the transport bar, whatever its
   // height, and camera presets frame their subject in the band the HUD leaves free.
   useEffect(() => {
+    const app = appRef.current;
     const stage = viewportRef.current;
-    const topbar = topbarRef.current;
     const transport = transportRef.current;
-    if (!stage || !topbar || !transport) return;
+    if (!app || !stage || !transport) return;
     const ro = new ResizeObserver(() => {
       document.documentElement.style.setProperty("--transport-h", `${transport.offsetHeight}px`);
-      runtime.manager?.setFreeBand(freeBand(stage, topbar, transport));
+      runtime.manager?.setFreeBand(freeBand(stage.getBoundingClientRect(), measureHud(app)));
     });
-    for (const el of [stage, topbar, transport]) ro.observe(el);
+    for (const el of [stage, ...hudElements(app)]) ro.observe(el);
     return () => ro.disconnect();
   }, [experience]);
 
   return (
-    <div className="app">
+    <div className="app" ref={appRef}>
       <div className="stage" ref={viewportRef} />
       <div className="vignette" aria-hidden="true" />
 
-      <header className="topbar" ref={topbarRef}>
+      <header className="topbar">
         <div className="topbar__start">
-          <div className="brand sticker">
+          <div className="brand sticker" data-hud-edge="top">
             <Mark />
             <span className="brand__word">4sight</span>
           </div>
@@ -101,7 +101,7 @@ function App() {
         <>
           <InfoPanel key={experience.id} experience={experience} />
           <ObjectInfo experience={experience} />
-          <footer className="card transport" ref={transportRef}>
+          <footer className="card transport" ref={transportRef} data-hud-edge="bottom">
             <div className="transport__row">
               <TimeControls />
               <TimeReadout experience={experience} />
@@ -116,28 +116,6 @@ function App() {
       <ExportDialog />
     </div>
   );
-}
-
-/**
- * The stage between the top bar and the bottom chrome. Status chips come and
- * go, so they do not count. A bottom sheet counts at its collapsed height,
- * so opening it to read does not move the camera.
- */
-function freeBand(stage: HTMLElement, topbar: HTMLElement, transport: HTMLElement): FreeBand {
-  const box = stage.getBoundingClientRect();
-  const bars = topbar.querySelectorAll(":scope > :not(.rail), :scope > .topbar__start > *");
-  const top = Math.max(box.top, ...Array.from(bars, (el) => el.getBoundingClientRect().bottom));
-  let bottom = transport.getBoundingClientRect().top;
-  const sheet = document.querySelector<HTMLElement>(".info");
-  const head = sheet?.querySelector<HTMLElement>(".info__head");
-  if (sheet && head) {
-    const r = sheet.getBoundingClientRect();
-    const middle = box.left + box.width / 2;
-    if (r.left < middle && r.right > middle) {
-      bottom = Math.min(bottom, r.bottom - head.offsetHeight - (sheet.offsetHeight - sheet.clientHeight));
-    }
-  }
-  return { top: (top - box.top) / box.height, bottom: (bottom - box.top) / box.height };
 }
 
 export default App;
