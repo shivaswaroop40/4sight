@@ -101,7 +101,7 @@ class UniverseExperience implements FourDExperience {
     root.add(wash);
     this.wash = wash;
 
-    this.field = new UniverseField(web, ctx.renderer.getPixelRatio(), this.track(galaxyAtlas()));
+    this.field = new UniverseField(web, this.track(galaxyAtlas()));
     root.add(this.field.matter, this.field.galaxies, this.field.veilBack, this.field.veil);
 
     this.whoosh = this.sprite(this.track(expansionTexture()));

@@ -212,7 +212,7 @@ export class UniverseField {
   private veilUniforms: Record<string, THREE.IUniform>;
   private disposables: { dispose(): void }[] = [];
 
-  constructor(web: CosmicWeb, pixelRatio: number, galaxyMap: THREE.Texture) {
+  constructor(web: CosmicWeb, galaxyMap: THREE.Texture) {
     const p = web.particles;
     const matterGeometry = this.track(new THREE.BufferGeometry());
     matterGeometry.setAttribute("position", new THREE.BufferAttribute(p.start, 3));
@@ -226,7 +226,7 @@ export class UniverseField {
       uVisible: { value: 0 },
       uStars: { value: 0 },
       uGalaxies: { value: 0 },
-      uPointScale: { value: 26 * pixelRatio },
+      uPointScale: { value: 26 },
     };
     this.matter = new THREE.Points(
       matterGeometry,
@@ -243,6 +243,11 @@ export class UniverseField {
     // The shader moves every particle, so the CPU bounding sphere is meaningless.
     this.matter.frustumCulled = false;
     this.matter.renderOrder = 1;
+    // gl_PointSize is in device pixels. The ratio changes under a video export
+    // (held at 1) and whenever the renderer is retuned, so read it per frame.
+    this.matter.onBeforeRender = (renderer) => {
+      this.matterUniforms.uPointScale.value = 26 * renderer.getPixelRatio();
+    };
 
     const g = web.galaxies;
     const quad = new THREE.PlaneGeometry(1, 1);

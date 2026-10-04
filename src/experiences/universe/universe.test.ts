@@ -1,5 +1,7 @@
+import * as THREE from "three";
 import { describe, expect, it } from "vitest";
 import { spanClock } from "../../core/analogy";
+import { fakeSceneContext } from "../../renderer/fakeSceneContext";
 import { YEAR_SECONDS } from "../../core/timescale";
 import { knotMapping } from "../../core/mappings";
 import { buildCosmicWeb } from "./cosmicWeb";
@@ -204,6 +206,23 @@ describe("universe scene data", () => {
     expect(hoverInfo("sun", 1.38e10)!.description).toMatch(/halfway/);
     const texts = new Set([8.8e9, 9.3e9, 1.1e10, 1.38e10].map((t) => hoverInfo("sun", t)!.description));
     expect(texts.size).toBe(4);
+  });
+
+  it("sizes the dots from the renderer's pixel ratio at each frame, not the one at mount", () => {
+    const ctx = fakeSceneContext();
+    const renderer = ctx.renderer as unknown as { getPixelRatio: () => number };
+    universeExperience.mount(ctx);
+    const matter = ctx.scene.getObjectsByProperty("type", "Points")[0] as THREE.Points<THREE.BufferGeometry, THREE.ShaderMaterial>;
+    const frame = () => matter.onBeforeRender(ctx.renderer, ctx.scene, ctx.camera, matter.geometry, matter.material, new THREE.Group());
+    frame();
+    expect(matter.material.uniforms.uPointScale.value).toBe(26);
+    renderer.getPixelRatio = () => 2;
+    frame();
+    expect(matter.material.uniforms.uPointScale.value).toBe(52);
+    renderer.getPixelRatio = () => 1;
+    frame();
+    expect(matter.material.uniforms.uPointScale.value).toBe(26);
+    universeExperience.dispose();
   });
 
   it("offers the three named views, none duplicating the Overview button", () => {
