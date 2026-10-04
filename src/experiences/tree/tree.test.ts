@@ -75,6 +75,17 @@ describe("oak growth", () => {
     expect((girthAt(100) - girthAt(50)) / 50).toBeCloseTo(0.0251, 3);
   });
 
+  it("grows the sapling at the rate its card claims", () => {
+    const card = EVENTS.find((e) => e.id === "sapling")!.keyPoints!.find((k) => /cm a year/.test(k))!;
+    const [, lo, hi] = card.match(/(\d+) to (\d+) cm a year/)!.map(Number);
+    expect([lo, hi]).toEqual([25, 30]);
+    for (let t = 2; t <= 20; t++) {
+      const cmPerYear = (heightAt(t + 1) - heightAt(t)) * 100;
+      expect(cmPerYear).toBeGreaterThanOrEqual(lo - 0.5);
+      expect(cmPerYear).toBeLessThanOrEqual(hi);
+    }
+  });
+
   it("lays down one ring per year", () => {
     expect(ringCount(0.9)).toBe(0);
     expect(ringCount(1)).toBe(1);

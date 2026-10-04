@@ -67,7 +67,7 @@ export const EVENTS: TimelineEvent[] = [
     description: `About ${heightAt(STORY.sapling).toFixed(1)} m tall, with leafy branches all the way down the stem.`,
     keyPoints: [
       "Rabbits and deer nibbling shoots and bark are the big danger now.",
-      "In good light it grows 30 to 50 cm a year.",
+      "In good light it grows 25 to 30 cm a year.",
       "Oak needs light: seedlings in deep shade rarely make it.",
     ],
     category: "growth",
