@@ -55,7 +55,7 @@ export function StatusRail() {
       {failed && (
         <div className="sticker toast toast--error">
           <span>Couldn't load {entryFor(failed.id)?.name ?? failed.id}</span>
-          <button type="button" className="chip" onClick={() => void showExperience(failed.id)}>
+          <button type="button" className="chip" onClick={() => void showExperience(failed.id, failed.u)}>
             <ResetIcon />
             <span>Retry</span>
           </button>
@@ -206,7 +206,7 @@ export function StageNotice() {
       <span className="notice__title">Couldn't load {name}</span>
       <p className="notice__detail">{load.message}</p>
       <div className="notice__actions">
-        <button type="button" className="chip chip--accent" onClick={() => void showExperience(load.id)}>
+        <button type="button" className="chip chip--accent" onClick={() => void showExperience(load.id, load.u)}>
           <ResetIcon />
           <span>Retry</span>
         </button>

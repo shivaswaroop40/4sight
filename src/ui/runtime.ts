@@ -23,11 +23,14 @@ export const controller = new TimeController();
 /** Set by App once the renderer exists. */
 export const runtime: { manager: SceneManager | null; urlSync: UrlSync | null } = { manager: null, urlSync: null };
 
-/** The latest experience request. "ready" means the mounted experience is the one asked for. */
+/**
+ * The latest experience request. "ready" means the mounted experience is the
+ * one asked for. `u` is the moment it was asked for, so a retry opens there.
+ */
 export type LoadState =
-  | { status: "loading"; id: ExperienceId }
+  | { status: "loading"; id: ExperienceId; u: number }
   | { status: "ready" }
-  | { status: "failed"; id: ExperienceId; message: string };
+  | { status: "failed"; id: ExperienceId; u: number; message: string };
 
 export type Toast = { kind: "copied" } | { kind: "copyFailed"; url: string } | { kind: "saved"; fileName: string };
 
@@ -119,7 +122,7 @@ export async function showExperience(id: ExperienceId, u = 0): Promise<void> {
     window.location.replace(formatMoment(window.location.href, { id, u }));
     return;
   }
-  setUi({ load: { status: "loading", id } });
+  setUi({ load: { status: "loading", id, u } });
   try {
     const experience = await loadExperience(id);
     const manager = runtime.manager;
@@ -131,7 +134,7 @@ export async function showExperience(id: ExperienceId, u = 0): Promise<void> {
   } catch (error) {
     if (request !== latestRequest) return;
     const message = error instanceof Error ? error.message : String(error);
-    setUi({ load: { status: "failed", id, message } });
+    setUi({ load: { status: "failed", id, u, message } });
   }
 }
 
