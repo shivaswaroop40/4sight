@@ -1,3 +1,4 @@
+import * as THREE from "three";
 import { describe, expect, it } from "vitest";
 import { fakeSceneContext } from "../../renderer/fakeSceneContext";
 import {
@@ -213,6 +214,25 @@ describe("heart filters", () => {
     heart.setFilters!({ electrical: true, "blood-flow": false });
     heart.setTime(150);
     expect(shown()).toEqual([true, false]);
+    heart.dispose();
+  });
+
+  it("stops the depolarisation front and tint on the muscle when the electrical signal is off", () => {
+    const ctx = fakeSceneContext();
+    heart.mount(ctx);
+    const wall = [...ctx.hoverables].find(([, id]) => id === "heartWall")![0] as THREE.Mesh;
+    const shader = {
+      uniforms: {} as Record<string, { value: number }>,
+      vertexShader: "#include <common>\n#include <begin_vertex>",
+      fragmentShader: "#include <common>\n#include <opaque_fragment>",
+    };
+    (wall.material as THREE.Material).onBeforeCompile(shader as never, ctx.renderer);
+    const wave = () => ["uAtrialSpread", "uAtrialTint", "uVentSpread", "uVentTint"].map((k) => shader.uniforms[k].value);
+    heart.setTime(200);
+    expect(wave()).toEqual([1, 0.5, 0.5, 1]);
+    heart.setFilters!({ electrical: false, "blood-flow": true });
+    heart.setTime(200);
+    expect(wave()).toEqual([0, 0, 0, 0]);
     heart.dispose();
   });
 });

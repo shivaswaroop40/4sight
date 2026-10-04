@@ -377,10 +377,11 @@ class HeartExperience implements FourDExperience {
     if (this.body) {
       const a = atrialWave(t);
       const v = ventricularWave(t);
-      this.body.wave.uAtrialSpread.value = a.spread;
-      this.body.wave.uAtrialTint.value = electrical ? a.tint : 0;
-      this.body.wave.uVentSpread.value = v.spread;
-      this.body.wave.uVentTint.value = electrical ? v.tint : 0;
+      const on = electrical ? 1 : 0;
+      this.body.wave.uAtrialSpread.value = a.spread * on;
+      this.body.wave.uAtrialTint.value = a.tint * on;
+      this.body.wave.uVentSpread.value = v.spread * on;
+      this.body.wave.uVentTint.value = v.tint * on;
     }
 
     for (const pool of this.pools) pool.uniforms.uPoolShrink.value = poolShrink(POOLS[pool.id].band, t);
