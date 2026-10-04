@@ -322,6 +322,11 @@ button {
   outline-offset: -3px;
 }
 
+.menu__item[aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: default;
+}
+
 /* Filters popover */
 
 .actions__btn {

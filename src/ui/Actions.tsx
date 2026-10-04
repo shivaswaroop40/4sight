@@ -214,6 +214,7 @@ function FilterRadios({ group, options, state }: { group: string; options: Visua
 
 function MoreMenu() {
   const exportable = useUi((s) => s.exportable);
+  const loading = useUi((s) => s.load.status === "loading");
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
@@ -280,7 +281,10 @@ function MoreMenu() {
               type="button"
               role="menuitem"
               className="menu__item"
+              aria-disabled={loading}
+              title={loading ? "Available once the experience has loaded" : undefined}
               onClick={() => {
+                if (loading) return;
                 // Focus on More first, so the export dialog hands it back there when it closes.
                 close(true);
                 void startExport();

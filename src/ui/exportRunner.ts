@@ -53,8 +53,9 @@ export function checkExportSupport(): void {
 
 export async function startExport(): Promise<void> {
   const manager = runtime.manager;
-  const { experience, exporting } = getUi();
-  if (!manager || !experience || exporting.phase !== "idle") return;
+  const { experience, exporting, load } = getUi();
+  // A chunk that lands mid-export would mount into the video.
+  if (!manager || !experience || exporting.phase !== "idle" || load.status === "loading") return;
   dispatchTour({ type: "exit" });
   const before = controller.state;
   controller.pause();

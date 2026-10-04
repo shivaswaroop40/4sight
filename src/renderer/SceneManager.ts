@@ -129,9 +129,12 @@ export class SceneManager {
    * before the controller attaches, so the first frame is already filtered.
    *
    * If the experience throws, it is unmounted, time is paused, nothing is
-   * mounted, and the error is rethrown.
+   * mounted, and the error is rethrown. Mounting while a video export holds
+   * the stage throws and leaves the current experience in place: the video
+   * would switch experiences mid-file.
    */
   mount(experience: FourDExperience, filters: FilterState, animateCamera = false): void {
+    if (this.loop === "held") throw new Error("Can't switch experiences while a video exports.");
     if (this.experience) this.unmount();
     this.experience = experience;
     this.setHovered(null);
