@@ -201,6 +201,13 @@ describe("oak hover and camera", () => {
     expect(hoverInfo("trunk", 0.2)).toBeNull();
   });
 
+  it("mentions the storm's narrow rings only once the storm has happened", () => {
+    expect(hoverInfo("rings", 50)!.description).not.toMatch(/storm/);
+    expect(hoverInfo("rings", STORY.storm - 0.01)!.description).not.toMatch(/storm/);
+    expect(hoverInfo("rings", STORY.storm)!.description).toMatch(/Narrow rings after year 84 mark the storm\.$/);
+    expect(hoverInfo("rings", 150)!.description).toMatch(/Narrow rings after year 84 mark the storm\.$/);
+  });
+
   it("calls the scar a hollow once rot opens it", () => {
     expect(hoverInfo("scar", 90)!.name).toBe("Storm scar");
     expect(hoverInfo("scar", 130)!.name).toBe("Storm scar and hollow");

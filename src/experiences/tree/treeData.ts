@@ -253,7 +253,8 @@ export function hoverInfo(id: string, t: number): ObjectMetadata | null {
         id,
         name: "Growth rings",
         description:
-          "A slice through the trunk near the ground, magnified. Each ring is one year: pale spring wood with big pores, then dense summer wood. Narrow rings after year 84 mark the storm.",
+          "A slice through the trunk near the ground, magnified. Each ring is one year: pale spring wood with big pores, then dense summer wood." +
+          (t >= STORY.storm ? " Narrow rings after year 84 mark the storm." : ""),
         category: "tree",
         properties: { Rings: ringCount(t), Age: age, "Pale sapwood": "outer 20 to 30 rings" },
       };
