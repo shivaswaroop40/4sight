@@ -142,7 +142,6 @@ class HeartExperience implements FourDExperience {
   private flow: THREE.InstancedMesh | null = null;
   private electrical: THREE.Group | null = null;
   private filters: FilterState = defaultFilterState(FILTERS);
-  private ecgGroup: THREE.Group | null = null;
   private ecgTrace: THREE.Mesh | null = null;
   private ecgHead: THREE.Mesh | null = null;
   private ecgLabels: Label[] = [];
@@ -151,7 +150,6 @@ class HeartExperience implements FourDExperience {
   private chamberLabels: { mesh: THREE.Mesh; pool: ChamberId }[] = [];
   private hoverables: THREE.Object3D[] = [];
   private textures: THREE.Texture[] = [];
-  private previousSceneHook: THREE.Object3D["onBeforeRender"] | null = null;
   private time = 0;
 
   private readonly scratch = new THREE.Object3D();
@@ -251,7 +249,6 @@ class HeartExperience implements FourDExperience {
 
     this.buildEcg(root);
     this.buildBursts(heart);
-    this.installBillboard(ctx.scene);
     document.fonts
       ?.load(DISPLAY_FONT_PROBE)
       .then(() => {
@@ -278,10 +275,18 @@ class HeartExperience implements FourDExperience {
     group.position.copy(ECG_POSITION);
     group.scale.setScalar(ECG_SCALE);
     root.add(group);
-    this.ecgGroup = group;
 
     const panel = ecgPanelMesh();
     panel.position.z = -0.1;
+    // The strip turns to face the camera so it stays readable from the side
+    // view. That is a view concern, not a time one, so it runs from the
+    // panel's own render hook rather than in setTime. The panel draws before
+    // its siblings so they render with the matrix this writes.
+    panel.renderOrder = -1;
+    panel.onBeforeRender = (_renderer, _scene, camera) => {
+      group.quaternion.copy(camera.quaternion);
+      group.updateMatrixWorld(true);
+    };
     group.add(panel);
     this.hover(panel, "ecg");
 
@@ -343,23 +348,6 @@ class HeartExperience implements FourDExperience {
     };
     this.lub = make("LUB!", LUB_ANCHOR);
     this.dub = make("DUB!", DUB_ANCHOR);
-  }
-
-  /**
-   * The ECG strip turns to face the camera so it stays readable from the
-   * side view. It is a view concern, not a time one, so it runs per frame
-   * from the scene's render hook rather than in setTime.
-   */
-  private installBillboard(scene: THREE.Scene): void {
-    const previous = scene.onBeforeRender;
-    this.previousSceneHook = previous;
-    scene.onBeforeRender = (...args) => {
-      if (this.ecgGroup) {
-        this.ecgGroup.quaternion.copy(args[2].quaternion);
-        this.ecgGroup.updateMatrixWorld(true);
-      }
-      previous.apply(scene, args);
-    };
   }
 
   setTime(time: number): void {
@@ -521,7 +509,6 @@ class HeartExperience implements FourDExperience {
     const ctx = this.ctx;
     if (ctx) {
       for (const o of this.hoverables) ctx.unregisterHoverable(o);
-      if (this.previousSceneHook) ctx.scene.onBeforeRender = this.previousSceneHook;
     }
     for (const tex of this.textures) tex.dispose();
     if (this.root) disposeObject(this.root);
@@ -540,11 +527,10 @@ class HeartExperience implements FourDExperience {
     this.saHalo = this.avHalo = null;
     this.flow = null;
     this.electrical = null;
-    this.ecgGroup = this.ecgTrace = this.ecgHead = null;
+    this.ecgTrace = this.ecgHead = null;
     this.lub = this.dub = null;
     this.root = null;
     this.lights = null;
-    this.previousSceneHook = null;
     this.ctx = null;
   }
 }

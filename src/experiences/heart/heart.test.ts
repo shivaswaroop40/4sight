@@ -196,6 +196,22 @@ describe("blood flow", () => {
   });
 });
 
+describe("ECG strip", () => {
+  it("turns to face the camera from its own panel and leaves the scene's render hook alone", () => {
+    const ctx = fakeSceneContext();
+    heart.mount(ctx);
+    expect(ctx.scene.onBeforeRender).toBe(THREE.Object3D.prototype.onBeforeRender);
+    const panel = [...ctx.hoverables].find(([, id]) => id === "ecg")![0] as THREE.Mesh;
+    const strip = ctx.scene.getObjectByName("ecg")!;
+    ctx.camera.position.set(12.4, 0.1, 14);
+    ctx.camera.lookAt(0.25, -1.6, 0);
+    expect(strip.quaternion.angleTo(ctx.camera.quaternion)).toBeGreaterThan(0.5);
+    panel.onBeforeRender(ctx.renderer, ctx.scene, ctx.camera, panel.geometry, panel.material as THREE.Material, null as never);
+    expect(strip.quaternion.angleTo(ctx.camera.quaternion)).toBe(0);
+    heart.dispose();
+  });
+});
+
 describe("heart filters", () => {
   it("offers the electrical signal and blood flow, both on", () => {
     expect(heart.getAvailableFilters().map((f) => [f.id, f.name, f.defaultOn])).toEqual([
