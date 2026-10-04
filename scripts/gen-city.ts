@@ -353,19 +353,19 @@ for (let gx = -20; gx <= -12; gx += 2.2) {
 
 // Named landmarks with their own hover text.
 landmark(-6.5, -4.6, [
-  { kit: KIT.townhouse, to: 1899 },
-  { kit: () => KIT.deco(5.2, "#E6D3B0"), from: 1902, hover: "exchange" },
+  { kit: KIT.townhouse, to: 1896 },
+  { kit: () => KIT.deco(5.2, "#E6D3B0"), from: 1899, hover: "exchange" },
 ]);
 landmark(4.6, -8.2, [
   { kit: KIT.cottage, to: 1798 },
-  { kit: KIT.warehouse, from: 1800, to: 1927 },
-  { kit: () => KIT.deco(9, "#D6BC92"), from: 1930, hover: "meridian" },
+  { kit: KIT.warehouse, from: 1800, to: 1925 },
+  { kit: () => KIT.deco(9, "#D6BC92"), from: 1928, hover: "meridian" },
 ]);
 landmark(-10.2, -5.3, [
-  { kit: KIT.apartment, from: 1890, to: 1964 },
-  { kit: () => KIT.glass(8.5, C.glassDeep), from: 1968, hover: "glass-tower" },
+  { kit: KIT.apartment, from: 1890, to: 1962 },
+  { kit: () => KIT.glass(8.5, C.glassDeep), from: 1965, hover: "glass-tower" },
 ]);
-landmark(-13.4, -5.4, [{ kit: () => [...KIT.glass(10.5, "#A9CCD8"), { primitive: "sphere", params: { radius: 0.5 }, color: C.leaf, position: v3(0, 10.85, 0) }], from: 2014, hover: "river-spire" }]);
+landmark(-13.4, -5.4, [{ kit: () => [...KIT.glass(10.5, "#A9CCD8"), { primitive: "sphere", params: { radius: 0.5 }, color: C.leaf, position: v3(0, 10.85, 0) }], from: 2011, hover: "river-spire" }]);
 
 plots.forEach((plot, i) => {
   plot.occupants.forEach((o, j) => {
@@ -465,15 +465,15 @@ thing("narrowboat", v3(-2, 0.03, 9), 0, { from: 1796, to: 1900 }, [
 const TRACK_Z = 5.2;
 add({ id: "railway", primitive: "box", params: { width: 22, height: 0.08, depth: 0.7, bottom: 1 }, color: "#8A7766", outline: 0.015, hover: "railway", position: v3(-17, 0, TRACK_Z), scale: lifeScale({ from: 1836, rise: 2 }) });
 for (const dz of [-0.18, 0.18]) {
-  add({ id: `rail-${dz < 0 ? "n" : "s"}`, primitive: "box", params: { width: 22, height: 0.06, depth: 0.05, bottom: 1 }, color: C.rail, outline: false, position: v3(-17, 0.08, TRACK_Z + dz), scale: lifeScale({ from: 1837, rise: 1.5 }) });
+  add({ id: `rail-${dz < 0 ? "n" : "s"}`, primitive: "box", params: { width: 22, height: 0.06, depth: 0.05, bottom: 1 }, color: C.rail, outline: false, position: v3(-17, 0.08, TRACK_Z + dz), scale: lifeScale({ from: 1836.5, rise: 1.5 }) });
 }
-thing("station", v3(-9.5, 0, 7.4), 0, { from: 1840, rise: 4 }, [
+thing("station", v3(-9.5, 0, 7.4), 0, { from: 1836, rise: 4 }, [
   box(3.2, 1.3, 1.3, C.stone),
   gable(1.3, 3.2, 0.5, C.roofDark, 1.3),
   { primitive: "cylinder", params: { radiusTop: 0.9, radiusBottom: 0.9, height: 4.4, radialSegments: 20 }, color: [key(START, "#B8C9C6"), key(1990, "#B8C9C6"), key(1995, C.glass, "smooth")], position: v3(-1.4, 0, -2.2), rotation: [0, 0, 90], outline: 0.025 },
   { primitive: "cylinder", params: { radiusTop: 0.25, radiusBottom: 0.25, height: 0.08, radialSegments: 16 }, color: C.wall, position: v3(0, 1.0, 0.68), rotation: [90, 0, 0], outline: 0.015 },
 ], "station");
-thing("station-tower", v3(-8.2, 0, 7.4), 0, { from: 1841, rise: 4 }, [
+thing("station-tower", v3(-8.2, 0, 7.4), 0, { from: 1836, rise: 4 }, [
   box(0.7, 2.4, 0.7, C.stone),
   pyramid(0.7, 0.7, 0.6, C.roofDark, 2.4),
 ], "station");
@@ -556,7 +556,7 @@ add({ id: "pond", primitive: "cylinder", params: { radiusTop: 1.6, radiusBottom:
 
 const BRIDGE_X = 2;
 const bz = riverZ(BRIDGE_X);
-thing("wooden-bridge", v3(BRIDGE_X, 0, bz), 0, { from: 1765, to: 1886, rise: 3 }, [
+thing("wooden-bridge", v3(BRIDGE_X, 0, bz), 0, { from: 1762, to: 1886, rise: 3 }, [
   box(1.0, 0.12, 6.2, C.timber, 0.4),
   ...[-1.4, 0, 1.4].map((dz) => ({ primitive: "cylinder", params: { radiusTop: 0.08, radiusBottom: 0.08, height: 0.45, radialSegments: 6, bottom: 1 }, color: C.trunk, position: v3(0, 0, dz), outline: 0.012 })),
 ], "wooden-bridge");
@@ -581,11 +581,11 @@ tram("light-rail", 2012, undefined, C.wall, C.steel, "light-rail");
 for (let i = 0; i < 8; i++) {
   const x = -9 + i * 3;
   const z = bankZ(x) - 0.2;
-  thing(`gas-lamp-${i + 1}`, v3(x, 0, z), 0, { from: 1818 + i * 0.6, to: 1890, rise: 1 }, [
+  thing(`gas-lamp-${i + 1}`, v3(x, 0, z), 0, { from: 1818 + i * 0.6, to: 1882 + i * 0.5, rise: 1, fall: 1 }, [
     { primitive: "cylinder", params: { radiusTop: 0.035, radiusBottom: 0.05, height: 0.8, radialSegments: 6, bottom: 1 }, color: C.ink, outline: false },
     { primitive: "box", params: { width: 0.18, height: 0.22, depth: 0.18, bottom: 1 }, color: C.lampGas, shading: "flat", position: v3(0, 0.8, 0), outline: 0.015 },
   ], "gas-lamps");
-  thing(`electric-lamp-${i + 1}`, v3(x, 0, z), 0, { from: 1884 + i * 0.5, rise: 1.5 }, [
+  thing(`electric-lamp-${i + 1}`, v3(x, 0, z), 0, { from: 1883 + i * 0.5, rise: 1.5 }, [
     { primitive: "cylinder", params: { radiusTop: 0.03, radiusBottom: 0.05, height: 1.3, radialSegments: 6, bottom: 1 }, color: "#4C5A55", outline: false },
     { primitive: "sphere", params: { radius: 0.13, widthSegments: 12, heightSegments: 8 }, color: C.lampElectric, shading: "flat", position: v3(0, 1.38, 0), outline: 0.015 },
   ], "electric-lamps");
@@ -595,7 +595,7 @@ for (let i = 0; i < 8; i++) {
 
 const HIGHWAY_Y = 1.5;
 const HIGHWAY_XS = Array.from({ length: 14 }, (_, i) => -26 + i * 4);
-thing("highway", v3(0, 0, 0), 0, { from: 1957, to: 2001, rise: 3, fall: 3 }, [
+thing("highway", v3(0, 0, 0), 0, { from: 1954, to: 2001, rise: 3, fall: 3 }, [
   ...HIGHWAY_XS.slice(1).map((x2, i) => {
     const x1 = HIGHWAY_XS[i];
     const dz = highwayZ(x2) - highwayZ(x1);
@@ -608,7 +608,7 @@ thing("highway", v3(0, 0, 0), 0, { from: 1957, to: 2001, rise: 3, fall: 3 }, [
   ...HIGHWAY_XS.slice(1, -1).map((x) => ({ primitive: "cylinder", params: { radiusTop: 0.15, radiusBottom: 0.18, height: HIGHWAY_Y, radialSegments: 8, bottom: 1 }, color: "#BDB5A8", position: v3(x, 0, highwayZ(x)), outline: 0.015 })),
 ], "highway");
 const RING_Z = -15;
-add({ id: "ring-road", primitive: "box", params: { width: 54, height: 0.06, depth: 1.3, bottom: 1 }, color: C.asphalt, outline: 0.015, hover: "ring-road", position: v3(0, 0, RING_Z), scale: lifeScale({ from: 1962, rise: 4 }) });
+add({ id: "ring-road", primitive: "box", params: { width: 54, height: 0.06, depth: 1.3, bottom: 1 }, color: C.asphalt, outline: 0.015, hover: "ring-road", position: v3(0, 0, RING_Z), scale: lifeScale({ from: 1958, rise: 4 }) });
 
 const CAR_COLORS = [C.steel, "#5E8FB0", C.lampGas, "#81B29A", "#E9B8A0", C.wall];
 function car(id: string, keys: Key<Vec3>[], life: Life, turn: number): void {

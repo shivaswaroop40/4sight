@@ -67,12 +67,18 @@ describe("city state", () => {
     expect(shown(1800, "canal")).toBe(true);
   });
 
-  it("lights the quay with gas, then electricity", () => {
+  it("lights the quay with gas, then swaps each lamp for an electric one from 1882", () => {
     expect(shown(1810, "gas-lamp-1")).toBe(false);
     expect(shown(1850, "gas-lamp-1")).toBe(true);
-    expect(shown(1850, "electric-lamp-1")).toBe(false);
-    expect(shown(1900, "gas-lamp-1")).toBe(false);
-    expect(shown(1900, "electric-lamp-1")).toBe(true);
+    expect(shown(1882, "electric-lamp-1")).toBe(false);
+    expect(shown(1890, "gas-lamp-8")).toBe(false);
+    expect(shown(1890, "electric-lamp-8")).toBe(true);
+    for (let lamp = 1; lamp <= 8; lamp++) {
+      for (let year = 1800; year <= 1900; year += 0.05) {
+        const both = shown(year, `gas-lamp-${lamp}`) && shown(year, `electric-lamp-${lamp}`);
+        expect(both, `lamp ${lamp} in ${year.toFixed(2)}`).toBe(false);
+      }
+    }
   });
 
   it("brings the railway in the 1830s and swaps steam for electric in the 1960s", () => {
@@ -124,14 +130,27 @@ describe("city state", () => {
     expect(pose(1950, "mill-wheel").rotation).toEqual(pose(2025, "mill-wheel").rotation);
   });
 
-  it("raises the art deco tower in 1930 and the River Spire in 2014", () => {
-    const meridian = exp.def.objects.find((o) => o.hover === "meridian")!;
-    const owner = meridian.parent!;
-    expect(shown(1925, owner)).toBe(false);
-    expect(shown(1935, owner)).toBe(true);
-    const spire = exp.def.objects.find((o) => o.hover === "river-spire")!.parent!;
-    expect(shown(2010, spire)).toBe(false);
-    expect(shown(2020, spire)).toBe(true);
+  it("finishes every dated landmark and structure by the year its card gives", () => {
+    const byId = new Map(exp.def.objects.map((o) => [o.id, o]));
+    const root = (id: string) => {
+      let o = byId.get(id)!;
+      while (o.parent) o = byId.get(o.parent)!;
+      return o.id;
+    };
+    const dated = Object.entries(exp.def.hover).flatMap(([id, h]) => {
+      const year = h.properties?.Built ?? h.properties?.Opened;
+      return typeof year === "number" && (h.category === "landmark" || h.category === "transport") ? [[id, year] as const] : [];
+    });
+    expect(dated.map(([id]) => id)).toEqual([
+      "railway", "station", "riverside-works", "wooden-bridge", "bridge", "highway", "ring-road", "exchange", "meridian", "glass-tower", "river-spire",
+    ]);
+    for (const [hover, year] of dated) {
+      const roots = new Set(exp.def.objects.filter((o) => o.hover === hover).map((o) => root(o.id)));
+      for (const id of roots) {
+        expect(pose(year, id).scale, `${id} (${hover}) in ${year}`).toEqual([1, 1, 1]);
+        expect(shown(year - 5, id), `${id} (${hover}) in ${year - 5}`).toBe(false);
+      }
+    }
   });
 
   it("describes landmarks for the year on screen", () => {
@@ -141,7 +160,18 @@ describe("city state", () => {
     );
     exp.setTime(1995);
     expect(exp.getHoveredObject("mill")?.description).toBe("Restored as a café and small museum.");
-    expect(exp.getHoveredObject("chimney")?.description).toMatch(/kept as a monument/);
+    expect(exp.getHoveredObject("chimney")?.description).toMatch(/monument/);
+  });
+
+  it("does not mention the park before it is laid out, or the station before it opens", () => {
+    exp.setTime(1980);
+    expect(exp.getHoveredObject("chimney")?.description).not.toMatch(/park|monument/);
+    exp.setTime(1987);
+    expect(exp.getHoveredObject("chimney")?.description).toMatch(/monument in the new park/);
+    exp.setTime(1837);
+    expect(exp.getHoveredObject("station-quarter")?.description).not.toMatch(/station/);
+    exp.setTime(1840);
+    expect(exp.getHoveredObject("station-quarter")?.description).toMatch(/station/);
   });
 });
 

@@ -97,7 +97,7 @@ export const cityStory = {
       title: "Electric light",
       when: "1882",
       description:
-        "Electric street lamps replace the gas lamps along the quay. In 1882 Edison's Pearl Street Station in New York and the Holborn Viaduct station in London began supplying electricity to paying customers.",
+        "Electric street lamps replace the gas lamps along the quay, one by one. In 1882 Edison's Pearl Street Station in New York and the Holborn Viaduct station in London began supplying electricity to paying customers.",
       keyPoints: ["Arc lamps and then bulbs replace gas flames", "Power stations send electricity through cables", "Electricity soon drives trams and lifts too"],
       category: "light",
     },
@@ -108,7 +108,7 @@ export const cityStory = {
       when: "1887 to 1890",
       description:
         "The old wooden bridge comes down and a steel arch bridge goes up, strong enough for heavy carts and, soon, trams. Steel had become cheap after the Bessemer process of the 1850s.",
-      keyPoints: ["Steel is stronger and lighter than iron", "The arch carries the deck on hangers", "Painted red to keep off rust"],
+      keyPoints: ["Steel is stronger than iron, so the frame can be slimmer", "The arch carries the deck on hangers", "Painted red to keep off rust"],
       category: "engineering",
     },
     {
@@ -165,9 +165,9 @@ export const cityStory = {
       id: "park",
       time: 1987,
       title: "A park on the old works",
-      when: "1987",
+      when: "1987 · opens in 1992",
       description:
-        "The cleaned-up works become a park with a pond, and one chimney is kept as a monument. Germany's Landscape Park Duisburg-Nord (1994) and Seattle's Gas Works Park (1975) turned old industry into parks the same way.",
+        "The cleaned-up works are laid out as a park with a pond, and one chimney is kept as a monument. Germany's Landscape Park Duisburg-Nord (1994) and Seattle's Gas Works Park (1975) turned old industry into parks the same way.",
       keyPoints: ["Polluted soil is capped or cleaned", "Old industrial landmarks are kept as reminders", "The warehouses become flats and studios"],
       category: "green",
     },
@@ -187,7 +187,7 @@ export const cityStory = {
       title: "Today",
       when: "2012 to today",
       description:
-        "Trams are back as modern light rail, the tallest tower has a garden on its roof, and boats carry visitors past the old mill. The church, the mill and one chimney still stand among glass towers three centuries younger.",
+        "Trams are back as modern light rail, the tallest tower has a garden on its roof, and boats carry visitors past the old mill. The church, the mill and one chimney still stand among glass towers centuries younger than the church.",
       keyPoints: ["Many cities rebuilt tram lines from the 1980s on", "Old buildings get new uses", "More than half of all people now live in cities"],
       category: "today",
     },
@@ -235,7 +235,8 @@ export const cityStory = {
       category: "district",
       descriptions: [
         range(START, "Farmland on the south bank."),
-        range(1836, "Streets of terraced houses grow up around the new railway station."),
+        range(1836, "Fields cleared for the railway, which is on its way."),
+        range(1840, "The new railway station opens, and streets of terraced houses grow up around it."),
       ],
     },
     works: {
@@ -255,7 +256,7 @@ export const cityStory = {
       descriptions: [
         range(START, "The oldest building in town and the tallest for over 150 years."),
         range(1902, "Now dwarfed by the new skyscrapers around it."),
-        range(1965, "Still standing among glass towers, three centuries on."),
+        range(1965, "Still standing among glass towers, centuries older than any of them."),
       ],
     },
     mill: {
@@ -286,7 +287,7 @@ export const cityStory = {
         range(1998, "A sightseeing boat for visitors."),
       ],
     },
-    canal: { name: "Canal", category: "transport", properties: { Opened: 1792 }, description: "Dug by hand to bring coal barges to the river. Horses walked the towpath pulling the boats." },
+    canal: { name: "Canal", category: "transport", properties: { Dug: "1792 to 1797" }, description: "Dug by hand to bring coal barges to the river. Horses walked the towpath pulling the boats." },
     railway: { name: "Railway line", category: "transport", properties: { Opened: 1838 }, description: "The line that brought the industrial age to town." },
     station: {
       name: "Railway station",
@@ -305,7 +306,7 @@ export const cityStory = {
     "riverside-works": {
       name: "Riverside works",
       category: "landmark",
-      properties: { Opened: 1846, Closed: 1978 },
+      properties: { Opened: 1850, Closed: 1978 },
       description: "The first big factory in town: a steam-powered textile mill employing hundreds of workers.",
     },
     factories: { name: "Factory", category: "industry", description: "Steam engines drive the machines inside; coal smoke pours from the chimney." },
@@ -314,7 +315,8 @@ export const cityStory = {
       category: "landmark",
       descriptions: [
         range(START, "The chimney of the riverside works, 42 metres of brick."),
-        range(1978, "The works have closed, but the chimney is kept as a monument in the new park."),
+        range(1978, "The works have closed. The chimney is left standing while the site is cleared."),
+        range(1987, "Kept as a monument in the new park on the old works."),
       ],
     },
     smoke: { name: "Coal smoke", category: "industry", description: "Soot and sulphur from burning coal. It blackened buildings and caused deadly smogs in industrial cities." },

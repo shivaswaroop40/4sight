@@ -104,7 +104,7 @@
       "time": 1882,
       "title": "Electric light",
       "when": "1882",
-      "description": "Electric street lamps replace the gas lamps along the quay. In 1882 Edison's Pearl Street Station in New York and the Holborn Viaduct station in London began supplying electricity to paying customers.",
+      "description": "Electric street lamps replace the gas lamps along the quay, one by one. In 1882 Edison's Pearl Street Station in New York and the Holborn Viaduct station in London began supplying electricity to paying customers.",
       "keyPoints": [
         "Arc lamps and then bulbs replace gas flames",
         "Power stations send electricity through cables",
@@ -119,7 +119,7 @@
       "when": "1887 to 1890",
       "description": "The old wooden bridge comes down and a steel arch bridge goes up, strong enough for heavy carts and, soon, trams. Steel had become cheap after the Bessemer process of the 1850s.",
       "keyPoints": [
-        "Steel is stronger and lighter than iron",
+        "Steel is stronger than iron, so the frame can be slimmer",
         "The arch carries the deck on hangers",
         "Painted red to keep off rust"
       ],
@@ -194,8 +194,8 @@
       "id": "park",
       "time": 1987,
       "title": "A park on the old works",
-      "when": "1987",
-      "description": "The cleaned-up works become a park with a pond, and one chimney is kept as a monument. Germany's Landscape Park Duisburg-Nord (1994) and Seattle's Gas Works Park (1975) turned old industry into parks the same way.",
+      "when": "1987 · opens in 1992",
+      "description": "The cleaned-up works are laid out as a park with a pond, and one chimney is kept as a monument. Germany's Landscape Park Duisburg-Nord (1994) and Seattle's Gas Works Park (1975) turned old industry into parks the same way.",
       "keyPoints": [
         "Polluted soil is capped or cleaned",
         "Old industrial landmarks are kept as reminders",
@@ -221,7 +221,7 @@
       "time": 2012,
       "title": "Today",
       "when": "2012 to today",
-      "description": "Trams are back as modern light rail, the tallest tower has a garden on its roof, and boats carry visitors past the old mill. The church, the mill and one chimney still stand among glass towers three centuries younger.",
+      "description": "Trams are back as modern light rail, the tallest tower has a garden on its roof, and boats carry visitors past the old mill. The church, the mill and one chimney still stand among glass towers centuries younger than the church.",
       "keyPoints": [
         "Many cities rebuilt tram lines from the 1980s on",
         "Old buildings get new uses",
@@ -281,7 +281,11 @@
       "category": "district",
       "descriptions": [
         {"from":1700,"text":"Farmland on the south bank."},
-        {"from":1836,"text":"Streets of terraced houses grow up around the new railway station."}
+        {"from":1836,"text":"Fields cleared for the railway, which is on its way."},
+        {
+          "from": 1840,
+          "text": "The new railway station opens, and streets of terraced houses grow up around it."
+        }
       ]
     },
     "works": {
@@ -301,7 +305,7 @@
       "descriptions": [
         {"from":1700,"text":"The oldest building in town and the tallest for over 150 years."},
         {"from":1902,"text":"Now dwarfed by the new skyscrapers around it."},
-        {"from":1965,"text":"Still standing among glass towers, three centuries on."}
+        {"from":1965,"text":"Still standing among glass towers, centuries older than any of them."}
       ]
     },
     "mill": {
@@ -338,7 +342,7 @@
     "canal": {
       "name": "Canal",
       "category": "transport",
-      "properties": {"Opened":1792},
+      "properties": {"Dug":"1792 to 1797"},
       "description": "Dug by hand to bring coal barges to the river. Horses walked the towpath pulling the boats."
     },
     "railway": {
@@ -367,7 +371,7 @@
     "riverside-works": {
       "name": "Riverside works",
       "category": "landmark",
-      "properties": {"Opened":1846,"Closed":1978},
+      "properties": {"Opened":1850,"Closed":1978},
       "description": "The first big factory in town: a steam-powered textile mill employing hundreds of workers."
     },
     "factories": {
@@ -380,7 +384,8 @@
       "category": "landmark",
       "descriptions": [
         {"from":1700,"text":"The chimney of the riverside works, 42 metres of brick."},
-        {"from":1978,"text":"The works have closed, but the chimney is kept as a monument in the new park."}
+        {"from":1978,"text":"The works have closed. The chimney is left standing while the site is cleared."},
+        {"from":1987,"text":"Kept as a monument in the new park on the old works."}
       ]
     },
     "smoke": {
@@ -6638,7 +6643,7 @@
       "primitive": "group",
       "position": [-6.5,0,-4.6],
       "rotation": [0,0,0],
-      "scale": [{"t":1700,"v":[1,1,1]},{"t":1899,"v":[1,1,1]},{"t":1901,"v":[1,0,1],"ease":"easeIn"}]
+      "scale": [{"t":1700,"v":[1,1,1]},{"t":1896,"v":[1,1,1]},{"t":1898,"v":[1,0,1],"ease":"easeIn"}]
     },
     {
       "id": "plot-34-1-1",
@@ -6723,7 +6728,7 @@
       "primitive": "group",
       "position": [-6.5,0,-4.6],
       "rotation": [0,0,0],
-      "scale": [{"t":1902,"v":[1,0,1]},{"t":1905,"v":[1,1,1],"ease":"backOut"}]
+      "scale": [{"t":1899,"v":[1,0,1]},{"t":1902,"v":[1,1,1],"ease":"backOut"}]
     },
     {
       "id": "plot-34-2-1",
@@ -6859,8 +6864,8 @@
       "scale": [
         {"t":1800,"v":[1,0,1]},
         {"t":1803,"v":[1,1,1],"ease":"backOut"},
-        {"t":1927,"v":[1,1,1]},
-        {"t":1929,"v":[1,0,1],"ease":"easeIn"}
+        {"t":1925,"v":[1,1,1]},
+        {"t":1927,"v":[1,0,1],"ease":"easeIn"}
       ]
     },
     {
@@ -6886,7 +6891,7 @@
       "primitive": "group",
       "position": [4.6,0,-8.2],
       "rotation": [0,0,0],
-      "scale": [{"t":1930,"v":[1,0,1]},{"t":1933,"v":[1,1,1],"ease":"backOut"}]
+      "scale": [{"t":1928,"v":[1,0,1]},{"t":1931,"v":[1,1,1],"ease":"backOut"}]
     },
     {
       "id": "plot-35-3-1",
@@ -6987,8 +6992,8 @@
       "scale": [
         {"t":1890,"v":[1,0,1]},
         {"t":1893,"v":[1,1,1],"ease":"backOut"},
-        {"t":1964,"v":[1,1,1]},
-        {"t":1966,"v":[1,0,1],"ease":"easeIn"}
+        {"t":1962,"v":[1,1,1]},
+        {"t":1964,"v":[1,0,1],"ease":"easeIn"}
       ]
     },
     {
@@ -7053,7 +7058,7 @@
       "primitive": "group",
       "position": [-10.2,0,-5.3],
       "rotation": [0,0,0],
-      "scale": [{"t":1968,"v":[1,0,1]},{"t":1971,"v":[1,1,1],"ease":"backOut"}]
+      "scale": [{"t":1965,"v":[1,0,1]},{"t":1968,"v":[1,1,1],"ease":"backOut"}]
     },
     {
       "id": "plot-36-2-1",
@@ -7155,7 +7160,7 @@
       "primitive": "group",
       "position": [-13.4,0,-5.4],
       "rotation": [0,0,0],
-      "scale": [{"t":2014,"v":[1,0,1]},{"t":2017,"v":[1,1,1],"ease":"backOut"}]
+      "scale": [{"t":2011,"v":[1,0,1]},{"t":2014,"v":[1,1,1],"ease":"backOut"}]
     },
     {
       "id": "plot-37-1-1",
@@ -7774,7 +7779,7 @@
       "color": "#6E625A",
       "outline": false,
       "position": [-17,0.08,5.02],
-      "scale": [{"t":1837,"v":[1,0,1]},{"t":1838.5,"v":[1,1,1],"ease":"backOut"}]
+      "scale": [{"t":1836.5,"v":[1,0,1]},{"t":1838,"v":[1,1,1],"ease":"backOut"}]
     },
     {
       "id": "rail-s",
@@ -7783,14 +7788,14 @@
       "color": "#6E625A",
       "outline": false,
       "position": [-17,0.08,5.38],
-      "scale": [{"t":1837,"v":[1,0,1]},{"t":1838.5,"v":[1,1,1],"ease":"backOut"}]
+      "scale": [{"t":1836.5,"v":[1,0,1]},{"t":1838,"v":[1,1,1],"ease":"backOut"}]
     },
     {
       "id": "station",
       "primitive": "group",
       "position": [-9.5,0,7.4],
       "rotation": [0,0,0],
-      "scale": [{"t":1840,"v":[1,0,1]},{"t":1844,"v":[1,1,1],"ease":"backOut"}]
+      "scale": [{"t":1836,"v":[1,0,1]},{"t":1840,"v":[1,1,1],"ease":"backOut"}]
     },
     {
       "id": "station-1",
@@ -7839,7 +7844,7 @@
       "primitive": "group",
       "position": [-8.2,0,7.4],
       "rotation": [0,0,0],
-      "scale": [{"t":1841,"v":[1,0,1]},{"t":1845,"v":[1,1,1],"ease":"backOut"}]
+      "scale": [{"t":1836,"v":[1,0,1]},{"t":1840,"v":[1,1,1],"ease":"backOut"}]
     },
     {
       "id": "station-tower-1",
@@ -9892,8 +9897,8 @@
       "position": [2,0,0.7969],
       "rotation": [0,0,0],
       "scale": [
-        {"t":1765,"v":[1,0,1]},
-        {"t":1768,"v":[1,1,1],"ease":"backOut"},
+        {"t":1762,"v":[1,0,1]},
+        {"t":1765,"v":[1,1,1],"ease":"backOut"},
         {"t":1886,"v":[1,1,1]},
         {"t":1888,"v":[1,0,1],"ease":"easeIn"}
       ]
@@ -10244,8 +10249,8 @@
       "scale": [
         {"t":1818,"v":[1,0,1]},
         {"t":1819,"v":[1,1,1],"ease":"backOut"},
-        {"t":1890,"v":[1,1,1]},
-        {"t":1892,"v":[1,0,1],"ease":"easeIn"}
+        {"t":1882,"v":[1,1,1]},
+        {"t":1883,"v":[1,0,1],"ease":"easeIn"}
       ]
     },
     {
@@ -10273,7 +10278,7 @@
       "primitive": "group",
       "position": [-9,0,-2.3827],
       "rotation": [0,0,0],
-      "scale": [{"t":1884,"v":[1,0,1]},{"t":1885.5,"v":[1,1,1],"ease":"backOut"}]
+      "scale": [{"t":1883,"v":[1,0,1]},{"t":1884.5,"v":[1,1,1],"ease":"backOut"}]
     },
     {
       "id": "electric-lamp-1-1",
@@ -10303,8 +10308,8 @@
       "scale": [
         {"t":1818.6,"v":[1,0,1]},
         {"t":1819.6,"v":[1,1,1],"ease":"backOut"},
-        {"t":1890,"v":[1,1,1]},
-        {"t":1892,"v":[1,0,1],"ease":"easeIn"}
+        {"t":1882.5,"v":[1,1,1]},
+        {"t":1883.5,"v":[1,0,1],"ease":"easeIn"}
       ]
     },
     {
@@ -10332,7 +10337,7 @@
       "primitive": "group",
       "position": [-6,0,-2.118],
       "rotation": [0,0,0],
-      "scale": [{"t":1884.5,"v":[1,0,1]},{"t":1886,"v":[1,1,1],"ease":"backOut"}]
+      "scale": [{"t":1883.5,"v":[1,0,1]},{"t":1885,"v":[1,1,1],"ease":"backOut"}]
     },
     {
       "id": "electric-lamp-2-1",
@@ -10362,8 +10367,8 @@
       "scale": [
         {"t":1819.2,"v":[1,0,1]},
         {"t":1820.2,"v":[1,1,1],"ease":"backOut"},
-        {"t":1890,"v":[1,1,1]},
-        {"t":1892,"v":[1,0,1],"ease":"easeIn"}
+        {"t":1883,"v":[1,1,1]},
+        {"t":1884,"v":[1,0,1],"ease":"easeIn"}
       ]
     },
     {
@@ -10391,7 +10396,7 @@
       "primitive": "group",
       "position": [-3,0,-1.7395],
       "rotation": [0,0,0],
-      "scale": [{"t":1885,"v":[1,0,1]},{"t":1886.5,"v":[1,1,1],"ease":"backOut"}]
+      "scale": [{"t":1884,"v":[1,0,1]},{"t":1885.5,"v":[1,1,1],"ease":"backOut"}]
     },
     {
       "id": "electric-lamp-3-1",
@@ -10421,8 +10426,8 @@
       "scale": [
         {"t":1819.8,"v":[1,0,1]},
         {"t":1820.8,"v":[1,1,1],"ease":"backOut"},
-        {"t":1890,"v":[1,1,1]},
-        {"t":1892,"v":[1,0,1],"ease":"easeIn"}
+        {"t":1883.5,"v":[1,1,1]},
+        {"t":1884.5,"v":[1,0,1],"ease":"easeIn"}
       ]
     },
     {
@@ -10450,7 +10455,7 @@
       "primitive": "group",
       "position": [0,0,-1.3],
       "rotation": [0,0,0],
-      "scale": [{"t":1885.5,"v":[1,0,1]},{"t":1887,"v":[1,1,1],"ease":"backOut"}]
+      "scale": [{"t":1884.5,"v":[1,0,1]},{"t":1886,"v":[1,1,1],"ease":"backOut"}]
     },
     {
       "id": "electric-lamp-4-1",
@@ -10480,8 +10485,8 @@
       "scale": [
         {"t":1820.4,"v":[1,0,1]},
         {"t":1821.4,"v":[1,1,1],"ease":"backOut"},
-        {"t":1890,"v":[1,1,1]},
-        {"t":1892,"v":[1,0,1],"ease":"easeIn"}
+        {"t":1884,"v":[1,1,1]},
+        {"t":1885,"v":[1,0,1],"ease":"easeIn"}
       ]
     },
     {
@@ -10509,7 +10514,7 @@
       "primitive": "group",
       "position": [3,0,-0.8605],
       "rotation": [0,0,0],
-      "scale": [{"t":1886,"v":[1,0,1]},{"t":1887.5,"v":[1,1,1],"ease":"backOut"}]
+      "scale": [{"t":1885,"v":[1,0,1]},{"t":1886.5,"v":[1,1,1],"ease":"backOut"}]
     },
     {
       "id": "electric-lamp-5-1",
@@ -10539,8 +10544,8 @@
       "scale": [
         {"t":1821,"v":[1,0,1]},
         {"t":1822,"v":[1,1,1],"ease":"backOut"},
-        {"t":1890,"v":[1,1,1]},
-        {"t":1892,"v":[1,0,1],"ease":"easeIn"}
+        {"t":1884.5,"v":[1,1,1]},
+        {"t":1885.5,"v":[1,0,1],"ease":"easeIn"}
       ]
     },
     {
@@ -10568,7 +10573,7 @@
       "primitive": "group",
       "position": [6,0,-0.482],
       "rotation": [0,0,0],
-      "scale": [{"t":1886.5,"v":[1,0,1]},{"t":1888,"v":[1,1,1],"ease":"backOut"}]
+      "scale": [{"t":1885.5,"v":[1,0,1]},{"t":1887,"v":[1,1,1],"ease":"backOut"}]
     },
     {
       "id": "electric-lamp-6-1",
@@ -10598,8 +10603,8 @@
       "scale": [
         {"t":1821.6,"v":[1,0,1]},
         {"t":1822.6,"v":[1,1,1],"ease":"backOut"},
-        {"t":1890,"v":[1,1,1]},
-        {"t":1892,"v":[1,0,1],"ease":"easeIn"}
+        {"t":1885,"v":[1,1,1]},
+        {"t":1886,"v":[1,0,1],"ease":"easeIn"}
       ]
     },
     {
@@ -10627,7 +10632,7 @@
       "primitive": "group",
       "position": [9,0,-0.2173],
       "rotation": [0,0,0],
-      "scale": [{"t":1887,"v":[1,0,1]},{"t":1888.5,"v":[1,1,1],"ease":"backOut"}]
+      "scale": [{"t":1886,"v":[1,0,1]},{"t":1887.5,"v":[1,1,1],"ease":"backOut"}]
     },
     {
       "id": "electric-lamp-7-1",
@@ -10657,8 +10662,8 @@
       "scale": [
         {"t":1822.2,"v":[1,0,1]},
         {"t":1823.2,"v":[1,1,1],"ease":"backOut"},
-        {"t":1890,"v":[1,1,1]},
-        {"t":1892,"v":[1,0,1],"ease":"easeIn"}
+        {"t":1885.5,"v":[1,1,1]},
+        {"t":1886.5,"v":[1,0,1],"ease":"easeIn"}
       ]
     },
     {
@@ -10686,7 +10691,7 @@
       "primitive": "group",
       "position": [12,0,-0.103],
       "rotation": [0,0,0],
-      "scale": [{"t":1887.5,"v":[1,0,1]},{"t":1889,"v":[1,1,1],"ease":"backOut"}]
+      "scale": [{"t":1886.5,"v":[1,0,1]},{"t":1888,"v":[1,1,1],"ease":"backOut"}]
     },
     {
       "id": "electric-lamp-8-1",
@@ -10714,8 +10719,8 @@
       "position": [0,0,0],
       "rotation": [0,0,0],
       "scale": [
-        {"t":1957,"v":[1,0,1]},
-        {"t":1960,"v":[1,1,1],"ease":"backOut"},
+        {"t":1954,"v":[1,0,1]},
+        {"t":1957,"v":[1,1,1],"ease":"backOut"},
         {"t":2001,"v":[1,1,1]},
         {"t":2004,"v":[1,0,1],"ease":"easeIn"}
       ]
@@ -10978,7 +10983,7 @@
       "outline": 0.015,
       "hover": "ring-road",
       "position": [0,0,-15],
-      "scale": [{"t":1962,"v":[1,0,1]},{"t":1966,"v":[1,1,1],"ease":"backOut"}]
+      "scale": [{"t":1958,"v":[1,0,1]},{"t":1962,"v":[1,1,1],"ease":"backOut"}]
     },
     {
       "id": "highway-car-1",
