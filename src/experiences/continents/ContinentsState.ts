@@ -5,7 +5,7 @@
 // time alone. Time is -Ma (millions of years, negative in the past).
 
 import * as THREE from "three";
-import { ANCHORS, BLOCKS, MAP_LABELS, RANGES, type LabelAnchor, type Profile } from "./continentsData";
+import { ANCHORS, BLOCKS, MAP_LABELS, RANGES, type BlockDef, type LabelAnchor, type Profile } from "./continentsData";
 import type { BlockId } from "./outlines";
 import { AGES, ROTATIONS } from "./reconstruction";
 import { arc, toLonLat, toVec } from "./sphere";
@@ -83,21 +83,24 @@ export function labelPosition(anchor: LabelAnchor, ma: number, out = new THREE.V
   return out.add(toVec(b, scratchV).applyQuaternion(rotationAt(idB, ma, scratchQ))).normalize();
 }
 
+/** One block at ma, for when only one is needed, as on its hover card. */
+export function blockStateAt(def: BlockDef, ma: number): BlockState {
+  const q = rotationAt(def.id, ma);
+  const [lon, lat] = toLonLat(anchorAt(def.id, ma));
+  return {
+    id: def.id,
+    quaternion: [q.x, q.y, q.z, q.w],
+    centre: { lon, lat },
+    speed: speedAt(def.id, ma),
+    ice: def.ice ? profileAt(def.ice, ma) : 0,
+  };
+}
+
 export function continentsStateAt(time: number): ContinentsState {
   const ma = maAt(time);
   return {
     ma,
-    blocks: BLOCKS.map((def) => {
-      const q = rotationAt(def.id, ma);
-      const [lon, lat] = toLonLat(anchorAt(def.id, ma));
-      return {
-        id: def.id,
-        quaternion: [q.x, q.y, q.z, q.w],
-        centre: { lon, lat },
-        speed: speedAt(def.id, ma),
-        ice: def.ice ? profileAt(def.ice, ma) : 0,
-      };
-    }),
+    blocks: BLOCKS.map((def) => blockStateAt(def, ma)),
     ranges: Object.fromEntries(RANGES.map((r) => [r.id, profileAt(r.growth, ma)])),
     labels: MAP_LABELS.map((l) => {
       const p = labelPosition(l.anchor, ma);

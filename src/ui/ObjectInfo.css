@@ -6,7 +6,10 @@
   top: 0;
   z-index: 20;
   width: max-content;
-  max-width: 260px;
+  max-width: min(260px, calc(100vw - 16px));
+  /* place() keeps the card 8px inside the window, which it can only do for a card that fits. */
+  max-height: calc(100dvh - 16px);
+  overflow: hidden;
   padding: 12px 14px;
   border-radius: var(--r);
   pointer-events: none;

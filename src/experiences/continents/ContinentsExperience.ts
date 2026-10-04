@@ -26,6 +26,7 @@ import type {
 import { BLOCKS, EVENTS, MAP_LABELS, RANGES, type BlockDef, type Profile } from "./continentsData";
 import {
   OLDEST_MA,
+  blockStateAt,
   continentsStateAt,
   formatLatitude,
   formatMa,
@@ -84,6 +85,7 @@ const ICE = new THREE.Color("#F7F4EC");
 const ICE_WALL = new THREE.Color("#C9D8DC");
 const PEAK = "#A98467";
 const SNOW = THEME.cream;
+const PANTHALASSA = MAP_LABELS.find((l) => l.id === "panthalassa")!;
 
 interface BlockView {
   def: BlockDef;
@@ -256,10 +258,9 @@ class ContinentsExperienceImpl implements FourDExperience {
 
   getHoveredObject(id: string): ObjectMetadata | null {
     const ma = maAt(this.time);
-    const state = continentsStateAt(this.time);
     if (id === "ocean") {
       // The card keeps the ocean's old name exactly as long as the map label still shows it.
-      const panthalassa = state.labels.find((l) => l.id === "panthalassa")!.opacity > 0.01;
+      const panthalassa = profileAt(PANTHALASSA.opacity, ma) > 0.01;
       return {
         id,
         name: panthalassa ? "Panthalassa" : "Ocean",
@@ -271,7 +272,7 @@ class ContinentsExperienceImpl implements FourDExperience {
     }
     const def = BLOCKS.find((b) => b.id === id);
     if (!def) return null;
-    const block = state.blocks.find((b) => b.id === id)!;
+    const block = blockStateAt(def, ma);
     const story = [...def.story].reverse().find(([from]) => ma <= from) ?? def.story[0];
     return {
       id,

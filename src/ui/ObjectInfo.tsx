@@ -32,13 +32,21 @@ function place(el: HTMLElement | null): void {
   el.style.transform = `translate(${Math.max(8, left)}px, ${Math.max(8, top)}px)`;
 }
 
+/** Everything the card shows, as one string. */
+function cardText(meta: ObjectMetadata | null): string | null {
+  if (!meta) return null;
+  let text = `${meta.name}\n${meta.description}`;
+  for (const [k, v] of Object.entries(meta.properties ?? {})) text += `\n${k}\t${v}`;
+  return text;
+}
+
 export function ObjectInfo({ experience }: { experience: FourDExperience }) {
   const hoveredId = useUi((s) => s.hoveredId);
   const ref = useRef<HTMLDivElement | null>(null);
-  // getHoveredObject returns a fresh object each call; its JSON is a snapshot
-  // React can compare, so playback re-renders the card only when text changes.
-  const json = useTime(() => JSON.stringify(hoveredId ? experience.getHoveredObject(hoveredId) : null));
-  const meta = useMemo(() => JSON.parse(json) as ObjectMetadata | null, [json]);
+  // getHoveredObject returns a fresh object each call, so the store compares
+  // the card's text instead: playback re-renders the card only when it changes.
+  const key = useTime(() => cardText(hoveredId ? experience.getHoveredObject(hoveredId) : null));
+  const meta = useMemo(() => (key === null ? null : experience.getHoveredObject(hoveredId!)), [key, experience, hoveredId]);
   const shown = meta !== null;
 
   useLayoutEffect(() => place(ref.current), [meta]);
