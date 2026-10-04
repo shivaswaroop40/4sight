@@ -1,10 +1,5 @@
 // src/test/sceneSnapshot.ts
 //
-// Everything setTime can change in a mounted scene, as plain data that
-// vitest compares with toEqual: each object's transform and visibility,
-// material colours, opacity and uniforms, light intensities, instance
-// matrices and colours, draw ranges, and a hash of every vertex attribute.
-//
 // Uniforms an experience adds through onBeforeCompile live only inside the
 // compiled shader, so captureShaderUniforms compiles each such material
 // once against the stock three.js shader for its type and keeps the
@@ -66,10 +61,15 @@ export function captureShaderUniforms(ctx: SceneContext): ShaderUniforms {
   return captured;
 }
 
+function texture(t: THREE.Texture): string {
+  const image = t.image as { width?: number; height?: number } | null;
+  return `texture:${t.name}:${image?.width ?? 0}x${image?.height ?? 0}:v${t.version}`;
+}
+
 function value(v: unknown): unknown {
   if (v === null || typeof v !== "object") return v;
   if (Array.isArray(v)) return v.map(value);
-  if (v instanceof THREE.Texture) return `texture:${v.name}`;
+  if (v instanceof THREE.Texture) return texture(v);
   if ("toArray" in v && typeof v.toArray === "function") return Array.from(v.toArray() as ArrayLike<number>);
   if (ArrayBuffer.isView(v)) return hash(v as unknown as ArrayLike<number>);
   return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, value(x)]));
@@ -91,17 +91,38 @@ function hash(array: ArrayLike<number>): string {
   return `${array.length}:${(h >>> 0).toString(16)}`;
 }
 
+function hashText(text: string): string {
+  return text.length > 64 ? hash(Array.from(text, (c) => c.charCodeAt(0))) : text;
+}
+
+function scalars(object: object, historyFields: readonly string[] = []): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(object)) {
+    if (historyFields.includes(k)) continue;
+    if (typeof v === "number" || typeof v === "boolean") out[k] = v;
+    else if (typeof v === "string") out[k] = hashText(v);
+  }
+  return out;
+}
+
+const MATERIAL_HISTORY = ["id", "uuid", "version"];
+
 function material(m: THREE.Material, shaderUniforms: ShaderUniforms): unknown {
   const props = m as THREE.Material & { color?: THREE.Color; emissive?: THREE.Color; uniforms?: Record<string, THREE.IUniform> };
+  const textures = Object.entries(m).filter((e): e is [string, THREE.Texture] => e[1] instanceof THREE.Texture);
   return {
-    type: m.type,
-    visible: m.visible,
-    opacity: m.opacity,
+    ...scalars(m, MATERIAL_HISTORY),
     color: props.color?.toArray(),
     emissive: props.emissive?.toArray(),
+    textures: Object.fromEntries(textures.map(([k, t]) => [k, texture(t)])),
     uniforms: uniforms(props.uniforms),
     shaderUniforms: uniforms(shaderUniforms.get(m)),
   };
+}
+
+function raycast(node: THREE.Object3D): string {
+  const own = (Object.getPrototypeOf(node) as THREE.Object3D).raycast;
+  return node.raycast === own ? "default" : `swapped:${hashText(node.raycast.toString())}`;
 }
 
 function geometry(g: THREE.BufferGeometry): unknown {
@@ -143,7 +164,7 @@ export function sceneSnapshot(ctx: FakeSceneContext, shaderUniforms: ShaderUnifo
     const base = { type: node.type, name: node.name, visible: node.visible };
     const transform = { position: node.position.toArray(), quaternion: node.quaternion.toArray(), scale: node.scale.toArray() };
     if (!node.visible) {
-      out.push(ctx.hoverables.has(node) ? { ...base, ...transform } : base);
+      out.push(ctx.hoverables.has(node) ? { ...base, ...transform, raycast: raycast(node) } : base);
       return;
     }
     const mesh = node as THREE.Mesh;
@@ -153,6 +174,8 @@ export function sceneSnapshot(ctx: FakeSceneContext, shaderUniforms: ShaderUnifo
       ...base,
       ...transform,
       renderOrder: node.renderOrder,
+      raycast: raycast(node),
+      userData: scalars(node.userData),
       light: light && { intensity: light.intensity, color: light.color.toArray() },
       materials: materialsOf(node).map((m) => material(m, shaderUniforms)),
       geometry: mesh.geometry && geometry(mesh.geometry),

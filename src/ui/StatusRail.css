@@ -174,7 +174,12 @@
 .tourbar__next {
   position: relative;
   overflow: hidden;
-  padding: 5px 10px 5px 12px;
+}
+
+@media (min-width: 900px) {
+  .tourbar__next {
+    padding: 5px 10px 5px 12px;
+  }
 }
 
 .tourbar__next > :not(.tourbar__hold) {
@@ -265,10 +270,6 @@
 @media (max-width: 899px) {
   .rail {
     justify-self: center;
-  }
-  /* The phone-sized chip, as the shared chip rule sizes every chip below 900px. */
-  .tourbar__next {
-    padding: 5px 10px;
   }
 }
 

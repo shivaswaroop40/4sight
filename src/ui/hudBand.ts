@@ -56,16 +56,20 @@ export function hudElements(root: ParentNode): HTMLElement[] {
 
 /** The declared HUD pieces under `root`, measured now. */
 export function measureHud(root: ParentNode): HudPiece[] {
-  return Array.from(root.querySelectorAll<HTMLElement>("[data-hud-edge]"), (el) => {
+  return Array.from(root.querySelectorAll<HTMLElement>("[data-hud-edge]")).flatMap((el): HudPiece[] => {
+    const edge = el.dataset.hudEdge;
+    if (edge !== "top" && edge !== "bottom") return [];
     const r = el.getBoundingClientRect();
     const rest = el.querySelector<HTMLElement>("[data-hud-rest]");
     const borders = el.offsetHeight - el.clientHeight;
-    return {
-      edge: el.dataset.hudEdge === "top" ? "top" : "bottom",
-      top: rest ? r.bottom - rest.offsetHeight - borders : r.top,
-      bottom: r.bottom,
-      left: r.left,
-      right: r.right,
-    };
+    return [
+      {
+        edge,
+        top: rest ? r.bottom - rest.offsetHeight - borders : r.top,
+        bottom: r.bottom,
+        left: r.left,
+        right: r.right,
+      },
+    ];
   });
 }

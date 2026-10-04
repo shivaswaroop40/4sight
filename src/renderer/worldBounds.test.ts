@@ -6,17 +6,18 @@ const box = () => new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), new THREE.MeshB
 const corners = (b: THREE.Box3) => [b.min.toArray(), b.max.toArray()];
 
 describe("worldBounds", () => {
-  it("counts each instance of an InstancedMesh where it is, and skips zero-scale ones", () => {
+  it("boxes an InstancedMesh's instance centres, padded by the largest instance's bounding sphere, and skips zero-scale ones", () => {
     const group = new THREE.Group();
     group.position.set(0, 10, 0);
     const mesh = new THREE.InstancedMesh(new THREE.BoxGeometry(2, 2, 2), new THREE.MeshBasicMaterial(), 3);
     mesh.setMatrixAt(0, new THREE.Matrix4().makeTranslation(4, 0, 0));
-    mesh.setMatrixAt(1, new THREE.Matrix4().makeTranslation(8, 0, 0));
+    mesh.setMatrixAt(1, new THREE.Matrix4().makeTranslation(8, 0, 0).scale(new THREE.Vector3(2, 2, 2)));
     mesh.setMatrixAt(2, new THREE.Matrix4().makeScale(0, 0, 0));
     group.add(mesh);
-    expect(corners(worldBounds(mesh))).toEqual([
-      [3, 9, -1],
-      [9, 11, 1],
+    const round = (b: THREE.Box3) => corners(b).map((c) => c.map((n) => Math.round(n * 1000) / 1000 + 0));
+    expect(round(worldBounds(mesh))).toEqual([
+      [0.536, 6.536, -3.464],
+      [11.464, 13.464, 3.464],
     ]);
   });
 

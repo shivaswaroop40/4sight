@@ -285,11 +285,10 @@ class HeartExperience implements FourDExperience {
 
     const panel = ecgPanelMesh();
     panel.position.z = -0.1;
-    // The strip turns to face the camera so it stays readable from the side
-    // view. That is a view concern, not a time one, so it runs from the
-    // panel's own render hook rather than in setTime. The panel draws before
-    // its siblings so they render with the matrix this writes.
+    // three runs onBeforeRender mid-frame in renderOrder and skips it for a
+    // frustum-culled object, so the panel draws first and is never culled.
     panel.renderOrder = -1;
+    panel.frustumCulled = false;
     panel.onBeforeRender = (_renderer, _scene, camera) => {
       group.quaternion.copy(camera.quaternion);
       group.updateMatrixWorld(true);

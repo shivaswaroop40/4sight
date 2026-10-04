@@ -35,6 +35,8 @@ const CAMERA_PRESETS: CameraPreset[] = [
   { id: "edge-on", name: "Edge-on", position: [0, 0.6, 30], target: [0, 0, 0] },
 ];
 
+const NEPTUNE_ORBIT_ASPECT = 1.8;
+
 const FILTERS: VisualizationFilter[] = [
   { id: "gas-and-dust", name: "Gas & dust", defaultOn: true, description: "The cloud and disk the planets grow from" },
   { id: "orbits", name: "Orbits", defaultOn: true, description: "Guide lines along each planet's path" },
@@ -246,6 +248,10 @@ class SolarSystemExperience implements FourDExperience {
 
   getCameraPresets(): CameraPreset[] {
     return CAMERA_PRESETS;
+  }
+
+  cameraSubjectAspect(): number {
+    return NEPTUNE_ORBIT_ASPECT;
   }
 
   reset(): void {

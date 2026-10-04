@@ -203,6 +203,14 @@ describe("ECG strip", () => {
     expect(strip.quaternion.angleTo(ctx.camera.quaternion)).toBe(0);
     heart.dispose();
   });
+
+  it("keeps its panel out of frustum culling, since three skips the render hook of a culled object", () => {
+    const ctx = fakeSceneContext();
+    heart.mount(ctx);
+    const panel = [...ctx.hoverables].find(([, id]) => id === "ecg")![0];
+    expect(panel.frustumCulled).toBe(false);
+    heart.dispose();
+  });
 });
 
 describe("heart filters", () => {
