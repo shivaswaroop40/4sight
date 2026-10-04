@@ -6,7 +6,30 @@ The rule that makes everything else work:
 
 > The scene is a pure function of `(t, filter state)`. `setTime(t)` renders the scene for `t` under the filter state last passed to `filters.set`. Calling it twice with the same `t` and the same filter state produces the same scene. It never reads the previous time, never accumulates, never plays an animation. Scrubbing, reverse, jumping, and warping all fall out of this one rule for free.
 
-`src/experiences/contract.test.ts` holds every registered experience to this rule. It mounts each one in a test scene, visits sample times and every event in several orders and under each filter state, and checks that the drawn scene (transforms, visibility, materials, uniforms, instances, vertex data) and every hover card match what a fresh mount draws at that time. It also checks that `dispose` unregisters every hoverable and empties the scene. A new experience is covered as soon as it is in the registry.
+`src/experiences/contract.test.ts` holds every registered experience to this rule. A new experience is covered as soon as it is in the registry. The test mounts each experience in a Node test scene with no WebGL.
+
+It visits these times: `u` = 0, 0.13, 0.37, 0.5, 0.81 and 1, and the time of every event. It uses these filter states: the defaults, and then each filter moved away from its default on its own.
+
+It checks five things:
+
+1. For each filter state, a fresh mount that visits the times forward and then backward draws the same frame at each time both ways.
+2. One mount that jumps between the times out of order draws what the fresh mounts drew.
+3. On that same mount, switching to each filter state and then back to the defaults draws what a fresh mount under that state drew.
+4. Under the default filters, every sample time gives a different snapshot. A no-op `setTime`, or a snapshot that records nothing, fails here.
+5. After `dispose`, no hoverables are registered and the scene and camera have no children.
+
+A frame is the snapshot from `src/test/sceneSnapshot.ts`, plus `getHoveredObject` for every registered hoverable id. The snapshot walks the scene and the camera and records the following for each object:
+
+- Type, name and `visible`. A hidden object records only that, but a hidden hoverable also records its transform and raycast, because it can still answer the pointer.
+- Position, quaternion, scale and `renderOrder`.
+- `raycast`: "default" for the class's own method, or a hash of the replacement's source.
+- Every number, boolean and string in `userData`, because a render hook can read them. The Continents labels read their opacity there.
+- A light's intensity and colour.
+- For each material, every number, boolean and string it holds, except `id`, `uuid` and `version`. This covers `opacity`, `rotation`, `emissiveIntensity`, `transparent`, `depthWrite`, `side`, `blending` and `alphaTest`. It also records `color`, `emissive` and `uniforms`, the uniforms an `onBeforeCompile` hook adds, and each texture by name, image size and `version`.
+- The geometry's draw range and a hash of each vertex attribute.
+- For an `InstancedMesh`, how many instances draw (zero-scale instances do not count), and hashes of their matrices, colours and per-instance attributes.
+
+The snapshot cannot see some things. It does not read canvas pixels. A texture's `version` counts uploads, so a `setTime` that repaints a canvas fails check 1 even when the repaint is pure. It also does not read shader `defines`, objects outside the scene and the camera, or what a render hook such as `onBeforeRender` writes during a real render.
 
 ## Time model
 

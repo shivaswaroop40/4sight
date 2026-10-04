@@ -67,6 +67,15 @@ describe.each(experiences)("$name keeps the contract", (entry) => {
     x.dispose();
   });
 
+  it("draws a different scene at each sample time, so the check above is not comparing empty frames", async () => {
+    const x = await entry.load();
+    const times = sampleTimes(x);
+    const m = mount(x, filterStates(x)[0]);
+    const drawn = new Set(times.map((t) => JSON.stringify(m.at(t).scene)));
+    x.dispose();
+    expect(drawn.size).toBe(times.length);
+  });
+
   it("leaves no hoverables and nothing in the scene after dispose", async () => {
     const x = await entry.load();
     const { ctx, at } = mount(x, filterStates(x)[0]);
