@@ -4,7 +4,7 @@ This is the one thing all three developers build together in Phase 1 and then fr
 
 The rule that makes everything else work:
 
-> `setTime(t)` is a pure function of `t`. Calling it twice with the same `t` produces the same scene. It never reads the previous time, never accumulates, never plays an animation. Scrubbing, reverse, jumping, and warping all fall out of this one rule for free.
+> The scene is a pure function of `(t, filter state)`. `setTime(t)` renders the scene for `t` under the filter state last passed to `filters.set`. Calling it twice with the same `t` and the same filter state produces the same scene. It never reads the previous time, never accumulates, never plays an animation. Scrubbing, reverse, jumping, and warping all fall out of this one rule for free.
 
 ## Time model
 
@@ -64,6 +64,7 @@ export interface TimeController {
   toggle(): void;
   reverse(): void;
 
+  /** Lands on exactly `time` (clamped to the span), so the event that starts at `time` is current. */
   setTime(time: number): void;
   setParam(u: TimeParam): void;
   setPlaybackSpeed(speed: number): void;
@@ -100,21 +101,31 @@ export interface ObjectMetadata {
   properties?: Record<string, string | number>;
 }
 
-export interface FilterContext {
-  experience: FourDExperience;
-  /** Shader uniforms the experience exposes for filters to drive. */
-  uniforms: Record<string, { value: unknown }>;
-  /** Named Three.js objects filters may show, hide, or restyle. */
-  objects: Record<string, import("three").Object3D>;
-}
-
 export interface VisualizationFilter {
   id: string;
   name: string;
-  /** Filters in the same group are mutually exclusive (radio). Ungrouped filters toggle. */
+  /** Filters sharing a group are radio options: exactly one is on. Ungrouped filters toggle. */
   group?: string;
-  apply(context: FilterContext): void;
-  reset?(context: FilterContext): void;
+  /** On when the experience mounts. In a group, exactly one option defaults on. */
+  defaultOn: boolean;
+  /** One line shown as the control's hint. */
+  description?: string;
+}
+
+/** Which filters are on, by id. View state owned by the shell. Read it with isFilterOn (core/filters.ts). */
+export type FilterState = Readonly<Record<string, boolean>>;
+
+/** An experience's filters. Offering filters and taking their state come together. */
+export interface ExperienceFilters {
+  /** Display order. Ids are unique; a group has exactly one option with defaultOn (see filterProblems). */
+  readonly options: readonly VisualizationFilter[];
+  /**
+   * Stores the state. It does not render: the shell calls setTime(t) right
+   * after, and setTime(t) renders the scene for t under the stored state. It
+   * may flip pipeline flags (transparent, depthWrite, raycast) when a value
+   * changes, but must not depend on time.
+   */
+  set(state: FilterState): void;
 }
 
 export type CameraMode = "orbit" | "free" | "follow" | "overview";
@@ -147,6 +158,12 @@ export interface FourDExperience {
   baseDurationSeconds: number;
   /** Time warp values offered in the UI for this experience. */
   warpPresets: number[];
+  /**
+   * Set when experience time is real elapsed time: the span from minTime to
+   * maxTime, in seconds. The UI then shows "If <span> fit in one day, now is
+   * 11:58:43 pm". Leave unset when time is not a duration (iPhone assembly).
+   */
+  elapsedSpanSeconds?: number;
   /** Labels at the two ends of the slider. */
   labels: { start: string; end: string };
   /** Sorted timeline events. Drives the "What's happening?" panel. */
@@ -154,24 +171,49 @@ export interface FourDExperience {
 
   /** Add objects to the scene. Called once when the experience becomes active. */
   mount(context: SceneContext): void;
-  /** Reconstruct the scene at time t. Pure. Idempotent. */
+  /** Reconstruct the scene at time t under the stored filter state. Pure. Idempotent. */
   setTime(time: number): void;
   /** Plain data describing the world at time t. Useful for tests and the HUD. */
   getState(time: number): unknown;
   getCurrentEvent(time: number): TimelineEvent | null;
   getHoveredObject(id: string): ObjectMetadata | null;
-  getAvailableFilters(): VisualizationFilter[];
+  /** The filters this experience offers and how it takes their state. Leave unset when it has none. */
+  filters?: ExperienceFilters;
   getCameraPresets(): CameraPreset[];
   /**
    * Optional multiplier on the preset camera's distance at time t, for scenes
    * that shrink or grow over time. 1 keeps the authored framing. It applies
-   * until the viewer moves the camera.
+   * after a preset, until the viewer drags, zooms, or follows an object.
    */
   cameraDistanceScale?(time: number): number;
 
   reset(): void;
   dispose(): void;
 }
+```
+
+## Filters
+
+A filter changes how the scene is drawn, never what happens in it: hide the gas and dust, turn the casing to X-ray. The shell owns which filters are on. The experience declares its filters and renders under whatever state it is handed.
+
+- `filters` is one optional member, so an experience either offers filters and takes their state, or has neither. Leave it out when there are none.
+- `filters.options` lists them in display order. Keep it the same array for the life of the experience. Ids are unique.
+- Ungrouped filters are switches. Filters that share a `group` are radio options, and the group name is shown as their heading. Exactly one option in a group has `defaultOn: true`. In development the shell refuses to mount an experience that breaks these rules (`filterProblems`), and a test checks every registered experience.
+- `filters.set(state)` only stores the state. The shell then calls `setTime(t)` with the current time, and `setTime` draws the scene for `t` under that state. Toggling a filter while paused updates the frame at once, and scrubbing keeps it applied.
+- `set` may flip pipeline flags such as `transparent`, `depthWrite` or a mesh's `raycast` when a value changes, but must not depend on time. Opacity, visibility and uniforms that vary with `t` are set in `setTime`.
+- Read the state with `isFilterOn(options, state, id)`. A state that leaves a filter out means its default.
+- On mount the shell passes the defaults (`defaultFilterState`) before the first `setTime`. Switching experiences resets to the new experience's defaults.
+
+```ts
+// src/core/filters.ts
+export function defaultFilterState(filters: readonly VisualizationFilter[]): FilterState;
+/** Ungrouped: flip. Grouped: select id and clear the rest of its group; picking the selected option keeps it on. */
+export function toggleFilter(filters: readonly VisualizationFilter[], state: FilterState, id: string): FilterState;
+export function isDefaultFilterState(filters: readonly VisualizationFilter[], state: FilterState): boolean;
+/** Whether filter `id` is on. A state that leaves it out means its default. */
+export function isFilterOn(filters: readonly VisualizationFilter[], state: FilterState, id: string): boolean;
+/** What breaks the filter rules, one sentence each. Empty when the filters are valid. */
+export function filterProblems(filters: readonly VisualizationFilter[]): string[];
 ```
 
 ## Helpers Shiv ships alongside the types
@@ -220,7 +262,6 @@ export const mockExperience: FourDExperience = {
   getState(t) { return { position: /* same math */ }; },
   getCurrentEvent(t) { return eventAt(this.events, t); },
   getHoveredObject(id) { return id === "cube" ? { id, name: "Cube", description: "Test object" } : null; },
-  getAvailableFilters() { return []; },
   getCameraPresets() { return []; },
   reset() {},
   dispose() {},
@@ -235,3 +276,31 @@ Exit checks for Phase 1, all three developers watching:
 4. Drag while playing. Release. Playback continues from where you released.
 5. The "What's happening?" panel reads "At A", "At B", "At C" as you pass the events.
 6. Hover the cube. A tooltip appears near the cursor reading "Cube".
+
+## Registering an experience
+
+`src/experiences/index.ts` holds one light entry per experience. The entry carries what the gallery shows without loading the experience, and a dynamic import that loads it on demand, so each experience is its own chunk.
+
+```ts
+export interface ExperienceEntry {
+  id: ExperienceId;
+  name: string;
+  /** One line for the gallery card, under ~60 characters. */
+  tagline: string;
+  /** Length of the span of time the experience shows, in real seconds. Orders the gallery. */
+  spanSeconds: number;
+  /** Dynamic import, so each experience is its own chunk. */
+  load: () => Promise<FourDExperience>;
+}
+
+// Example:
+{
+  id: "solarSystem",
+  name: "Solar System",
+  tagline: "A cloud of dust becomes the Sun and eight planets",
+  spanSeconds: 4.6e9 * YEAR_SECONDS,
+  load: () => import("./solar-system/SolarSystemExperience").then((m) => m.solarSystemExperience),
+}
+```
+
+Never import an experience module statically from shell code. A static import pulls it into the main chunk.

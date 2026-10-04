@@ -25,7 +25,6 @@ function fakeExperience(mapping: TimeMapping, baseDurationSeconds: number, warpP
     getState: () => null,
     getCurrentEvent: () => null,
     getHoveredObject: () => null,
-    getAvailableFilters: () => [],
     getCameraPresets: () => [],
     reset() {},
     dispose() {},
@@ -246,5 +245,27 @@ describe("warp helpers", () => {
     expect(formatWarp(0.25)).toBe("0.25×");
     expect(formatWarp(1)).toBe("1×");
     expect(formatWarp(20)).toBe("20×");
+  });
+});
+
+describe("TimeController setTime", () => {
+  // 10^(2 * log10(t) / 2) misses these by a float step, which would show the event before t.
+  it.each([3, 20, 30, 70])("lands on exactly t = %d, so the event that starts at t is current", (t) => {
+    const { experience, calls } = fakeExperience(logMapping, 10, [1]);
+    const c = new TimeController();
+    c.attach(experience);
+    c.setTime(t);
+    expect(c.state.time).toBe(t);
+    expect(calls.at(-1)).toBe(t);
+  });
+
+  it("clamps a time outside the span to its end", () => {
+    const { experience } = fakeExperience(logMapping, 10, [1]);
+    const c = new TimeController();
+    c.attach(experience);
+    c.setTime(500);
+    expect([c.state.param, c.state.time]).toEqual([1, 100]);
+    c.setTime(0.5);
+    expect([c.state.param, c.state.time]).toEqual([0, 1]);
   });
 });

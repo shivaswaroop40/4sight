@@ -1,4 +1,6 @@
+import type * as THREE from "three";
 import { describe, expect, it } from "vitest";
+import { fakeSceneContext } from "../../test/fakeSceneContext";
 import { EVENTS, KNOTS } from "./solarData";
 import { formatYears, knotMapping } from "./solarMapping";
 import { solarStateAt } from "./SolarSystemState";
@@ -27,6 +29,15 @@ describe("solar mapping", () => {
   it("labels interior ticks with times, leaving story beats to the event flags", () => {
     expect(mapping.ticks().map((t) => t.label)).toEqual([
       "Nebula", "100k yrs", "1M yrs", "10M yrs", "50M yrs", "100M yrs", "700M yrs", "Today",
+    ]);
+  });
+
+  it("never reads 1000 of a unit in the readout", () => {
+    expect([999.7, 998_000, 999_700, 999.7e6].map(formatYears)).toEqual([
+      "1.0 thousand years",
+      "998 thousand years",
+      "1.0 million years",
+      "1.00 billion years",
     ]);
   });
 
@@ -82,8 +93,68 @@ describe("solar state", () => {
     expect(solarSystemExperience.getCameraPresets().map((p) => p.name)).toEqual(["Tilted", "Top", "Edge-on"]);
   });
 
+  it("spans 4.6 billion years of real elapsed time, for the one-day analogy", () => {
+    expect(solarSystemExperience.elapsedSpanSeconds).toBeCloseTo(4.6e9 * 365.25 * 86_400, -3);
+  });
+
   it("is a pure function of time", () => {
     const t = mapping.toTime(0.63);
     expect(solarSystemExperience.getState(t)).toEqual(solarSystemExperience.getState(t));
+  });
+});
+
+describe("solar filters", () => {
+  it("offers Gas & dust and Orbits, both on by default", () => {
+    expect(solarSystemExperience.filters!.options.map((f) => [f.id, f.name, f.defaultOn])).toEqual([
+      ["gas-and-dust", "Gas & dust", true],
+      ["orbits", "Orbits", true],
+    ]);
+  });
+
+  it("hides the gas and dust and the orbit lines at the same t only while their filters are off", () => {
+    const ctx = fakeSceneContext();
+    solarSystemExperience.mount(ctx);
+    const particles = ctx.scene.getObjectByName("accretion") as THREE.Points;
+    const gasAndDust = () => (particles.material as THREE.ShaderMaterial).uniforms.uGasAndDust.value;
+    const orbits = () => ctx.scene.getObjectsByProperty("name", "orbit").map((o) => o.visible);
+    const today = mapping.toTime(1);
+
+    solarSystemExperience.filters!.set({ "gas-and-dust": true, orbits: true });
+    solarSystemExperience.setTime(today);
+    expect([particles.visible, gasAndDust()]).toEqual([true, 1]);
+    expect(orbits()).toEqual(Array(8).fill(true));
+
+    solarSystemExperience.filters!.set({ "gas-and-dust": false, orbits: false });
+    solarSystemExperience.setTime(today);
+    expect([particles.visible, gasAndDust()]).toEqual([true, 0]);
+    expect(orbits()).toEqual(Array(8).fill(false));
+
+    solarSystemExperience.filters!.set({ "gas-and-dust": true, orbits: true });
+    solarSystemExperience.setTime(today);
+    expect([particles.visible, gasAndDust()]).toEqual([true, 1]);
+    expect(orbits()).toEqual(Array(8).fill(true));
+    solarSystemExperience.dispose();
+  });
+
+  it("keeps the particle cloud drawn with gas and dust off, so forming planets and the belts stay", () => {
+    const ctx = fakeSceneContext();
+    solarSystemExperience.mount(ctx);
+    const particles = ctx.scene.getObjectByName("accretion")!;
+    solarSystemExperience.filters!.set({ "gas-and-dust": false, orbits: true });
+    const shown = [0, 0.5, 1].map((u) => {
+      solarSystemExperience.setTime(mapping.toTime(u));
+      return particles.visible;
+    });
+    expect(shown).toEqual([true, true, true]);
+    solarSystemExperience.dispose();
+  });
+
+  it("draws no orbit lines before the planets settle, whatever the filter says", () => {
+    const ctx = fakeSceneContext();
+    solarSystemExperience.mount(ctx);
+    solarSystemExperience.filters!.set({ "gas-and-dust": true, orbits: true });
+    solarSystemExperience.setTime(mapping.toTime(0.3));
+    expect(ctx.scene.getObjectsByProperty("name", "orbit").some((o) => o.visible)).toBe(false);
+    solarSystemExperience.dispose();
   });
 });

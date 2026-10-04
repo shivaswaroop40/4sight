@@ -1,15 +1,16 @@
 // src/core/types.ts
 //
-// Shared contract. Frozen after Phase 1. Every experience compiles against
-// this file. Changing it requires a message in the team chat and all three
-// developers agreeing.
+// Shared contract. Every experience compiles against this file, so a change
+// here is a change for every lane: update docs/CONTRACT.md with it.
 //
 // The rule that makes everything else work:
 //
-//   setTime(t) is a pure function of t. Calling it twice with the same t
-//   produces the same scene. It never reads the previous time, never
-//   accumulates, never plays an animation. Scrubbing, reverse, jumping, and
-//   warping all fall out of this one rule for free.
+//   The scene is a pure function of (t, filter state). setTime(t) renders
+//   the scene for t under the filter state last passed to filters.set.
+//   Calling it twice with the same t and the same filter state produces the
+//   same scene. It never reads the previous time, never accumulates, never
+//   plays an animation. Scrubbing, reverse, jumping, and warping all fall
+//   out of this one rule for free.
 
 export type ExperienceId = "iphone" | "solarSystem" | "galaxy" | "universe" | "mock" | "mockLog";
 
@@ -48,6 +49,7 @@ export interface TimeController {
   toggle(): void;
   reverse(): void;
 
+  /** Lands on exactly `time` (clamped to the span), so the event that starts at `time` is current. */
   setTime(time: number): void;
   setParam(u: TimeParam): void;
   setPlaybackSpeed(speed: number): void;
@@ -84,21 +86,31 @@ export interface ObjectMetadata {
   properties?: Record<string, string | number>;
 }
 
-export interface FilterContext {
-  experience: FourDExperience;
-  /** Shader uniforms the experience exposes for filters to drive. */
-  uniforms: Record<string, { value: unknown }>;
-  /** Named Three.js objects filters may show, hide, or restyle. */
-  objects: Record<string, import("three").Object3D>;
-}
-
 export interface VisualizationFilter {
   id: string;
   name: string;
-  /** Filters in the same group are mutually exclusive (radio). Ungrouped filters toggle. */
+  /** Filters sharing a group are radio options: exactly one is on. Ungrouped filters toggle. */
   group?: string;
-  apply(context: FilterContext): void;
-  reset?(context: FilterContext): void;
+  /** On when the experience mounts. In a group, exactly one option defaults on. */
+  defaultOn: boolean;
+  /** One line shown as the control's hint. */
+  description?: string;
+}
+
+/** Which filters are on, by id. View state owned by the shell. Read it with isFilterOn (core/filters.ts). */
+export type FilterState = Readonly<Record<string, boolean>>;
+
+/** An experience's filters. Offering filters and taking their state come together. */
+export interface ExperienceFilters {
+  /** Display order. Ids are unique; a group has exactly one option with defaultOn (see filterProblems). */
+  readonly options: readonly VisualizationFilter[];
+  /**
+   * Stores the state. It does not render: the shell calls setTime(t) right
+   * after, and setTime(t) renders the scene for t under the stored state. It
+   * may flip pipeline flags (transparent, depthWrite, raycast) when a value
+   * changes, but must not depend on time.
+   */
+  set(state: FilterState): void;
 }
 
 export type CameraMode = "orbit" | "free" | "follow" | "overview";
@@ -135,6 +147,12 @@ export interface FourDExperience {
    * seconds. Presets faster than a 1 s pass are hidden (see core/warp.ts).
    */
   warpPresets: number[];
+  /**
+   * Set when experience time is real elapsed time: the span from minTime to
+   * maxTime, in seconds. The UI then shows "If <span> fit in one day, now is
+   * 11:58:43 pm". Leave unset when time is not a duration (iPhone assembly).
+   */
+  elapsedSpanSeconds?: number;
   /** Labels at the two ends of the slider. */
   labels: { start: string; end: string };
   /** Sorted timeline events. Drives the "What's happening?" panel. */
@@ -142,18 +160,19 @@ export interface FourDExperience {
 
   /** Add objects to the scene. Called once when the experience becomes active. */
   mount(context: SceneContext): void;
-  /** Reconstruct the scene at time t. Pure. Idempotent. */
+  /** Reconstruct the scene at time t under the stored filter state. Pure. Idempotent. */
   setTime(time: number): void;
   /** Plain data describing the world at time t. Useful for tests and the HUD. */
   getState(time: number): unknown;
   getCurrentEvent(time: number): TimelineEvent | null;
   getHoveredObject(id: string): ObjectMetadata | null;
-  getAvailableFilters(): VisualizationFilter[];
+  /** The filters this experience offers and how it takes their state. Leave unset when it has none. */
+  filters?: ExperienceFilters;
   getCameraPresets(): CameraPreset[];
   /**
    * Optional multiplier on the preset camera's distance at time t, for scenes
    * that shrink or grow over time. 1 keeps the authored framing. It applies
-   * until the viewer moves the camera.
+   * after a preset, until the viewer drags, zooms, or follows an object.
    */
   cameraDistanceScale?(time: number): number;
 

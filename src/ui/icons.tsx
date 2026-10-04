@@ -66,9 +66,71 @@ export const OverviewIcon = () => (
   </Icon>
 );
 
+/** A target: the camera keeps this object centred. */
+export const FollowIcon = () => (
+  <Icon width="18" height="18">
+    <circle cx="12" cy="12" r="6.5" />
+    <circle cx="12" cy="12" r="1.8" fill="currentColor" />
+    <path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3" />
+  </Icon>
+);
+
 export const ChevronIcon = ({ up }: { up: boolean }) => (
   <Icon width="18" height="18" style={{ transform: up ? "rotate(180deg)" : undefined, transition: "transform 200ms" }}>
     <path d="M6 9.5l6 6 6-6" />
+  </Icon>
+);
+
+export const CloseIcon = () => (
+  <Icon width="20" height="20">
+    <path d="M6.5 6.5l11 11M17.5 6.5l-11 11" />
+  </Icon>
+);
+
+export const MoreIcon = () => (
+  <Icon>
+    <circle cx="5.5" cy="12" r="1.9" fill="currentColor" stroke="none" />
+    <circle cx="12" cy="12" r="1.9" fill="currentColor" stroke="none" />
+    <circle cx="18.5" cy="12" r="1.9" fill="currentColor" stroke="none" />
+  </Icon>
+);
+
+/** Three sliders. */
+export const FiltersIcon = () => (
+  <Icon>
+    <path d="M4 7h16M4 12h16M4 17h16" />
+    <circle cx="9" cy="7" r="2.3" fill="var(--cream)" />
+    <circle cx="15.5" cy="12" r="2.3" fill="var(--cream)" />
+    <circle cx="7.5" cy="17" r="2.3" fill="var(--cream)" />
+  </Icon>
+);
+
+export const LinkIcon = () => (
+  <Icon width="20" height="20">
+    <path d="M10.2 13.8a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1.4 1.4" />
+    <path d="M13.8 10.2a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1.4-1.4" />
+  </Icon>
+);
+
+export const VideoIcon = () => (
+  <Icon width="20" height="20">
+    <rect x="2.8" y="6.5" width="12.4" height="11" rx="2.4" />
+    <path d="M15.2 10.6l5.6-3.1v9l-5.6-3.1z" />
+  </Icon>
+);
+
+/** A pennant like the timeline's event flags: the tour visits each one. */
+export const TourIcon = () => (
+  <Icon>
+    <path d="M6.5 20.5V4" />
+    <path d="M6.5 4.5h11l-2.8 4.2 2.8 4.3h-11" fill="var(--mustard)" />
+  </Icon>
+);
+
+export const NextIcon = () => (
+  <Icon width="16" height="16">
+    <path d="M6 5.5v13l9-6.5z" fill="currentColor" />
+    <path d="M18.5 5.5v13" />
   </Icon>
 );
 

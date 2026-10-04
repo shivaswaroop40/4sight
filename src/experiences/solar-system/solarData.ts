@@ -416,7 +416,7 @@ export const EVENTS: TimelineEvent[] = [
     title: "The Sun ignites",
     when: "~50 million years in",
     description:
-      "The core reaches about 15 million Â°C and hydrogen fusion begins. A strong solar wind blows the remaining gas out of the solar system.",
+      "The core reaches about 15 million °C and hydrogen fusion begins. A strong solar wind blows the remaining gas out of the solar system.",
     keyPoints: ["Hydrogen fuses into helium", "The solar wind clears the disk", "Planet formation from gas ends"],
     category: "star",
   },

@@ -11,6 +11,18 @@ Two experiences, one time engine:
 
 Live site: https://shivaswaroop40.github.io/4sight/
 
+## Features
+
+- **Gallery.** The picker at the top (or G) opens every experience as a ladder of timescales, from seconds to billions of years. Each experience downloads only when you pick it.
+- **Scrub, play, reverse, warp.** Drag the timeline, play either way, and pick a time warp. Event flags jump to the big moments.
+- **One-day clock.** When time is real elapsed time, the readout squeezes the whole span into one day: "If 4.6 billion years fit in one day, now is 5:32:10 pm".
+- **Camera views.** Preset views per experience, plus Overview.
+- **Follow.** Click or tap a planet or a phone part and the camera stays on it while time runs, scrubs, or tours. Drag to orbit around it; scroll or pinch to zoom. A chip under the top bar names it. Esc, the chip's stop button, a view, or Overview lets go. When the object is hidden at the current time (a planet before it forms), the camera keeps to the spot where it is and the chip says "Hidden now".
+- **Guided tour.** Tour (or T) visits every event in order. It glides forward to each one, stops on it, and highlights the card for a reading time sized to its text. Next skips ahead. Esc, Exit, playing, scrubbing, a flag, or picking another experience ends it. The link follows each stop.
+- **Filters.** The sliders button in the top bar shows or hides layers of a scene, paused or playing: the gas and dust and the orbit lines in Solar System, an X-ray view of the iPhone that lets you hover the parts inside.
+- **Links to a moment.** The address bar follows the experience and the timeline position (`?x=solarSystem&u=0.5`) whenever playback stops. More > Copy link copies the exact moment, even mid-playback. A link opens paused on that frame.
+- **Export video.** More > Export video renders the whole experience, start to end, into a video file: H.264 MP4, or VP9 WebM where H.264 can't be encoded, at up to 1920x1080 (1080x1920 on a phone) in the shape of your screen, 30 frames per second. It records every frame, however slow the device, and only the scene and its paper, never the controls. It follows the camera you set up: a view, or an object you follow. Cancel or Esc stops it. Afterwards the timeline, playback and camera are as you left them. The item shows only in browsers that can encode video (WebCodecs).
+
 ## Status
 
 Core scaffold, time engine, and Pages deploy are live. The iPhone and Solar System experiences are in progress. The visual style is warm, beige, and cartoony, with toon-shaded 3D.
@@ -27,7 +39,7 @@ Core scaffold, time engine, and Pages deploy are live. The iPhone and Solar Syst
 
 ## Stack
 
-React, TypeScript, Vite, Three.js. Fully client-side. Deployed to GitHub Pages on every merge to `main`.
+React, TypeScript, Vite, Three.js. [Mediabunny](https://mediabunny.dev) muxes video exports, loaded only when export is used. Fully client-side. Deployed to GitHub Pages on every merge to `main`.
 
 ## Team
 

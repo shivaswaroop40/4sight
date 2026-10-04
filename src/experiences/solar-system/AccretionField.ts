@@ -36,6 +36,7 @@ uniform float uP;
 uniform float uContract;
 uniform float uCloudSpin;
 uniform float uClear;
+uniform float uGasAndDust;
 uniform float uPointScale;
 uniform float uAngle[NB];
 uniform float uRadius[NB];
@@ -108,17 +109,21 @@ void main() {
   float size = mix(2.4, 1.0, f);
   vec3 pos = mix(cp, dp, f);
   float heat = 0.0;
+  // How far this particle is part of a body rather than loose gas and dust.
+  float bound = 0.0;
 
   if (kind == ${KIND_STAR}) {
     float c = uClump[b];
     pos = mix(pos, ballAround(vec3(0.0), uSize[b], c), smoothstep(0.0, 1.0, c));
     heat = c;
     alpha *= 1.0 - 0.85 * uFade[b];
+    bound = smoothstep(0.2, 0.6, c);
     size *= 1.3;
   } else if (kind == ${KIND_PLANET}) {
     pos = mix(cp, feedPos(b, theta, h), f);
     heat = smoothstep(0.3, 0.9, uClump[b]);
     alpha *= 1.0 - uFade[b];
+    bound = smoothstep(0.2, 0.6, uClump[b]);
   } else if (kind == ${KIND_MOON}) {
     int pb = int(uParent[b] + 0.5);
     vec3 inParent = feedPos(pb, theta, h);
@@ -140,6 +145,7 @@ void main() {
     heat = mix(smoothstep(0.3, 0.9, uClump[pb]), smoothstep(0.3, 0.9, mc), emerge);
     // Hidden inside the parent once it solidifies, visible again as debris flies out.
     alpha *= mix(1.0 - uFade[pb], 1.0, emerge) * (1.0 - uFade[b]);
+    bound = max(smoothstep(0.2, 0.6, uClump[pb]), emerge);
   } else if (kind == ${KIND_GAS}) {
     // Blown outward and dissipated by the solar wind after ignition.
     float r = aRadius * (1.0 + 2.5 * uClear);
@@ -151,8 +157,11 @@ void main() {
     col = mix(col, vec3(0.62, 0.58, 0.54), f);
     alpha *= mix(1.0, 0.75, f);
     size *= mix(1.0, 0.7, f);
+    // Part of the disk until the solar wind clears the gas around them.
+    bound = uClear;
   }
 
+  alpha *= mix(uGasAndDust, 1.0, bound);
   col = mix(col, hot, heat);
   alpha *= 1.0 + 0.8 * heat;
 
@@ -316,6 +325,7 @@ export class AccretionField {
       uContract: { value: 0 },
       uCloudSpin: { value: 0 },
       uClear: { value: 0 },
+      uGasAndDust: { value: 1 },
       uPointScale: { value: 70 * pixelRatio },
       uAngle: { value: new Float32Array(NB) },
       uRadius: { value: bodyRadius },
