@@ -178,6 +178,14 @@ describe("universe scene data", () => {
     expect(hoverInfo("nothing", 0)).toBeNull();
   });
 
+  it("stops saying the CMB is breaking free once the fog has cleared", () => {
+    expect(universeStateAt(3.5e5).fog).toBeGreaterThan(0);
+    expect(hoverInfo("cmb", 3.5e5)!.description).toMatch(/breaking free right now/);
+    expect(universeStateAt(4.5e5).fog).toBe(0);
+    expect(hoverInfo("cmb", 5e5)!.description).toMatch(/cosmic microwave background/);
+    expect(hoverInfo("cmb", 5e5)!.description).not.toMatch(/breaking free/);
+  });
+
   it("offers the three named views, none duplicating the Overview button", () => {
     expect(universeExperience.getCameraPresets().map((p) => p.name)).toEqual(["Wide", "Inside the web", "Galaxy close-up"]);
   });

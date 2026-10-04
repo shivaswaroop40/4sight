@@ -25,7 +25,7 @@ const HOVERS: Record<HoverId, HoverDef> = {
       [0, "Not released yet. Space is a glowing fog of plasma, and light cannot travel far before bumping into a free electron."],
       [1e4, "Sound waves ripple through the hot plasma. Their pattern is about to be frozen into the sky."],
       [3.2e5, "Atoms are forming and the fog is lifting. This light is breaking free right now, and it will still be arriving 13.8 billion years later."],
-      [2.5e6, "The edge of what we can see. Look this far away and you see the cosmic microwave background, the fog as it was at 380,000 years."],
+      [4.5e5, "The edge of what we can see. Look this far away and you see the cosmic microwave background, the fog as it was at 380,000 years."],
     ],
   },
   "first-stars": {
