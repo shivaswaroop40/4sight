@@ -1,8 +1,8 @@
 // src/renderer/videoExport.ts
 //
 // Encodes a video export with mediabunny over WebCodecs. It is a dynamic
-// import, and mediabunny with it, so neither is in the main chunk; the More
-// menu loads it when it first asks whether export is supported.
+// import, and mediabunny with it, so neither is in the main chunk; the
+// first export loads it.
 //
 // The caller draws each frame; this module stacks it the way the page does:
 // the paper gradient (.stage in index.css), the transparent WebGL canvas,
