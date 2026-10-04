@@ -107,6 +107,30 @@ describe("mitosis state", () => {
   });
 });
 
+describe("mitosis story matches the motion", () => {
+  it("says a kinetochore is caught only once every chromosome's fibre has reached it", () => {
+    const reach = (t: number, c: string) => {
+      const [a, b] = [pose(t, "centrosome-l").position, pose(t, c).position];
+      return pose(t, `kfibre-${c}`).scale[1] / Math.hypot(b[0] - a[0], b[1] - a[1], b[2] - a[2]);
+    };
+    const captured = (t: number) => ["c1a", "c2a", "c3a", "c4a"].every((c) => Math.abs(reach(t, c) - 1) < 1e-9);
+    expect(captured(24.9)).toBe(false);
+    expect(captured(25)).toBe(true);
+    exp.setTime(24.9);
+    expect(exp.getHoveredObject("chromosome")?.description).not.toMatch(/caught/i);
+    exp.setTime(25);
+    expect(exp.getHoveredObject("chromosome")?.description).toMatch(/^Caught\./);
+  });
+
+  it("shows the contractile ring from late anaphase, as the furrow starts", () => {
+    expect(pose(45.9, "contractile-ring").visible).toBe(false);
+    expect(pose(45.9, "cell-a").position).toEqual([0, 0, 0]);
+    expect(pose(46.5, "contractile-ring").visible).toBe(true);
+    expect(pose(49, "contractile-ring").scale[0]).toBeLessThan(pose(46.5, "contractile-ring").scale[0]);
+    expect(exp.getCurrentEvent(46.5)?.title).toBe("Anaphase");
+  });
+});
+
 describe("mitosis one-day clock", () => {
   it("squeezes 65 minutes into a day", () => {
     const at = (minute: number) => spanClock(minute, exp.minTime, exp.maxTime);

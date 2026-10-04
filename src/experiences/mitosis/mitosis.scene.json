@@ -183,7 +183,11 @@
         {"from":5,"text":"Coiling up tight. The two sisters stay glued together by cohesin, making an X."},
         {
           "from": 20,
-          "text": "A microtubule has caught this chromosome's kinetochore and is towing it to the middle."
+          "text": "Free in the cell now. Microtubules grow and shrink, searching for its kinetochores, the protein patches at the centromere."
+        },
+        {
+          "from": 25,
+          "text": "Caught. A microtubule from each pole holds one sister's kinetochore and tows the chromosome to the middle."
         },
         {
           "from": 30,
@@ -399,8 +403,16 @@
       "outline": 0.02,
       "hover": "ring",
       "rotation": [0,90,0],
-      "visible": [{"t":0,"v":false},{"t":50,"v":true,"ease":"step"}],
+      "visible": [{"t":0,"v":false},{"t":46,"v":true,"ease":"step"}],
       "scale": [
+        {"t":46,"v":2.96},
+        {"t":46.5,"v":2.96},
+        {"t":47,"v":2.9594},
+        {"t":47.5,"v":2.9574},
+        {"t":48,"v":2.9528},
+        {"t":48.5,"v":2.9449},
+        {"t":49,"v":2.9332},
+        {"t":49.5,"v":2.9182},
         {"t":50,"v":2.9009},
         {"t":50.5,"v":2.8831},
         {"t":51,"v":2.8671},

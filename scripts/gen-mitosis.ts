@@ -10,7 +10,9 @@
 //   node scripts/gen-mitosis.ts --check   # fail if the JSON is stale
 //
 // Axes: x runs pole to pole, y is up, z faces the default camera. The cell
-// radius is 3 units, roughly 20 micrometres in a real cell.
+// is 6 units across, for a real cell about 20 micrometres across, so one
+// unit is about 3.3 micrometres. Each sister travels 1.9 units (about
+// 6 micrometres) in the 5 minutes of anaphase: about 1 micrometre a minute.
 
 import { key, lerp, mixHex, rng, round, sampled, smoothWindow, v3, writeScene, type Key, type Vec3 } from "./sceneKit.ts";
 
@@ -88,8 +90,8 @@ add({
   outline: 0.02,
   hover: "ring",
   rotation: [0, 90, 0],
-  visible: [key(0, false), key(T.anaphaseEnd, true, "step")],
-  scale: sampled(T.anaphaseEnd, T.end, HALF_STEP, (t) => round(Math.max(waist(t) - 0.04, 0.22))),
+  visible: [key(0, false), key(46, true, "step")],
+  scale: sampled(46, T.end, HALF_STEP, (t) => round(Math.max(waist(t) - 0.04, 0.22))),
 });
 
 // Mitochondria ride along with whichever half they sit in.
@@ -520,7 +522,8 @@ export const mitosisScene = {
       descriptions: [
         { from: 0, text: "Copied but still loose: two sister chromatids of long, tangled chromatin." },
         { from: T.prophase, text: "Coiling up tight. The two sisters stay glued together by cohesin, making an X." },
-        { from: T.prometaphase, text: "A microtubule has caught this chromosome's kinetochore and is towing it to the middle." },
+        { from: T.prometaphase, text: "Free in the cell now. Microtubules grow and shrink, searching for its kinetochores, the protein patches at the centromere." },
+        { from: Math.max(...CHROMOSOMES.map((c) => c.capture)), text: "Caught. A microtubule from each pole holds one sister's kinetochore and tows the chromosome to the middle." },
         { from: T.metaphase, text: "Lined up on the equator, one sister tied to each pole, waiting for the checkpoint to clear." },
         { from: T.anaphase, text: "The sisters have split. Each is now a chromosome of its own, pulled centromere first toward a pole." },
         { from: T.telophase, text: "Arrived. Unwinding back into chromatin inside a new nucleus." },
