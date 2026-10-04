@@ -72,7 +72,10 @@ const HOVERS: Record<HoverId, HoverDef> = {
     category: "home",
     properties: { Formed: "4.6 billion years ago", "Born at": "9.2 billion years after the Big Bang", Type: "G2V star" },
     story: [
-      [0, "The Sun forms (4.6 billion years ago) from gas enriched by earlier generations of stars. Open the Solar System experience to watch it happen."],
+      [0, "A cloud of gas in one arm of the Milky Way, enriched by earlier generations of stars, is collapsing under its own gravity. The Sun is about to light up."],
+      [9.2e9, "The Sun has just lit up, 4.6 billion years ago. The leftover disk of gas and dust around it is clumping into planets, Earth among them."],
+      [9.7e9, "A steady yellow star with its planets settled. Earth already has oceans, and the first life is appearing on it."],
+      [1.35e10, "The Sun is about halfway through its 10-billion-year life and slowly brightening. Open the Solar System experience to watch its story."],
     ],
   },
 };

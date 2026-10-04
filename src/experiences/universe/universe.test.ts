@@ -186,6 +186,16 @@ describe("universe scene data", () => {
     expect(hoverInfo("cmb", 5e5)!.description).not.toMatch(/breaking free/);
   });
 
+  it("walks the Sun from a collapsing cloud to middle age", () => {
+    expect(universeStateAt(8.8e9).sun).toBeGreaterThan(0.001);
+    expect(hoverInfo("sun", 8.8e9)!.description).toMatch(/collapsing/);
+    expect(hoverInfo("sun", 9.3e9)!.description).toMatch(/planets/);
+    expect(hoverInfo("sun", 1.1e10)!.description).toMatch(/oceans/);
+    expect(hoverInfo("sun", 1.38e10)!.description).toMatch(/halfway/);
+    const texts = new Set([8.8e9, 9.3e9, 1.1e10, 1.38e10].map((t) => hoverInfo("sun", t)!.description));
+    expect(texts.size).toBe(4);
+  });
+
   it("offers the three named views, none duplicating the Overview button", () => {
     expect(universeExperience.getCameraPresets().map((p) => p.name)).toEqual(["Wide", "Inside the web", "Galaxy close-up"]);
   });
