@@ -255,10 +255,6 @@ class TreeExperienceImpl implements FourDExperience {
 
   dispose(): void {
     if (this.ctx) for (const o of this.hoverables) this.ctx.unregisterHoverable(o);
-    // disposeObject frees geometry and materials; instance buffers need the mesh itself disposed.
-    this.root?.traverse((o) => {
-      if (o instanceof THREE.InstancedMesh) o.dispose();
-    });
     if (this.root) disposeObject(this.root);
     if (this.lights) disposeObject(this.lights);
     this.hoverables = [];
