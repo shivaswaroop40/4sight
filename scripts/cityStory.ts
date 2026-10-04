@@ -15,6 +15,7 @@ export const cityStory = {
   maxTime: END,
   mapping: {
     kind: "knots",
+    interpolate: "linear",
     knots: [
       { u: 0, time: START, label: "1700" },
       { u: 0.12, time: 1760, label: "1760" },

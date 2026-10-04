@@ -14,6 +14,7 @@ describe("city timeline", () => {
     expect(exp.mapping.format(1838.4)).toBe("1838");
     expect(exp.mapping.toTime(0.27)).toBe(1830);
     expect(exp.mapping.toParam(1880)).toBeCloseTo(0.45, 9);
+    expect(exp.mapping.toTime(0.36)).toBeCloseTo(1855, 9);
     expect(exp.mapping.toParam(exp.mapping.toTime(0.66))).toBeCloseTo(0.66, 9);
     expect(exp.mapping.ticks().map((t) => t.label)).toEqual(["1700", "1760", "1830", "1880", "1930", "1970", "Today"]);
   });

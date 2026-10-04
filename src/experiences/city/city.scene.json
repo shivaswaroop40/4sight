@@ -5,6 +5,7 @@
   "maxTime": 2025,
   "mapping": {
     "kind": "knots",
+    "interpolate": "linear",
     "knots": [
       {"u":0,"time":1700,"label":"1700"},
       {"u":0.12,"time":1760,"label":"1760"},
