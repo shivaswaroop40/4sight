@@ -147,7 +147,7 @@ describe("continents hover and views", () => {
   });
 
   it("calls the ocean Panthalassa exactly while its map label is drawn", () => {
-    const labelOpacity = (time: number) => exp.getState(time).labels.find((l) => l.id === "panthalassa")!.opacity;
+    const labelOpacity = (time: number) => continentsStateAt(time).labels.find((l) => l.id === "panthalassa")!.opacity;
     exp.setTime(-171);
     expect(labelOpacity(-171)).toBeCloseTo(0.05, 9);
     expect(exp.getHoveredObject("ocean")!.name).toBe("Panthalassa");
@@ -157,7 +157,7 @@ describe("continents hover and views", () => {
   });
 
   it("keeps the Tethys label up until Arabia closes it, as the stories say", () => {
-    const tethys = (ma: number) => exp.getState(-ma).labels.find((l) => l.id === "tethys")!.opacity;
+    const tethys = (ma: number) => continentsStateAt(-ma).labels.find((l) => l.id === "tethys")!.opacity;
     expect(tethys(56)).toBe(1);
     expect(tethys(35)).toBe(1);
     expect(tethys(20)).toBe(0);
