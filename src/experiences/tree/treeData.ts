@@ -151,7 +151,7 @@ export const EVENTS: TimelineEvent[] = [
     description: "Rot behind the old storm scar has opened a hollow. A tawny owl raises its chicks inside.",
     keyPoints: [
       "A hollow does not kill an oak. The living part of a trunk is its outer few centimetres.",
-      "Hollow trees can even stand up to wind better.",
+      "A hollow trunk keeps most of its strength while the outer wall stays thick, like a tube next to a solid rod.",
     ],
     category: "wildlife",
   },
@@ -161,7 +161,7 @@ export const EVENTS: TimelineEvent[] = [
     title: "A veteran in the making",
     when: "Year 150",
     description:
-      "With a scar, a hollow and dead wood, this oak is already a veteran tree and a home for hundreds of species. Yet it is only middle-aged: English oaks can live for more than 1,000 years.",
+      "With a scar, a hollow and dead wood, this oak already has the features that make a tree a home for hundreds of species. Yet at 150 it is still in its growing years: English oaks can live for more than 1,000 years.",
     keyPoints: [
       "About 2,300 species live on or with oaks in the UK, more than any other native tree.",
       `About ${Math.round(heightAt(STORY.end))} m tall, with a girth of about ${girthAt(STORY.end).toFixed(1)} m.`,
