@@ -225,6 +225,27 @@ describe("universe scene data", () => {
     universeExperience.dispose();
   });
 
+  it("answers the CMB hover on the whole ball while foggy and only on its rim once clear", () => {
+    const ctx = fakeSceneContext();
+    universeExperience.mount(ctx);
+    const horizon = [...ctx.hoverables].find(([, id]) => id === "cmb")![0];
+    const hits = (t: number, offset: number) => {
+      universeExperience.setTime(t);
+      ctx.scene.updateMatrixWorld(true);
+      const R = universeStateAt(t).radius;
+      const ray = new THREE.Raycaster(new THREE.Vector3(offset * R, 0, 5 * R), new THREE.Vector3(0, 0, -1));
+      return ray.intersectObject(horizon).map((hit) => hit.object);
+    };
+    expect(universeStateAt(1e5).fog).toBe(1);
+    expect(hits(1e5, 0)).toEqual([horizon]);
+    expect(hits(1e5, 0.95)).toEqual([horizon]);
+    expect(universeStateAt(1e9).fog).toBe(0);
+    expect(hits(1e9, 0)).toEqual([]);
+    expect(hits(1e9, 0.95)).toEqual([horizon]);
+    expect(hits(1e9, 1.1)).toEqual([]);
+    universeExperience.dispose();
+  });
+
   it("offers the three named views, none duplicating the Overview button", () => {
     expect(universeExperience.getCameraPresets().map((p) => p.name)).toEqual(["Wide", "Inside the web", "Galaxy close-up"]);
   });

@@ -38,6 +38,11 @@ const NIGHT = new THREE.Color("#222B52");
 const WHOOSH_HOT = new THREE.Color(THEME.mustard);
 const WHOOSH_COOL = new THREE.Color(THEME.cream);
 
+// Scratch for horizonRaycast, which runs on every pointer move.
+const ORIGIN = new THREE.Vector3();
+const POINT = new THREE.Vector3();
+const SPHERE = new THREE.Sphere();
+
 interface Proxy {
   id: HoverId;
   /** Shown (and so hoverable) only while this returns true. */
@@ -76,6 +81,8 @@ class UniverseExperience implements FourDExperience {
   private pin: THREE.Sprite | null = null;
   private sun: THREE.Sprite | null = null;
   private proxies: Proxy[] = [];
+  /** The CMB proxy mesh, the object horizonRaycast reports. */
+  private horizon: THREE.Mesh | null = null;
   private hoverables: THREE.Object3D[] = [];
   private disposables: { dispose(): void }[] = [];
   private current: UniverseState = universeStateAt(0);
@@ -156,7 +163,8 @@ class UniverseExperience implements FourDExperience {
     );
     const mid: Vec3 = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2];
 
-    this.addProxy("cmb", () => true, sphere, hidden, [0, 0, 0]).mesh.raycast = this.horizonRaycast;
+    this.horizon = this.addProxy("cmb", () => true, sphere, hidden, [0, 0, 0]).mesh;
+    this.horizon.raycast = this.horizonRaycast;
     this.addProxy("cluster", (s) => s.structure > 0.25, sphere, hidden, web.knots[web.cluster].position, 0.09);
     this.addProxy("filament", (s) => s.structure > 0.2, tube, hidden, mid);
 
@@ -258,6 +266,7 @@ class UniverseExperience implements FourDExperience {
     this.disposables = [];
     this.hoverables = [];
     this.proxies = [];
+    this.horizon = null;
     this.stars = [];
     this.starGroup = null;
     this.field = null;
@@ -281,19 +290,21 @@ class UniverseExperience implements FourDExperience {
   private horizonRaycast = (raycaster: THREE.Raycaster, intersects: THREE.Intersection[]): void => {
     const R = this.current.radius;
     const ray = raycaster.ray;
-    const centre = new THREE.Vector3();
     if (this.current.fog > 0.5) {
-      const hit = ray.intersectSphere(new THREE.Sphere(centre, R), new THREE.Vector3());
-      if (hit) intersects.push({ distance: ray.origin.distanceTo(hit), point: hit, object: this.proxies[0].mesh });
+      if (ray.intersectSphere(SPHERE.set(ORIGIN, R), POINT)) this.pushHorizonHit(ray, intersects);
       return;
     }
     if (ray.origin.length() < R) return;
-    const d = ray.closestPointToPoint(centre, new THREE.Vector3()).length();
+    const d = ray.closestPointToPoint(ORIGIN, POINT).length();
     if (d < R * 0.9 || d > R * 1.03) return;
     // Report where the ray enters the skin, so anything drawn in front of it still wins.
-    const entry = ray.intersectSphere(new THREE.Sphere(centre, R * 1.03), new THREE.Vector3());
-    if (entry) intersects.push({ distance: ray.origin.distanceTo(entry), point: entry, object: this.proxies[0].mesh });
+    if (ray.intersectSphere(SPHERE.set(ORIGIN, R * 1.03), POINT)) this.pushHorizonHit(ray, intersects);
   };
+
+  /** POINT holds the hit; the intersection gets its own copy, as Mesh.raycast does. */
+  private pushHorizonHit(ray: THREE.Ray, intersects: THREE.Intersection[]): void {
+    intersects.push({ distance: ray.origin.distanceTo(POINT), point: POINT.clone(), object: this.horizon! });
+  }
 
   private addProxy(
     id: HoverId,
