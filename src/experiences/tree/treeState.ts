@@ -48,6 +48,9 @@ function limbStateAt(t: number): LimbState {
   return "fallen";
 }
 
+/** The displayed year of the mast-year event is always a mast year. */
+const MAST_YEAR = Math.floor(seasonClockAt(STORY.mast));
+
 /** Acorn crop on the tree and on the ground, 0..1 each, from age, season and the year's mast. */
 export function acornsAt(t: number): { onTree: number; onGround: number; ripe: number; mast: boolean } {
   const phase = seasonPhase(t);
@@ -57,9 +60,6 @@ export function acornsAt(t: number): { onTree: number; onGround: number; ripe: n
   const crop = acornCapacity(t) * (mast ? 1 : mastFactor(year));
   return { onTree: s.onTree * crop, onGround: s.onGround * crop, ripe: s.ripe, mast: mast && crop > 0 };
 }
-
-/** The displayed year of the mast-year event is always a mast year. */
-const MAST_YEAR = Math.floor(seasonClockAt(STORY.mast));
 
 function wildlifeAt(t: number): Wildlife[] {
   const out: Wildlife[] = [];
