@@ -26,11 +26,13 @@ export const runtime: { manager: SceneManager | null; urlSync: UrlSync | null } 
 /**
  * The latest experience request. "ready" means the mounted experience is the
  * one asked for. `u` is the moment it was asked for, so a retry opens there.
+ * A failure happened downloading the chunk or mounting the experience; after
+ * a failed mount nothing is mounted.
  */
 export type LoadState =
   | { status: "loading"; id: ExperienceId; u: number }
   | { status: "ready" }
-  | { status: "failed"; id: ExperienceId; u: number; message: string };
+  | { status: "failed"; id: ExperienceId; u: number; stage: "chunk" | "mount"; message: string };
 
 export type Toast = { kind: "copied" } | { kind: "copyFailed"; url: string } | { kind: "saved"; fileName: string };
 
@@ -108,9 +110,10 @@ export function currentMoment(): Moment | null {
  * experience keeps running while the chunk downloads, and only the latest
  * request may mount, so picking A then B quickly ends on B.
  *
- * Asking again for the experience that just failed reloads the page on it:
- * the browser remembers a failed module fetch for the life of the page, so
- * a second import() of the same chunk fails without touching the network.
+ * Asking again for an experience whose chunk just failed reloads the page
+ * on it: the browser remembers a failed module fetch for the life of the
+ * page, so a second import() of the same chunk fails without touching the
+ * network. A chunk that loaded but failed to mount is simply mounted again.
  */
 export async function showExperience(id: ExperienceId, u = 0): Promise<void> {
   const request = ++latestRequest;
@@ -118,24 +121,34 @@ export async function showExperience(id: ExperienceId, u = 0): Promise<void> {
     setUi({ load: { status: "ready" } });
     return;
   }
-  if (ui.load.status === "failed" && ui.load.id === id) {
+  if (ui.load.status === "failed" && ui.load.id === id && ui.load.stage === "chunk") {
     window.location.replace(formatMoment(window.location.href, { id, u }));
     return;
   }
   setUi({ load: { status: "loading", id, u } });
+  let experience: FourDExperience;
   try {
-    const experience = await loadExperience(id);
-    const manager = runtime.manager;
-    if (request !== latestRequest || !manager) return;
-    const filters = defaultFilterState(experience.getAvailableFilters());
-    manager.mount(experience, filters, ui.experience !== null);
-    if (u > 0) controller.setParam(u);
-    setUi({ experience, filters, load: { status: "ready" }, hoveredId: null });
+    experience = await loadExperience(id);
   } catch (error) {
-    if (request !== latestRequest) return;
-    const message = error instanceof Error ? error.message : String(error);
-    setUi({ load: { status: "failed", id, u, message } });
+    if (request === latestRequest) setUi({ load: failed(id, u, "chunk", error) });
+    return;
   }
+  const manager = runtime.manager;
+  if (request !== latestRequest || !manager) return;
+  const filters = defaultFilterState(experience.getAvailableFilters());
+  try {
+    manager.mount(experience, filters, ui.experience !== null);
+  } catch (error) {
+    const current = manager.current;
+    setUi({ experience: current, filters: current ? ui.filters : {}, hoveredId: null, load: failed(id, u, "mount", error) });
+    return;
+  }
+  if (u > 0) controller.setParam(u);
+  setUi({ experience, filters, load: { status: "ready" }, hoveredId: null });
+}
+
+function failed(id: ExperienceId, u: number, stage: "chunk" | "mount", error: unknown): LoadState {
+  return { status: "failed", id, u, stage, message: error instanceof Error ? error.message : String(error) };
 }
 
 /** Applies the viewer pressing filter `id`: the scene re-renders at the current moment, paused or not. */

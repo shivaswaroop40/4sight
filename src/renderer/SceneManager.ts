@@ -127,33 +127,46 @@ export class SceneManager {
    * Disposes the current experience, mounts the next under `filters`, resets
    * u to 0 (paused), and frames its first preset. The filters are stored
    * before the controller attaches, so the first frame is already filtered.
+   *
+   * If the experience throws, it is unmounted, time is paused, nothing is
+   * mounted, and the error is rethrown.
    */
   mount(experience: FourDExperience, filters: FilterState, animateCamera = false): void {
     if (this.experience) this.unmount();
     this.experience = experience;
     this.setHovered(null);
-    experience.mount(this.context);
-    experience.setFilters?.(filters);
-    this.timeController.attach(experience);
-    this.scene.updateMatrixWorld(true);
-    this.warmUp();
-    this.cameras.setDistanceScale(experience.cameraDistanceScale?.(this.timeController.state.time) ?? 1);
-    const [first] = experience.getCameraPresets();
-    if (first) this.cameras.applyPreset(first, animateCamera);
-    else this.cameras.overview(this.scene, animateCamera);
+    try {
+      experience.mount(this.context);
+      experience.setFilters?.(filters);
+      this.timeController.attach(experience);
+      this.scene.updateMatrixWorld(true);
+      this.warmUp();
+      this.cameras.setDistanceScale(experience.cameraDistanceScale?.(this.timeController.state.time) ?? 1);
+      const [first] = experience.getCameraPresets();
+      if (first) this.cameras.applyPreset(first, animateCamera);
+      else this.cameras.overview(this.scene, animateCamera);
+    } catch (error) {
+      this.timeController.pause();
+      this.unmount();
+      throw error;
+    }
   }
 
   unmount(): void {
-    if (!this.experience) return;
+    const experience = this.experience;
+    if (!experience) return;
+    this.experience = null;
     this.cameras.stopFollowing();
-    this.experience.dispose();
     this.hoverables.clear();
     this.setHovered(null);
-    // Safety net: free anything the experience left behind.
-    for (const child of [...this.scene.children]) disposeObject(child);
-    this.scene.background = null;
-    this.scene.fog = null;
-    this.experience = null;
+    try {
+      experience.dispose();
+    } finally {
+      // Safety net: free anything the experience left behind, even if dispose threw.
+      for (const child of [...this.scene.children]) disposeObject(child);
+      this.scene.background = null;
+      this.scene.fog = null;
+    }
   }
 
   /**
