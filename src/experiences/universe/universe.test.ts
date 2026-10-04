@@ -120,6 +120,14 @@ describe("universe state", () => {
     expect(universeStateAt(3.8e5).ripples).toBeGreaterThan(0.95);
   });
 
+  it("keeps the quark soup until the protons event and clears it within a decade of time", () => {
+    const protons = EVENTS.find((e) => e.id === "protons")!.time;
+    expect(protons).toBe(seconds(1e-5));
+    expect(universeStateAt(seconds(1e-6)).quarks).toBeGreaterThan(0.95);
+    expect(universeStateAt(protons).quarks).toBeCloseTo(0.5, 1);
+    expect(universeStateAt(seconds(1e-4)).quarks).toBe(0);
+  });
+
   it("brings the first stars, galaxies, and the Sun in order", () => {
     expect(universeStateAt(5e7).firstStars).toBe(0);
     expect(universeStateAt(2e8).firstStars).toBe(1);

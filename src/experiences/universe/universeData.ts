@@ -87,9 +87,9 @@ export const EVENTS: TimelineEvent[] = [
   },
   {
     id: "protons",
-    time: seconds(1e-6),
+    time: seconds(1e-5),
     title: "Quarks become protons",
-    when: "About a millionth of a second",
+    when: "About ten millionths of a second",
     description:
       "Until now space was a soup of free quarks and gluons. As it cools below about two trillion degrees, quarks lock together in threes to make protons and neutrons.",
     keyPoints: ["Quark-gluon plasma cools", "Protons and neutrons appear", "Matter outnumbers antimatter by about one part in a billion"],

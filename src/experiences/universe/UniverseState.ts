@@ -179,7 +179,7 @@ export function universeStateAt(time: number): UniverseState {
     flash: 1 - smoothstep(lsec(1e-40), lsec(1e-33), lt),
     fog,
     fogHeat: smoothstep(lsec(1e-6), L(3.8e5), lt),
-    quarks: smoothstep(lsec(1e-33), lsec(1e-31), lt) * (1 - smoothstep(lsec(2e-7), lsec(2e-6), lt)),
+    quarks: smoothstep(lsec(1e-33), lsec(1e-31), lt) * (1 - smoothstep(lsec(4e-6), lsec(2.5e-5), lt)),
     boil: (Math.min(Math.max(lt, lsec(1e-36)), L(3.8e5)) - lsec(1e-36)) * 0.15,
     ripples: smoothstep(L(1e4), L(3.5e5), lt),
     afterglow: smoothstep(L(3e5), L(3.8e5), lt) * (1 - smoothstep(L(4.2e5), L(1.5e6), lt)),
