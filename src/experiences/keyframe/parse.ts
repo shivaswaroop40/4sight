@@ -143,7 +143,11 @@ function mappingSpec(v: unknown, minTime: number, maxTime: number, path: string)
         fail(`${path}.knots[${i}]`, "u and time must both increase");
       }
     }
-    return { kind, knots };
+    const interpolate = optional(m, "interpolate", path, str) ?? "log";
+    if (interpolate !== "log" && interpolate !== "linear") {
+      fail(`${path}.interpolate`, `expected "log" or "linear", got "${interpolate}"`);
+    }
+    return { kind, knots, interpolate };
   }
   return fail(`${path}.kind`, `unknown mapping "${kind}" (expected "linear" or "knots")`);
 }
@@ -346,6 +350,14 @@ export function parseScene(json: unknown): SceneDef {
     cameraPresets: cameraPresets(root.cameraPresets, "cameraPresets"),
     cameraDistanceScale:
       root.cameraDistanceScale === undefined ? [] : track(root.cameraDistanceScale, 1, "cameraDistanceScale", num),
+    cameraSubjectAspect:
+      root.cameraSubjectAspect === undefined
+        ? []
+        : track(root.cameraSubjectAspect, 1, "cameraSubjectAspect", (x, p) => {
+            const n = num(x, p);
+            if (n <= 0) fail(p, "must be greater than 0");
+            return n;
+          }),
     hover,
     objects,
   };

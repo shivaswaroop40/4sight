@@ -88,9 +88,14 @@ export interface HoverDef {
   descriptions: HoverText[];
 }
 
+/**
+ * "knots" gives each era its own slider width. Between knots, time is
+ * log-interpolated by default (spans of many orders of magnitude);
+ * "linear" suits calendar years, where log spacing has no meaning.
+ */
 export type MappingSpec =
   | { kind: "linear"; ticks?: TimeTick[] }
-  | { kind: "knots"; knots: SliderKnot[] };
+  | { kind: "knots"; knots: SliderKnot[]; interpolate: "log" | "linear" };
 
 export interface SceneDef {
   id: string;
@@ -112,6 +117,8 @@ export interface SceneDef {
   cameraPresets: CameraPreset[];
   /** Multiplier on the preset camera distance over time; empty means always 1. */
   cameraDistanceScale: Track<number>;
+  /** Width over height of what the presets frame, over time; empty means the renderer's default. */
+  cameraSubjectAspect: Track<number>;
   hover: Record<string, HoverDef>;
   /** Parents come before their children. */
   objects: SceneObjectDef[];

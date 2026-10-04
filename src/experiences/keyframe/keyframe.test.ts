@@ -180,6 +180,38 @@ describe("keyframeExperience", () => {
     expect(exp.getState(6.3)).toEqual(a);
   });
 
+  it("frames a subject of the authored width when the scene gives one", () => {
+    expect(exp.cameraSubjectAspect).toBeUndefined();
+    const wide = keyframeExperience("mock", scene({ cameraSubjectAspect: [{ t: 0, v: 1.6 }, { t: 10, v: 1.1 }] }));
+    expect(wide.cameraSubjectAspect?.(0)).toBe(1.6);
+    expect(wide.cameraSubjectAspect?.(5)).toBeCloseTo(1.35, 12);
+    expect(wide.cameraSubjectAspect?.(10)).toBe(1.1);
+  });
+
+  it("maps calendar years linearly between knots when asked", () => {
+    const knots = [
+      { u: 0, time: 1700, label: "1700" },
+      { u: 0.5, time: 1900, label: "1900" },
+      { u: 1, time: 2000, label: "2000" },
+    ];
+    const years = (interpolate?: string) =>
+      keyframeExperience("mock", scene({ minTime: 1700, maxTime: 2000, events: [], mapping: { kind: "knots", knots, interpolate } }));
+    const linear = years("linear").mapping;
+    expect(linear.toTime(0.25)).toBe(1800);
+    expect(linear.toTime(0.75)).toBe(1950);
+    expect(linear.toParam(1800)).toBe(0.25);
+    expect(linear.toParam(1650)).toBe(0);
+    expect(linear.ticks().map((t) => t.label)).toEqual(["1700", "1900", "2000"]);
+    expect(years().mapping.toTime(0.25)).toBeCloseTo(1797.2, 1);
+  });
+
+  it("reads small durations in seconds, so a slow warp rate is not zero", () => {
+    expect(exp.mapping.format(0.36)).toBe("22 s");
+    expect(exp.mapping.format(0)).toBe("0 min");
+    expect(exp.mapping.format(0.995)).toBe("1 min");
+    expect(exp.mapping.format(1)).toBe("1 min");
+  });
+
   it("refuses a scene whose id does not match", () => {
     expect(() => keyframeExperience("iphone", scene())).toThrow('scene id "mock" does not match experience id "iphone"');
   });
@@ -271,6 +303,10 @@ describe("parseScene validation", () => {
     expect(bad({ mapping: { kind: "knots", knots: [{ u: 0, time: 0, label: "" }, { u: 1, time: 9, label: "" }] } })).toThrow(
       "must run from minTime to maxTime",
     );
+    expect(bad({ mapping: { kind: "knots", interpolate: "cubic", knots: [{ u: 0, time: 0, label: "" }, { u: 1, time: 10, label: "" }] } })).toThrow(
+      'mapping.interpolate: expected "log" or "linear", got "cubic"',
+    );
+    expect(bad({ cameraSubjectAspect: [{ t: 0, v: 0 }] })).toThrow("cameraSubjectAspect[0].v: must be greater than 0");
     expect(bad({ timeFormat: "fortnights" })).toThrow('unknown time format "fortnights"');
     expect(bad({ secondsPerUnit: 0 })).toThrow("secondsPerUnit: must be greater than 0");
   });

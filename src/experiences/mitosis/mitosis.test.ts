@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { spanClock } from "../../core/analogy";
+import { effectiveRate, formatRate } from "../../core/warp";
 import { mitosisExperience as exp } from "./MitosisExperience";
 
 const pose = (t: number, id: string) => exp.getState(t).objects.find((o) => o.id === id)!;
@@ -24,6 +25,11 @@ describe("mitosis timeline", () => {
     expect(exp.mapping.format(38)).toBe("38 min");
     expect(exp.mapping.format(65)).toBe("1 h 05 min");
     expect(exp.mapping.toTime(0.5)).toBe(32.5);
+  });
+
+  it("shows a readable rate at every warp preset", () => {
+    const rate = (warp: number) => formatRate(exp.mapping, effectiveRate(exp.mapping, exp.baseDurationSeconds, 0.5, warp));
+    expect(exp.warpPresets.map(rate)).toEqual(["≈ 22 s / s", "≈ 43 s / s", "≈ 1 min / s", "≈ 3 min / s", "≈ 6 min / s"]);
   });
 
   it("names the event at a time", () => {

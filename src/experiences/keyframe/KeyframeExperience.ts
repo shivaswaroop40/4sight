@@ -10,7 +10,6 @@
 // See types.ts for the data shape and parse.ts for the authoring format.
 
 import * as THREE from "three";
-import { linearMapping } from "../../core/mappings";
 import { addOutline, addWarmLights, disposeObject, makeToonMaterial } from "../../core/theme";
 import { eventAt } from "../../core/Timeline";
 import type {
@@ -23,11 +22,10 @@ import type {
   TimelineEvent,
   VisualizationFilter,
 } from "../../core/types";
-import { knotMapping } from "../../core/mappings";
+import { mappingFor } from "./mapping";
 import { parseScene } from "./parse";
 import { buildGeometry, hullGeometry } from "./primitives";
-import { cameraDistanceScaleAt, hoverDescription, sampleScene } from "./sample";
-import { TIME_FORMATS } from "./timeFormats";
+import { cameraDistanceScaleAt, hoverDescription, sampleNumber, sampleScene } from "./sample";
 import type { SceneDef, SceneObjectDef, SceneSample } from "./types";
 
 type SurfaceMaterial = THREE.MeshToonMaterial | THREE.MeshBasicMaterial;
@@ -40,13 +38,6 @@ interface ObjectView {
   /** The object's fullest opacity; the outline fades relative to it so see-through shells keep solid ink. */
   peakOpacity: number;
   dynamicColor: boolean;
-}
-
-function mappingFor(def: SceneDef): TimeMapping {
-  const format = TIME_FORMATS[def.timeFormat];
-  return def.mapping.kind === "knots"
-    ? knotMapping(def.mapping.knots, format)
-    : linearMapping(def.minTime, def.maxTime, format, def.mapping.ticks);
 }
 
 const DEG = Math.PI / 180;
@@ -78,6 +69,8 @@ export class KeyframeExperience implements FourDExperience {
   readonly labels: { start: string; end: string };
   readonly events: TimelineEvent[];
   readonly def: SceneDef;
+  /** Present only when the scene authors one, so the renderer keeps its default otherwise. */
+  readonly cameraSubjectAspect?: (time: number) => number;
 
   private ctx: SceneContext | null = null;
   private root: THREE.Group | null = null;
@@ -101,6 +94,8 @@ export class KeyframeExperience implements FourDExperience {
     this.labels = def.labels;
     this.events = def.events;
     this.currentTime = def.minTime;
+    const aspect = def.cameraSubjectAspect;
+    if (aspect.length > 0) this.cameraSubjectAspect = (time) => sampleNumber(aspect, time);
   }
 
   mount(ctx: SceneContext): void {
