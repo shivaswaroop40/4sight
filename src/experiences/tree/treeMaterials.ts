@@ -136,30 +136,39 @@ export function leafInkGeometry(leaf: THREE.BufferGeometry, grow = 0.16): THREE.
   return g;
 }
 
-/** Round stones: one jittered sphere per cell, sliced by the surface. Distance is 1 at a stone's edge. */
+/**
+ * Round stones: one jittered sphere per cell, sliced by the surface. Returns the
+ * nearest stone's distance (1 at its edge) and its radius in cells.
+ */
 const STONES = /* glsl */ `
-float stoneDist(vec3 p, float cell, float keep) {
+vec2 stoneDist(vec3 p, float cell, float keep) {
   vec3 q = p / cell;
   vec3 id = floor(q);
-  float best = 1.0;
+  vec2 best = vec2(1.0, 0.3);
   for (int x = -1; x <= 1; x++)
   for (int y = -1; y <= 1; y++)
   for (int z = -1; z <= 1; z++) {
     vec3 c = id + vec3(float(x), float(y), float(z));
     vec3 h = fract(sin(vec3(dot(c, vec3(127.1, 311.7, 74.7)), dot(c, vec3(269.5, 183.3, 246.1)), dot(c, vec3(113.5, 271.9, 124.6)))) * 43758.5453);
     if (h.x < keep) continue;
-    float d = length(q - (c + 0.25 + 0.5 * h)) / (0.22 + 0.2 * h.y);
-    best = min(best, d);
+    float r = 0.22 + 0.2 * h.y;
+    float d = length(q - (c + 0.25 + 0.5 * h)) / r;
+    if (d < best.x) best = vec2(d, r);
   }
   return best;
 }
 
-/** Stone colour over a base, with an ink rim so it reads as a cartoon pebble. */
-vec3 stone(vec3 col, vec3 p, float cell, float keep, vec3 tint, vec3 ink) {
-  float d = stoneDist(p, cell, keep);
-  float aa = fwidth(d) * 1.2;
-  float fill = 1.0 - smoothstep(1.0 - aa, 1.0, d);
-  float rim = smoothstep(0.86 - aa, 0.86, d);
+/**
+ * Stone colour over a base, with an ink rim so it reads as a cartoon pebble.
+ * px is one pixel's footprint in p's units, taken by the caller with fwidth in
+ * uniform control flow: a derivative inside the depth branches is undefined on
+ * pixels whose quad neighbours skip the branch, and shimmers frame to frame.
+ */
+vec3 stone(vec3 col, vec3 p, float px, float cell, float keep, vec3 tint, vec3 ink) {
+  vec2 s = stoneDist(p, cell, keep);
+  float aa = px / (cell * s.y) * 1.2;
+  float fill = 1.0 - smoothstep(1.0 - aa, 1.0, s.x);
+  float rim = smoothstep(0.86 - aa, 0.86, s.x);
   return mix(col, mix(tint, ink, rim * 0.75), fill);
 }
 `;
@@ -183,7 +192,8 @@ export function strataMaterial(radius: number, dome: number): THREE.MeshToonMate
       .replace("#include <common>", `#include <common>\nvarying vec3 vStrata;\n${STONES}`)
       .replace(
         "vec4 diffuseColor = vec4( diffuse, opacity );",
-        `float rr = length(vStrata.xz);
+        `float px = length(fwidth(vStrata));
+        float rr = length(vStrata.xz);
         float top = -${dome.toFixed(3)} * (rr * rr) / ${(radius * radius).toFixed(3)};
         float depth = top - vStrata.y;
         float ang = atan(vStrata.z, vStrata.x);
@@ -193,13 +203,12 @@ export function strataMaterial(radius: number, dome: number): THREE.MeshToonMate
         if (depth > 0.6 + 0.08 * wob) col = ${c(PALETTE.subsoil)};
         if (depth > 2.4 + 0.3 * wob) col = ${c(PALETTE.clay)};
         if (depth > 4.4 + 0.4 * wob) col = ${c(PALETTE.rock)};
-        // stone() takes fwidth, which is undefined inside a branch some pixels
-        // of a quad skip, so every layer is computed and the depth picks one.
-        vec3 ink = ${c("#4A3528")};
-        vec3 pebbled = stone(col, vStrata, 0.035, 0.6, col * 0.84, col * 0.84);
-        pebbled = stone(pebbled, vStrata + 3.1, 0.06, 0.84, ${c(PALETTE.rock)}, ink);
-        vec3 boulders = stone(pebbled, vStrata + 7.7, 0.7, 0.86, ${c("#D8C8AE")}, ink);
-        if (depth > 0.05) col = depth > 0.6 ? boulders : pebbled;
+        if (depth > 0.05) {
+          vec3 ink = ${c("#4A3528")};
+          col = stone(col, vStrata, px, 0.035, 0.6, col * 0.84, col * 0.84);
+          col = stone(col, vStrata + 3.1, px, 0.06, 0.84, ${c(PALETTE.rock)}, ink);
+          if (depth > 0.6) col = stone(col, vStrata + 7.7, px, 0.7, 0.86, ${c("#D8C8AE")}, ink);
+        }
         vec4 diffuseColor = vec4(col, opacity);`,
       );
   };
