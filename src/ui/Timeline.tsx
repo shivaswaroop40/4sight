@@ -11,7 +11,7 @@
 
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { FourDExperience, TimelineEvent, TimeTick } from "../core/types";
-import { clusterFlags, type FlagCluster } from "./flagClusters";
+import { clusterFlags, openClusterKey, type FlagCluster } from "./flagClusters";
 import { controller, runtime } from "./runtime";
 import "./Timeline.css";
 
@@ -24,6 +24,8 @@ interface Marker {
   u: number;
   color: number;
 }
+
+const markerKey = (m: Marker) => m.event.id;
 
 export function Timeline({ experience }: { experience: FourDExperience }) {
   const rootRef = useRef<HTMLDivElement | null>(null);
@@ -39,6 +41,7 @@ export function Timeline({ experience }: { experience: FourDExperience }) {
     [experience],
   );
   const clusters = useMemo(() => clusterFlags(markers, trackWidth, FLAG_GAP), [markers, trackWidth]);
+  if (openClusterKey(clusters, openId, markerKey) !== openId) setOpenId(null);
   const shown = useMemo(
     () => visibleTicks(ticks.map((t) => ({ u: t.u, label: endLabel(t.u, experience) ?? t.label })), width),
     [ticks, width, experience],
@@ -148,13 +151,13 @@ export function Timeline({ experience }: { experience: FourDExperience }) {
       <div className="timeline__flags" role="group" aria-label="Events" ref={flagsRef}>
         {clusters.map((c) =>
           c.items.length === 1 ? (
-            <EventFlag key={c.items[0].event.id} marker={c.items[0]} onPick={jump} />
+            <EventFlag key={markerKey(c.items[0])} marker={c.items[0]} onPick={jump} />
           ) : (
             <ClusterFlag
-              key={c.items[0].event.id}
+              key={markerKey(c.items[0])}
               cluster={c}
               trackWidth={trackWidth}
-              open={openId === c.items[0].event.id}
+              open={openId === markerKey(c.items[0])}
               setOpenId={setOpenId}
               onPick={jump}
             />
@@ -244,7 +247,7 @@ function ClusterFlag({
         ref={buttonRef}
         type="button"
         className="flag flag--cluster"
-        data-u={cluster.u}
+        data-u={cluster.end}
         data-color={first.color}
         data-edge={flagEdge(cluster.u)}
         style={{ left: `${cluster.u * 100}%` }}
