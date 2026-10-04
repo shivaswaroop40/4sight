@@ -53,7 +53,7 @@ export const EVENTS: TimelineEvent[] = [
     keyPoints: [
       "This atrial kick adds about a fifth of the ventricles' blood at rest",
       "The tricuspid and mitral valves are wide open",
-      "Blue blood stays on the right, red on the left; they never mix",
+      "Oxygen-poor blood, drawn blue here, stays on the right and oxygen-rich red blood on the left. They never mix",
     ],
     category: "mechanical",
   },
@@ -105,7 +105,7 @@ export const EVENTS: TimelineEvent[] = [
     title: "Blood shoots out",
     when: "260 ms · aortic and pulmonary valves open",
     description:
-      "Left ventricle pressure passes the 80 mmHg in the aorta and the outflow valves pop open. Each ventricle pushes out about 70 mL: red blood to the body, blue blood to the lungs.",
+      "Left ventricle pressure passes the 80 mmHg in the aorta and the outflow valves pop open. Each ventricle pushes out about 70 mL: oxygen-rich blood to the body, oxygen-poor blood to the lungs.",
     keyPoints: [
       "The left ventricle peaks near 120 mmHg, the right near 25 mmHg",
       "Both sides pump the same 70 mL, so the two loops stay balanced",
@@ -136,7 +136,7 @@ export const EVENTS: TimelineEvent[] = [
       "The ventricles relax and their pressure drops below the arteries. Blood starts to fall back, fills the valve cups, and snaps the aortic and pulmonary valves shut. That is the dub.",
     keyPoints: [
       "All four valves are shut again while the muscle relaxes",
-      "The small bump in aortic pressure here is the dicrotic notch",
+      "The small dip in aortic pressure here is the dicrotic notch. The bump after it is the dicrotic wave",
       "Lub-dub is what a stethoscope hears",
     ],
     category: "sound",
@@ -187,7 +187,7 @@ interface HoverCard {
   description: string;
   category: string;
   properties: Record<string, string | number>;
-  /** Live readouts at time t, listed before the fixed properties (the card shows three). */
+  /** Live readouts at time t, listed before the fixed properties. */
   live?: (t: number) => Record<string, string>;
 }
 
@@ -200,7 +200,7 @@ export const HOVER: Record<HoverId, HoverCard> = {
   rightAtrium: {
     name: "Right atrium",
     category: "chamber",
-    description: "Collects blue, oxygen-poor blood coming back from the body through the vena cava.",
+    description: "Collects oxygen-poor blood, drawn blue here, coming back from the body through the vena cava.",
     properties: { Typical: "2 to 6 mmHg, 25 to 70 mL" },
     live: both("rightAtrium"),
   },
@@ -244,7 +244,7 @@ export const HOVER: Record<HoverId, HoverCard> = {
     name: "Pulmonary valve",
     category: "valve",
     description: "Three pocket-shaped cusps at the exit of the right ventricle. It snaps shut at the dub.",
-    properties: { Cusps: 3, Open: "260 ms to 540 ms (dub)", Opening: "about 2 cm²" },
+    properties: { Cusps: 3, Open: "260 ms to 540 ms (dub)", Opening: "about 4 cm²" },
     live: state("pulmonary"),
   },
   aortic: {
@@ -278,7 +278,7 @@ export const HOVER: Record<HoverId, HoverCard> = {
     name: "Pulmonary artery",
     category: "vessel",
     description:
-      "Carries blue, oxygen-poor blood from the right ventricle to both lungs. It is the only artery that carries oxygen-poor blood.",
+      "Carries oxygen-poor blood, drawn blue here, from the right ventricle to both lungs. After birth it is the one artery that carries oxygen-poor blood; before birth the umbilical arteries do too.",
     properties: { Typical: "25 / 10 mmHg", Branches: "one to each lung" },
     live: mmHg("pulmonaryArtery"),
   },
@@ -291,7 +291,7 @@ export const HOVER: Record<HoverId, HoverCard> = {
   pulmonaryVeins: {
     name: "Pulmonary veins",
     category: "vessel",
-    description: "Bring oxygen-rich blood from the lungs to the left atrium. They are the only veins that carry oxygen-rich blood.",
+    description: "Bring oxygen-rich blood from the lungs to the left atrium. After birth they are the only veins that carry oxygen-rich blood.",
     properties: { Count: "4 (2 drawn)", Pressure: "about 8 mmHg" },
   },
   heartWall: {
@@ -306,7 +306,7 @@ export const HOVER: Record<HoverId, HoverCard> = {
     category: "electrical",
     description:
       "An electrocardiogram: the heart's electrical activity measured from the skin. P is the atria firing, QRS the ventricles firing, T the ventricles resetting.",
-    properties: { "P wave": "0 to 90 ms", "QRS": "160 to 240 ms", "T wave": "380 to 540 ms", "Paper squares": "40 ms each" },
+    properties: { "P wave at": "0 to 90 ms", "QRS at": "160 to 225 ms", "T wave at": "380 to 540 ms", "Paper squares": "40 ms each" },
   },
 };
 
