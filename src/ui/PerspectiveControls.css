@@ -48,8 +48,17 @@
 }
 
 @media (max-width: 599px) {
+  .views {
+    flex-wrap: wrap;
+    gap: 6px 4px;
+    overflow: visible;
+    padding: 0;
+    background: none;
+    border: 0;
+    box-shadow: none;
+  }
   .views .chip {
-    padding: 5px 9px;
+    padding: 5px 8px;
   }
   .views .chip--accent svg {
     display: none;
