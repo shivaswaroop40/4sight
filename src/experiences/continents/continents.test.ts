@@ -2,11 +2,12 @@ import { describe, expect, it } from "vitest";
 import { fakeSceneContext } from "../../renderer/fakeSceneContext";
 import { spanClock } from "../../core/analogy";
 import { YEAR_SECONDS } from "../../core/timescale";
-import { EVENTS } from "./continentsData";
+import { ANCHORS, EVENTS } from "./continentsData";
 import { continentsExperience as exp } from "./ContinentsExperience";
-import { continentsStateAt, formatMa } from "./ContinentsState";
+import { continentsStateAt, formatMa, rotationAt } from "./ContinentsState";
 import { triangulate } from "./globeModel";
 import { GREATER_INDIA, OUTLINES } from "./outlines";
+import { toLonLat, toVec } from "./sphere";
 
 function block(ma: number, id: string) {
   return continentsStateAt(-ma).blocks.find((b) => b.id === id)!;
@@ -79,6 +80,24 @@ describe("continents reconstruction", () => {
     expect(block(60, "india").speed).toBeGreaterThan(15);
     expect(block(0, "africa").speed).toBeLessThan(3);
     expect(block(0, "australia").speed).toBeGreaterThan(6);
+  });
+
+  it("slows India after the collision to the 4 to 5 cm a year the event card quotes", () => {
+    const speeds = [45, 40, 30, 20, 10, 0].map((ma) => block(ma, "india").speed);
+    for (let i = 1; i < speeds.length; i++) expect(speeds[i]).toBeLessThanOrEqual(speeds[i - 1] + 1e-6);
+    expect(speeds[0]).toBeLessThan(10);
+    expect(block(0, "india").speed).toBeGreaterThanOrEqual(4);
+    expect(block(0, "india").speed).toBeLessThan(5);
+    exp.setTime(0);
+    expect(exp.getHoveredObject("india")!.properties!.Speed).toBe("4 cm a year");
+  });
+
+  it("drives India about 2,400 km into Asia since the collision, with Greater India's tip at the suture at 50 Ma", () => {
+    const inEurasiaFrame = (p: readonly [number, number], ma: number) =>
+      toLonLat(toVec(p).applyQuaternion(rotationAt("india", ma)).applyQuaternion(rotationAt("eurasia", ma).invert()));
+    const tip = GREATER_INDIA[0][0].reduce((a, b) => (b[1] > a[1] ? b : a));
+    expect(inEurasiaFrame(tip, 50)[1]).toBeCloseTo(29.5, 0);
+    expect(inEurasiaFrame(ANCHORS.india, 0)[1] - inEurasiaFrame(ANCHORS.india, 50)[1]).toBeCloseTo(22, 0);
   });
 
   it("opens the Atlantic", () => {

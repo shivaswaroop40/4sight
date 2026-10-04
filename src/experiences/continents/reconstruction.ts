@@ -103,10 +103,14 @@ const INDIA_FIT = place(ANCHORS.india, [56, -22], -43);
 
 const india = keys((a) => {
   if (a >= 90) return compose(madagascar[a], INDIA_FIT);
-  if (a === 66) return compose(africa[66], place(ANCHORS.india, [67, -6], -18));
+  if (a === 66) return compose(africa[66], place(ANCHORS.india, [67, -12], -18));
   // After about 50 million years ago India is jammed against Asia, still
-  // creeping north as Greater India slides under Tibet.
-  const behind: Partial<Record<Age, number>> = { 50: 13, 40: 10.5, 20: 6.5, 0: 0 };
+  // pushing north as Greater India slides under Tibet. Degrees of latitude
+  // still to go in Eurasia's frame: about 2,400 km of convergence since the
+  // collision, slowing from roughly 7 cm a year to 4 to 5 today (Molnar &
+  // Stock 2009; GPS across the Himalaya gives 3.5 to 5, DeMets & Merkouriev
+  // 2021).
+  const behind: Partial<Record<Age, number>> = { 50: 22, 40: 16, 20: 8, 0: 0 };
   const [lon, lat] = ANCHORS.india;
   return compose(eurasia[a], place(ANCHORS.india, [lon, lat - behind[a]!], 0));
 });
