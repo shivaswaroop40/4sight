@@ -7,6 +7,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import type { FourDExperience, ObjectMetadata } from "../core/types";
 import { useTime, useUi } from "./runtime";
+import "./ObjectInfo.css";
 
 const OFFSET = 18;
 const pointer = { x: -1000, y: -1000 };

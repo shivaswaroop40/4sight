@@ -1,0 +1,297 @@
+/* Status rail chips, follow, the guided tour bar and the stage notice. */
+
+/* Status rail: transient chips under the top bar. */
+.rail {
+  grid-column: 1 / -1;
+  justify-self: center;
+  display: grid;
+  justify-items: center;
+  gap: var(--s2);
+  pointer-events: none;
+}
+
+.rail > * {
+  pointer-events: auto;
+}
+
+.toast {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  max-width: calc(100vw - 24px);
+  padding: 6px 6px 6px 16px;
+  font-size: 14px;
+  font-weight: 800;
+  box-shadow: var(--shadow-sm);
+  animation: pop-in var(--t) var(--bounce);
+}
+
+.toast--error {
+  background: #f8d9cc;
+}
+
+.toast--ok {
+  padding: 8px 18px 8px 14px;
+  background: var(--sage);
+}
+
+.toast--ok svg {
+  width: 18px;
+  height: 18px;
+}
+
+.toast__url {
+  flex: 1 1 220px;
+  min-width: 0;
+  padding: 5px 10px;
+  border: 2px solid var(--ink);
+  border-radius: var(--r-sm);
+  background: var(--cream);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.toast__dismiss {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--ink-soft);
+}
+
+.toast__dismiss:hover {
+  color: var(--ink);
+  background: rgba(59, 47, 42, 0.08);
+}
+
+.toast .chip svg,
+.notice .chip svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* Follow: the object the camera keeps centred, with a stop button. */
+.follow {
+  flex-wrap: nowrap;
+  gap: 8px;
+  padding: 4px 4px 4px 12px;
+  background: var(--mustard);
+}
+
+.follow > svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+}
+
+.follow__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 700;
+}
+
+.follow__label b {
+  font-weight: 800;
+}
+
+.follow__hidden {
+  flex: none;
+  padding: 1px 8px;
+  border: 2px solid var(--ink);
+  border-radius: var(--r-pill);
+  background: var(--cream);
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+/* Guided tour: where it is, with Next and Exit. */
+.tourbar {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  max-width: calc(100vw - 24px);
+  padding: 5px 6px 5px 16px;
+  border-radius: var(--r-pill);
+  box-shadow: var(--shadow-sm);
+  animation: pop-in var(--t) var(--bounce);
+}
+
+.tourbar__count {
+  font-size: 14px;
+  font-weight: 800;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.tourbar__dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.tourbar__dot {
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: var(--cream);
+  transition:
+    background var(--t) var(--ease),
+    scale var(--t) var(--bounce);
+}
+
+.tourbar__dot[data-state="past"] {
+  background: var(--terracotta);
+}
+
+.tourbar__dot[data-state="here"],
+.tourbar__dot[data-state="heading"] {
+  background: var(--mustard);
+  scale: 1.35;
+}
+
+/* On the way: the next dot breathes until the tour arrives. */
+.tourbar__dot[data-state="heading"] {
+  animation: dot-pulse 900ms var(--ease) infinite alternate;
+}
+
+@keyframes dot-pulse {
+  from {
+    scale: 0.9;
+    background: var(--cream);
+  }
+}
+
+.tourbar__next {
+  position: relative;
+  overflow: hidden;
+  padding: 5px 10px 5px 12px;
+}
+
+.tourbar__next > :not(.tourbar__hold) {
+  position: relative;
+}
+
+/* Fills over the hold on an event: when it is full, the tour moves on. */
+.tourbar__hold {
+  position: absolute;
+  inset: 0;
+  background: var(--sage);
+  transform-origin: left;
+  animation: hold-fill linear both;
+}
+
+@keyframes hold-fill {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+.tourbar__icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--ink-soft);
+}
+
+.tourbar__icon:hover {
+  color: var(--ink);
+  background: rgba(59, 47, 42, 0.08);
+}
+
+/* First load: the stage has nothing to show yet. */
+.notice {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  width: max-content;
+  max-width: min(360px, calc(100vw - 32px));
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 20px 26px;
+  text-align: center;
+  animation: pop-in var(--t) var(--ease);
+}
+
+.notice:not(.notice--error) {
+  grid-auto-flow: column;
+  align-items: center;
+  padding: 14px 22px;
+}
+
+.notice__title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 20px;
+}
+
+.notice__detail {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink-soft);
+  overflow-wrap: anywhere;
+}
+
+.notice__actions {
+  display: flex;
+  gap: var(--s2);
+  margin-top: 4px;
+}
+
+@media (max-width: 1100px) {
+  /* Centered, the rail would run into the info panel here. */
+  .rail {
+    justify-self: start;
+  }
+}
+
+@media (max-width: 899px) {
+  .rail {
+    justify-self: center;
+  }
+  /* The phone-sized chip, as the shared chip rule sizes every chip below 900px. */
+  .tourbar__next {
+    padding: 5px 10px;
+  }
+}
+
+@media (max-width: 599px) {
+  .tourbar {
+    gap: 8px;
+    padding-left: 14px;
+  }
+  .tourbar__word {
+    display: none;
+  }
+  .tourbar__dots {
+    gap: 3px;
+  }
+  .tourbar__dot {
+    width: 8px;
+    height: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Its fill is the countdown itself; cut short, it would read as already full. */
+  .tourbar__hold {
+    display: none;
+  }
+}

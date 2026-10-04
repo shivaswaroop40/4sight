@@ -1,0 +1,141 @@
+/* Info panel: the current event, and on phones a bottom sheet. */
+
+.info {
+  position: absolute;
+  top: 96px;
+  right: var(--s5);
+  width: 344px;
+  max-height: calc(100% - 96px - 210px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* The tour is holding on this card's event: a mustard mat inside the ink outline. Inset, so the card keeps its footprint. */
+.info[data-reading="1"] {
+  box-shadow:
+    inset 0 0 0 5px var(--mustard),
+    var(--shadow-lg);
+  transition: box-shadow var(--t) var(--ease);
+}
+
+.info__head {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  width: 100%;
+  padding: 14px 16px 12px 20px;
+  border: 0;
+  background: none;
+  text-align: left;
+}
+
+.info__peek {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.info__count {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.info__body {
+  overflow-y: auto;
+  padding: 0 20px 20px;
+}
+
+.info__event {
+  animation: pop-in var(--t) var(--ease);
+}
+
+.info__title {
+  margin: 10px 0 6px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 26px;
+  line-height: 1.12;
+  letter-spacing: -0.005em;
+}
+
+.info__desc {
+  margin: 0 0 12px;
+  max-width: 38ch;
+  font-size: 15px;
+  line-height: 1.55;
+  color: #4b3e37;
+}
+
+.info__points {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.info__points li {
+  position: relative;
+  padding-left: 24px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.info__points li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 3px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid var(--ink);
+  background: var(--terracotta);
+}
+
+.info__points li:nth-child(3n + 2)::before {
+  background: var(--sage);
+}
+
+.info__points li:nth-child(3n + 3)::before {
+  background: var(--mustard);
+}
+
+@media (max-width: 1100px) {
+  .info {
+    top: 150px;
+    max-height: calc(100% - 150px - 210px);
+  }
+}
+
+@media (max-width: 899px) {
+  /* Bottom sheet above the transport bar. */
+  .info {
+    top: auto;
+    left: 12px;
+    right: 12px;
+    width: auto;
+    bottom: calc(var(--transport-h, 176px) + 22px);
+    /* Stops short of the status rail, however many chips it holds. */
+    max-height: min(44vh, calc(100% - var(--transport-h, 176px) - 22px - var(--rail-bottom, 0px) - 12px));
+    border-radius: var(--r-lg);
+  }
+  .info__head {
+    padding: 11px 14px 10px 16px;
+  }
+  .info__body {
+    padding: 0 16px 16px;
+  }
+  .info__title {
+    font-size: 22px;
+  }
+}

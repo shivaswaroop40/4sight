@@ -5,6 +5,7 @@
 
 import { CameraIcon, OverviewIcon } from "./icons";
 import { runtime, useUi } from "./runtime";
+import "./PerspectiveControls.css";
 
 export function PerspectiveControls() {
   const experience = useUi((s) => s.experience);

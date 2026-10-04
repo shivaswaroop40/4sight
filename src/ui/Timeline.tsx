@@ -13,6 +13,7 @@ import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "re
 import type { FourDExperience, TimelineEvent, TimeTick } from "../core/types";
 import { clusterFlags, type FlagCluster } from "./flagClusters";
 import { controller, runtime } from "./runtime";
+import "./Timeline.css";
 
 const NUDGE = 0.01;
 /** A flag's hit area is 24 px wide: closer than that, two flags overlap. */

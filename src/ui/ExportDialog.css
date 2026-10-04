@@ -1,0 +1,99 @@
+/* Video export dialog. */
+
+.exporter {
+  width: min(380px, calc(100vw - 32px));
+  max-width: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  overflow: visible;
+}
+
+.exporter[open] {
+  animation: gallery-in 260ms var(--bounce);
+}
+
+.exporter::backdrop {
+  background: rgba(59, 47, 42, 0.32);
+  backdrop-filter: blur(3px);
+}
+
+.exporter__sheet {
+  display: grid;
+  gap: 10px;
+  padding: 20px 22px 22px;
+  box-shadow: var(--shadow-lg);
+}
+
+.exporter__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+}
+
+.exporter__eyebrow svg {
+  width: 17px;
+  height: 17px;
+}
+
+.exporter__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 26px;
+  line-height: 1.1;
+}
+
+.exporter__detail {
+  margin: -4px 0 4px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.45;
+  color: var(--ink-soft);
+  overflow-wrap: anywhere;
+}
+
+.exporter__bar {
+  position: relative;
+  height: 16px;
+  border: var(--outline);
+  border-radius: var(--r-pill);
+  background: var(--paper);
+  overflow: hidden;
+}
+
+.exporter__fill {
+  position: absolute;
+  inset: 0;
+  background: var(--terracotta);
+  transform-origin: left;
+}
+
+.exporter__status {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.exporter__action {
+  justify-self: end;
+  margin-top: 4px;
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
+.exporter__action svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* The phone-sized chip, as the shared chip rule sizes every chip below 900px. */
+@media (max-width: 899px) {
+  .exporter__action {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+}

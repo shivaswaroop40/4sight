@@ -1,0 +1,57 @@
+/* Camera views. */
+
+/* Camera views */
+.views {
+  grid-column: 3;
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 5px 5px 12px;
+  background: var(--cream);
+  border: var(--outline);
+  border-radius: var(--r-pill);
+  box-shadow: var(--shadow);
+}
+
+.views__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-right: 4px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+@media (max-width: 1100px) {
+  .views {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-self: start;
+  }
+}
+
+@media (max-width: 899px) {
+  .views {
+    max-width: 100%;
+    padding: 4px;
+    gap: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .views__label {
+    display: none;
+  }
+}
+
+@media (max-width: 599px) {
+  .views .chip {
+    padding: 5px 9px;
+  }
+  .views .chip--accent svg {
+    display: none;
+  }
+}

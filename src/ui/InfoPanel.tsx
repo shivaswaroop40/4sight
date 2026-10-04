@@ -10,6 +10,7 @@ import { useId, useState } from "react";
 import type { FourDExperience } from "../core/types";
 import { ChevronIcon } from "./icons";
 import { useTime, useUi } from "./runtime";
+import "./InfoPanel.css";
 
 export function InfoPanel({ experience }: { experience: FourDExperience }) {
   const eventId = useTime((s) => experience.getCurrentEvent(s.time)?.id ?? null);

@@ -13,6 +13,7 @@ import { formatSpan, rungPosition } from "../core/timescale";
 import { entryFor, experiences, type ExperienceEntry } from "../experiences/index";
 import { ChevronIcon, CloseIcon } from "./icons";
 import { getUi, setUi, showExperience, useUi, type LoadState } from "./runtime";
+import "./Gallery.css";
 
 const PICKER_ID = "experience-picker";
 

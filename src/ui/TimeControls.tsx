@@ -10,6 +10,7 @@ import { formatSpan } from "../core/timescale";
 import type { FourDExperience } from "../core/types";
 import { DirectionIcon, PauseIcon, PlayIcon, ResetIcon } from "./icons";
 import { controller, useTime } from "./runtime";
+import "./TimeControls.css";
 
 export function TimeControls() {
   const isPlaying = useTime((s) => s.isPlaying);

@@ -16,6 +16,7 @@ import { FiltersIcon, LinkIcon, MoreIcon, TourIcon, VideoIcon } from "./icons";
 import { currentMoment, pressFilter, setUi, useUi } from "./runtime";
 import { isTouring } from "./tour/tourMachine";
 import { dispatchTour } from "./tour/tourRunner";
+import "./Actions.css";
 
 export function Actions() {
   const experience = useUi((s) => s.experience);

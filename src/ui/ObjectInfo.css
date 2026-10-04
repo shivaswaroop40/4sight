@@ -1,0 +1,52 @@
+/* Hover card for the object under the pointer. */
+
+.tip {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 20;
+  width: max-content;
+  max-width: 260px;
+  padding: 12px 14px;
+  border-radius: var(--r);
+  pointer-events: none;
+  animation: tip-in 180ms var(--bounce);
+}
+
+.tip__name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 17px;
+}
+
+.tip__desc {
+  margin: 4px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #4b3e37;
+}
+
+.tip__props {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 3px 12px;
+  margin: 10px 0 0;
+  padding-top: 8px;
+  border-top: 2px dashed var(--ink-faint);
+  font-size: 12px;
+}
+
+.tip__props > div {
+  display: contents;
+}
+
+.tip__props dt {
+  font-weight: 800;
+  color: var(--ink-soft);
+}
+
+.tip__props dd {
+  margin: 0;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
