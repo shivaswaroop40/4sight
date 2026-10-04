@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { describe, expect, it } from "vitest";
-import { fakeSceneContext } from "../../renderer/fakeSceneContext";
+import { fakeSceneContext } from "../../test/fakeSceneContext";
 import { IPHONE_DATA_FALLBACK } from "./iphoneData";
 import { componentPose, eyeOpenness, faceOpacity, hopPose, iphoneState, screenOpacity } from "./IPhoneState";
 import { iphoneExperience } from "./IPhoneExperience";

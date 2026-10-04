@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fakeSceneContext } from "../../renderer/fakeSceneContext";
+import { fakeSceneContext } from "../../test/fakeSceneContext";
 import { EVENTS, KNOTS } from "./solarData";
 import { formatYears, knotMapping } from "./solarMapping";
 import { solarStateAt } from "./SolarSystemState";

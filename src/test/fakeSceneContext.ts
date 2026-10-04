@@ -1,10 +1,9 @@
-// src/renderer/fakeSceneContext.ts
+// src/test/fakeSceneContext.ts
 //
-// Test-only. A SceneContext that lets vitest mount a real experience in
-// Node: a plain Scene and camera, a renderer that only answers
-// getPixelRatio, and a 2D canvas whose drawing calls do nothing, so canvas
-// textures build without a browser. Tests then read the scene graph the
-// experience built.
+// A SceneContext that lets vitest mount a real experience in Node: a plain
+// Scene and camera and a renderer that only answers getPixelRatio. Canvas
+// textures build against the inert document installed by setup.ts. Tests
+// then read the scene graph the experience built.
 //
 //   const ctx = fakeSceneContext();
 //   experience.mount(ctx);
@@ -21,7 +20,6 @@ export interface FakeSceneContext extends SceneContext {
 }
 
 export function fakeSceneContext(): FakeSceneContext {
-  stubCanvas();
   const scene = new THREE.Scene();
   const hoverables = new Map<THREE.Object3D, string>();
   const raycaster = new THREE.Raycaster();
@@ -44,16 +42,4 @@ export function fakeSceneContext(): FakeSceneContext {
       return null;
     },
   };
-}
-
-function stubCanvas(): void {
-  if (typeof document !== "undefined") return;
-  // Every property is a no-op function that returns itself, so chains like
-  // ctx.createLinearGradient(...).addColorStop(...) work.
-  const inert: object = new Proxy(() => inert, {
-    get: (_target, key) => (key === Symbol.toPrimitive ? () => 0 : inert),
-    set: () => true,
-  });
-  const createElement = () => ({ width: 0, height: 0, style: {}, getContext: () => inert });
-  (globalThis as unknown as { document: unknown }).document = { createElement };
 }
