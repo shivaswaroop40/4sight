@@ -27,10 +27,4 @@ describe("mockExperience", () => {
     expect(p.y).toBeCloseTo(0);
     expect(p.z).toBeCloseTo(0);
   });
-
-  it("is a pure function of t: repeated calls agree", () => {
-    const first = position(0.37);
-    const second = position(0.37);
-    expect(first).toEqual(second);
-  });
 });

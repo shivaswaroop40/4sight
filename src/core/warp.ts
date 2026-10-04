@@ -91,9 +91,9 @@ export function effectiveRate(
   return Math.abs(mappingDerivative(mapping, u, direction)) * (warp / baseDurationSeconds);
 }
 
-/** "≈ 230 Myr / s" using the experience's own formatter. */
+/** "≈ 230 million years / s" in the experience's own words for a length of time. */
 export function formatRate(mapping: TimeMapping, rate: number): string {
-  return `≈ ${mapping.format(rate)} / s`;
+  return `≈ ${mapping.formatSpan ? mapping.formatSpan(rate) : mapping.format(rate)} / s`;
 }
 
 /** "1x", "0.25x", "20x". */

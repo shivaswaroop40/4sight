@@ -19,6 +19,7 @@ import type { CameraMode, FilterState, FourDExperience, SceneContext, TimeContro
 import { disposeObject } from "../core/theme";
 import { CameraManager } from "./CameraManager";
 import { NO_PRESS, stepPress, type Press, type PressInput } from "./pointerGesture";
+import { REFERENCE_BAND, type FreeBand } from "./stageFit";
 
 /**
  * What the UI shows about the camera. `shown` is false while the followed
@@ -64,12 +65,14 @@ export class SceneManager {
   private hoveredId: string | null = null;
   private onHoverChange?: (id: string | null) => void;
   private cameraView: CameraView = ORBIT;
+  private freeBand: FreeBand = REFERENCE_BAND;
   private onCameraChange?: (view: CameraView) => void;
 
   private lastFrameTime = 0;
   private frameId = 0;
   private loop: Loop = "stopped";
   private resizeObserver: ResizeObserver;
+  private pixelRatioQuery: MediaQueryList | null = null;
 
   constructor(container: HTMLElement, timeController: TimeController) {
     this.container = container;
@@ -83,7 +86,7 @@ export class SceneManager {
     // Transparent canvas: the warm paper gradient behind it is CSS.
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     this.renderer.setClearColor(0x000000, 0);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.setPixelRatio(pixelRatio());
     this.renderer.setSize(container.clientWidth, container.clientHeight);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     container.appendChild(this.renderer.domElement);
@@ -109,6 +112,7 @@ export class SceneManager {
 
     this.resizeObserver = new ResizeObserver(() => this.handleResize());
     this.resizeObserver.observe(container);
+    this.watchPixelRatio();
   }
 
   get current(): FourDExperience | null {
@@ -144,7 +148,7 @@ export class SceneManager {
       this.timeController.attach(experience);
       this.scene.updateMatrixWorld(true);
       this.warmUp();
-      this.cameras.setDistanceScale(experience.cameraDistanceScale?.(this.timeController.state.time) ?? 1);
+      this.frameSubject();
       const [first] = experience.getCameraPresets();
       if (first) this.cameras.applyPreset(first, animateCamera);
       else this.cameras.overview(this.scene, animateCamera);
@@ -216,6 +220,17 @@ export class SceneManager {
     this.cameras.stopFollowing();
   }
 
+  /** The band of the stage the HUD leaves free. Presets frame their subject inside it. */
+  setFreeBand(band: FreeBand): void {
+    this.freeBand = band;
+    if (this.loop !== "held") this.cameras.setBand(band);
+  }
+
+  private frameSubject(): void {
+    const time = this.timeController.state.time;
+    this.cameras.setSubject(this.experience?.cameraDistanceScale?.(time) ?? 1, this.experience?.cameraSubjectAspect?.(time));
+  }
+
   /** The stage's size in CSS pixels. */
   get viewport(): { width: number; height: number } {
     return { width: this.container.clientWidth, height: this.container.clientHeight };
@@ -230,7 +245,7 @@ export class SceneManager {
       const dt = Math.min(Math.max((now - this.lastFrameTime) / 1000, 0), 0.1);
       this.lastFrameTime = now;
       this.timeController.tick(dt);
-      this.cameras.setDistanceScale(this.experience?.cameraDistanceScale?.(this.timeController.state.time) ?? 1);
+      this.frameSubject();
       this.cameras.update(dt);
       this.updateCameraView();
       this.updateHover();
@@ -254,14 +269,14 @@ export class SceneManager {
     this.stop();
     this.loop = "held";
     const camera = this.cameras.snapshot();
-    const pixelRatio = this.renderer.getPixelRatio();
     this.renderer.setPixelRatio(1);
     this.renderer.setSize(width, height, false);
-    this.camera.aspect = width / height;
-    this.camera.updateProjectionMatrix();
+    // A video has no HUD over it: it frames presets the way the desktop layout does.
+    this.cameras.setBand(REFERENCE_BAND);
+    this.cameras.setAspect(width / height);
     return {
       render: () => {
-        this.cameras.setDistanceScale(this.experience?.cameraDistanceScale?.(this.timeController.state.time) ?? 1);
+        this.frameSubject();
         this.cameras.settle();
         this.renderer.render(this.scene, this.camera);
         return this.renderer.domElement;
@@ -269,7 +284,7 @@ export class SceneManager {
       release: () => {
         if (this.loop !== "held") return;
         this.loop = "stopped";
-        this.renderer.setPixelRatio(pixelRatio);
+        this.cameras.setBand(this.freeBand);
         this.handleResize();
         this.cameras.restore(camera);
         if (!document.hidden) this.start();
@@ -282,6 +297,7 @@ export class SceneManager {
     this.unmount();
     this.cameras.dispose();
     this.resizeObserver.disconnect();
+    this.pixelRatioQuery?.removeEventListener("change", this.handlePixelRatio);
     const canvas = this.renderer.domElement;
     canvas.removeEventListener("pointerdown", this.handlePointerDown);
     canvas.removeEventListener("pointermove", this.handlePointerMove);
@@ -387,10 +403,31 @@ export class SceneManager {
     const width = this.container.clientWidth;
     const height = this.container.clientHeight;
     if (width === 0 || height === 0) return;
-    this.camera.aspect = width / height;
-    this.camera.updateProjectionMatrix();
+    this.cameras.setAspect(width / height);
+    this.renderer.setPixelRatio(pixelRatio());
     this.renderer.setSize(width, height);
   }
+
+  /**
+   * The device pixel ratio changes without a resize when the window moves to
+   * another display or the page is zoomed. A resolution query matches only
+   * the ratio it was made for, so each change re-arms it for the new one.
+   */
+  private watchPixelRatio(): void {
+    this.pixelRatioQuery?.removeEventListener("change", this.handlePixelRatio);
+    this.pixelRatioQuery = window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
+    this.pixelRatioQuery.addEventListener("change", this.handlePixelRatio);
+  }
+
+  private handlePixelRatio = (): void => {
+    this.watchPixelRatio();
+    this.handleResize();
+  };
+}
+
+/** Sharp on high-density screens, capped at 2 to keep fill rate in check. */
+function pixelRatio(): number {
+  return Math.min(window.devicePixelRatio, 2);
 }
 
 function isShown(object: THREE.Object3D | null): boolean {

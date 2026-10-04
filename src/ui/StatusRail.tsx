@@ -19,6 +19,7 @@ import { CloseIcon, FollowIcon, LinkIcon, NextIcon, ResetIcon, TourIcon, VideoIc
 import { getUi, runtime, setUi, showExperience, useUi } from "./runtime";
 import { holdMs } from "./tour/tourMachine";
 import { dispatchTour } from "./tour/tourRunner";
+import "./StatusRail.css";
 
 const FADE_MS = { copied: 2000, saved: 3500 } as const;
 

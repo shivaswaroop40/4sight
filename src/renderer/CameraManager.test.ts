@@ -37,7 +37,7 @@ describe("camera framing", () => {
     cameras.applyPreset(FRONT, false);
     expect(cameras.framing.kind).toBe("anchored");
     expect(at(camera.position)).toEqual([0, 0, 10]);
-    cameras.setDistanceScale(2);
+    cameras.setSubject(2);
     cameras.settle();
     expect(at(camera.position)).toEqual([0, 0, 20]);
   });
@@ -50,7 +50,7 @@ describe("camera framing", () => {
 
     press(cameras, [["down", 100, 100], ["move", 110, 100], ["up", 110, 100]]);
     expect(cameras.framing.kind).toBe("free");
-    cameras.setDistanceScale(3);
+    cameras.setSubject(3);
     cameras.update(1);
     expect(at(camera.position)).toEqual([0, 0, 10]);
   });
@@ -81,11 +81,11 @@ describe("camera framing", () => {
     const before = at(camera.position);
     const snapshot = cameras.snapshot();
 
-    cameras.setDistanceScale(2);
+    cameras.setSubject(2);
     cameras.settle();
     expect(at(camera.position)).toEqual([20, 0, 0]);
 
-    cameras.setDistanceScale(1);
+    cameras.setSubject(1);
     cameras.restore(snapshot);
     expect(at(camera.position)).toEqual(before);
     expect(cameras.framing.kind).toBe("anchored");

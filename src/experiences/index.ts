@@ -47,6 +47,48 @@ const real: ExperienceEntry[] = [
     spanSeconds: 4.6e9 * YEAR_SECONDS,
     load: () => import("./solar-system/SolarSystemExperience").then((m) => m.solarSystemExperience),
   },
+  {
+    id: "heart",
+    name: "Heartbeat",
+    tagline: "One beat of a human heart, in slow motion",
+    spanSeconds: 0.8,
+    load: () => import("./heart/HeartExperience").then((m) => m.heartExperience),
+  },
+  {
+    id: "mitosis",
+    name: "Mitosis",
+    tagline: "One cell splits into two",
+    spanSeconds: 65 * 60,
+    load: () => import("./mitosis/MitosisExperience").then((m) => m.mitosisExperience),
+  },
+  {
+    id: "tree",
+    name: "Oak tree",
+    tagline: "An acorn grows into a grand old oak",
+    spanSeconds: 150 * YEAR_SECONDS,
+    load: () => import("./tree/TreeExperience").then((m) => m.treeExperience),
+  },
+  {
+    id: "city",
+    name: "River City",
+    tagline: "A village by a river becomes a city",
+    spanSeconds: 325 * YEAR_SECONDS,
+    load: () => import("./city/CityExperience").then((m) => m.cityExperience),
+  },
+  {
+    id: "continents",
+    name: "Continental drift",
+    tagline: "Pangaea breaks apart into today's continents",
+    spanSeconds: 250e6 * YEAR_SECONDS,
+    load: () => import("./continents/ContinentsExperience").then((m) => m.continentsExperience),
+  },
+  {
+    id: "universe",
+    name: "Universe",
+    tagline: "From the Big Bang to today",
+    spanSeconds: 13.8e9 * YEAR_SECONDS,
+    load: () => import("./universe/UniverseExperience").then((m) => m.universeExperience),
+  },
 ];
 
 const mocks: ExperienceEntry[] = [

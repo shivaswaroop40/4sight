@@ -24,7 +24,8 @@ import type {
 } from "../../core/types";
 import { AccretionField } from "./AccretionField";
 import { BODIES, EVENTS, KNOTS, type BodyDef } from "./solarData";
-import { formatYears, knotMapping } from "./solarMapping";
+import { knotMapping } from "../../core/mappings";
+import { formatYears } from "./solarMapping";
 import { solarStateAt, type SolarState } from "./SolarSystemState";
 import { bandsTexture, earthTexture, glowTexture, ringTexture } from "./textures";
 
@@ -102,7 +103,7 @@ class SolarSystemExperience implements FourDExperience {
 
     root.add(this.starfield());
 
-    this.field = new AccretionField(ctx.renderer.getPixelRatio());
+    this.field = new AccretionField();
     this.field.points.name = "accretion";
     root.add(this.field.points);
 

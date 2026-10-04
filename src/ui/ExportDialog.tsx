@@ -10,6 +10,7 @@ import { useEffect, useId, useRef } from "react";
 import { cancelExport } from "./exportRunner";
 import { CloseIcon, VideoIcon } from "./icons";
 import { EXPORT_IDLE, setUi, useUi, type ExportState } from "./runtime";
+import "./ExportDialog.css";
 
 export function ExportDialog() {
   const exporting = useUi((s) => s.exporting);

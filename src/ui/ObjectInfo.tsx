@@ -1,11 +1,13 @@
 // src/ui/ObjectInfo.tsx
 //
-// Tooltip for the hovered object. React renders only when the hovered id
+// Tooltip for the hovered object. Hover text can depend on time, so the card
+// re-reads the metadata on every time change but renders only when its text
 // changes; the card follows the cursor by writing a transform directly.
 
-import { useEffect, useRef } from "react";
-import type { FourDExperience } from "../core/types";
-import { useUi } from "./runtime";
+import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import type { FourDExperience, ObjectMetadata } from "../core/types";
+import { useTime, useUi } from "./runtime";
+import "./ObjectInfo.css";
 
 const OFFSET = 18;
 const pointer = { x: -1000, y: -1000 };
@@ -20,30 +22,44 @@ if (typeof window !== "undefined") {
   );
 }
 
+function place(el: HTMLElement | null): void {
+  if (!el) return;
+  const { x, y } = pointer;
+  const w = el.offsetWidth;
+  const h = el.offsetHeight;
+  const left = x + OFFSET + w > window.innerWidth - 8 ? x - OFFSET - w : x + OFFSET;
+  const top = y + OFFSET + h > window.innerHeight - 8 ? y - OFFSET - h : y + OFFSET;
+  el.style.transform = `translate(${Math.max(8, left)}px, ${Math.max(8, top)}px)`;
+}
+
+/** Everything the card shows, as one string. */
+function cardText(meta: ObjectMetadata | null): string | null {
+  if (!meta) return null;
+  let text = `${meta.name}\n${meta.description}`;
+  for (const [k, v] of Object.entries(meta.properties ?? {})) text += `\n${k}\t${v}`;
+  return text;
+}
+
 export function ObjectInfo({ experience }: { experience: FourDExperience }) {
   const hoveredId = useUi((s) => s.hoveredId);
   const ref = useRef<HTMLDivElement | null>(null);
-  const meta = hoveredId ? experience.getHoveredObject(hoveredId) : null;
+  // getHoveredObject returns a fresh object each call, so the store compares
+  // the card's text instead: playback re-renders the card only when it changes.
+  const key = useTime(() => cardText(hoveredId ? experience.getHoveredObject(hoveredId) : null));
+  const meta = useMemo(() => (key === null ? null : experience.getHoveredObject(hoveredId!)), [key, experience, hoveredId]);
+  const shown = meta !== null;
+
+  useLayoutEffect(() => place(ref.current), [meta]);
 
   useEffect(() => {
-    const place = () => {
-      const { x, y } = pointer;
-      const el = ref.current;
-      if (!el) return;
-      const w = el.offsetWidth;
-      const h = el.offsetHeight;
-      const left = x + OFFSET + w > window.innerWidth - 8 ? x - OFFSET - w : x + OFFSET;
-      const top = y + OFFSET + h > window.innerHeight - 8 ? y - OFFSET - h : y + OFFSET;
-      el.style.transform = `translate(${Math.max(8, left)}px, ${Math.max(8, top)}px)`;
-    };
-    const onMove = () => place();
+    if (!shown) return;
+    const onMove = () => place(ref.current);
     window.addEventListener("pointermove", onMove, { passive: true });
-    place();
     return () => window.removeEventListener("pointermove", onMove);
-  }, [meta]);
+  }, [shown]);
 
   if (!meta) return null;
-  const props = Object.entries(meta.properties ?? {}).slice(0, 3);
+  const props = Object.entries(meta.properties ?? {});
 
   return (
     <div className="card tip" ref={ref} role="tooltip">

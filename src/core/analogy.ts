@@ -7,6 +7,9 @@
 //   dayClock(0)     // "12:00:00 am"
 //   dayClock(0.5)   // "12:00:00 pm"
 //   dayClock(1)     // "midnight"
+//
+// spanClock counts from the start of the span, so it reads the same for a
+// span that runs 0..13.8e9 years, -250..0 Ma or the calendar years 1700..2025.
 
 const DAY_SECONDS = 86_400;
 
@@ -21,4 +24,9 @@ export function dayClock(fraction: number): string {
   const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${h12}:${pad(minutes)}:${pad(seconds)} ${h24 < 12 ? "am" : "pm"}`;
+}
+
+/** The one-day clock at experience time `time`: `minTime` is the first midnight, `maxTime` the second. */
+export function spanClock(time: number, minTime: number, maxTime: number): string {
+  return dayClock((time - minTime) / (maxTime - minTime));
 }

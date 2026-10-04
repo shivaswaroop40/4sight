@@ -203,7 +203,7 @@ export class AccretionField {
   private geometry: THREE.BufferGeometry;
   private material: THREE.ShaderMaterial;
 
-  constructor(pixelRatio: number) {
+  constructor() {
     const rand = mulberry32(4600);
     const gauss = () => {
       const u = Math.max(rand(), 1e-9);
@@ -326,7 +326,7 @@ export class AccretionField {
       uCloudSpin: { value: 0 },
       uClear: { value: 0 },
       uGasAndDust: { value: 1 },
-      uPointScale: { value: 70 * pixelRatio },
+      uPointScale: { value: 70 },
       uAngle: { value: new Float32Array(NB) },
       uRadius: { value: bodyRadius },
       uClump: { value: new Float32Array(NB) },
@@ -348,6 +348,11 @@ export class AccretionField {
     this.points = new THREE.Points(this.geometry, this.material);
     // The shader moves every particle, so the CPU bounding sphere is meaningless.
     this.points.frustumCulled = false;
+    // gl_PointSize is in device pixels. The ratio changes with the display and
+    // under a video export (held at 1), so read it per frame.
+    this.points.onBeforeRender = (renderer) => {
+      this.uniforms.uPointScale.value = 70 * renderer.getPixelRatio();
+    };
   }
 
   update(state: SolarState): void {

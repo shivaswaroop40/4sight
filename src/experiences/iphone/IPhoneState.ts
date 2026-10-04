@@ -110,6 +110,11 @@ export function cameraDistanceScale(t: number): number {
   return lerp(1.3, 1, easeInOutCubic(windowFn(t, 0.62, 0.92)));
 }
 
+/** The exploded layout spreads sideways, so a narrow screen needs a wider shot of it than of the finished phone. */
+export function cameraSubjectAspect(t: number): number {
+  return lerp(1.45, 1.1, easeInOutCubic(windowFn(t, 0.8, 0.92)));
+}
+
 export function screenOpacity(t: number): number {
   return smoothstep(WAKE.screenOn[0], WAKE.screenOn[1], t);
 }

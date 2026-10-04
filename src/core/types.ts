@@ -12,7 +12,7 @@
 //   plays an animation. Scrubbing, reverse, jumping, and warping all fall
 //   out of this one rule for free.
 
-export type ExperienceId = "iphone" | "solarSystem" | "galaxy" | "universe" | "mock" | "mockLog";
+export type ExperienceId = "iphone" | "solarSystem" | "galaxy" | "universe" | "mock" | "mockLog" | "mitosis" | "city" | "heart" | "tree" | "continents";
 
 /** Normalized slider and playback parameter in [0, 1]. */
 export type TimeParam = number;
@@ -31,6 +31,12 @@ export interface TimeMapping {
   ticks(): TimeTick[];
   /** Human readable time for the HUD, e.g. "0.42", "380,000 years", "9.2 billion years". */
   format(time: number): string;
+  /**
+   * A length of experience time, for the playback rate ("≈ 6 years / s").
+   * Needed when a moment does not read as a length: the year 1923, or
+   * "200 million years ago". Leave unset when format already reads as one.
+   */
+  formatSpan?(duration: number): string;
 }
 
 export interface TimeState {
@@ -175,6 +181,13 @@ export interface FourDExperience {
    * after a preset, until the viewer drags, zooms, or follows an object.
    */
   cameraDistanceScale?(time: number): number;
+  /**
+   * Optional width over height of what the presets frame at time t. Presets
+   * are authored on a 1440x900 screen; on a narrower one the camera fits a
+   * subject this wide into the stage. Leave it out for a subject about as
+   * wide as it is tall (1.1); return more while the scene spreads sideways.
+   */
+  cameraSubjectAspect?(time: number): number;
 
   reset(): void;
   dispose(): void;

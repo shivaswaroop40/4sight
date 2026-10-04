@@ -4,26 +4,44 @@
 // variable written from a controller subscription, so playback never
 // re-renders React. Tick labels come from mapping.ticks() and thin out when
 // the track is narrow; event flags sit at mapping.toParam(event.time) and
-// jump there on click. The flags are siblings of the slider, not children:
-// a slider's children are presentational, which hides them from assistive
-// tech.
+// jump there on click. Events too close to tell apart share one flag with a
+// count, which opens a small list of them. The flags are siblings of the
+// slider, not children: a slider's children are presentational, which hides
+// them from assistive tech.
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import type { FourDExperience, TimeTick } from "../core/types";
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
+import type { FourDExperience, TimelineEvent, TimeTick } from "../core/types";
+import { clusterFlags, openClusterKey, type FlagCluster } from "./flagClusters";
 import { controller, runtime } from "./runtime";
+import "./Timeline.css";
 
 const NUDGE = 0.01;
+/** A flag's hit area is 24 px wide: closer than that, two flags overlap. */
+const FLAG_GAP = 24;
+
+interface Marker {
+  event: TimelineEvent;
+  u: number;
+  color: number;
+}
+
+const markerKey = (m: Marker) => m.event.id;
 
 export function Timeline({ experience }: { experience: FourDExperience }) {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const railRef = useRef<HTMLDivElement | null>(null);
+  const flagsRef = useRef<HTMLDivElement | null>(null);
   const [width, setWidth] = useState(0);
+  const [trackWidth, setTrackWidth] = useState(0);
+  const [openId, setOpenId] = useState<string | null>(null);
 
   const ticks = useMemo(() => experience.mapping.ticks(), [experience]);
-  const markers = useMemo(
-    () => experience.events.map((e) => ({ event: e, u: experience.mapping.toParam(e.time) })),
+  const markers = useMemo<Marker[]>(
+    () => experience.events.map((e, i) => ({ event: e, u: experience.mapping.toParam(e.time), color: i % 3 })),
     [experience],
   );
+  const clusters = useMemo(() => clusterFlags(markers, trackWidth, FLAG_GAP), [markers, trackWidth]);
+  if (openClusterKey(clusters, openId, markerKey) !== openId) setOpenId(null);
   const shown = useMemo(
     () => visibleTicks(ticks.map((t) => ({ u: t.u, label: endLabel(t.u, experience) ?? t.label })), width),
     [ticks, width, experience],
@@ -46,15 +64,24 @@ export function Timeline({ experience }: { experience: FourDExperience }) {
     };
     apply();
     return controller.subscribe(apply);
-  }, [experience, markers]);
+  }, [experience, clusters, openId]);
 
   useEffect(() => {
     const rail = railRef.current;
-    if (!rail) return;
-    const ro = new ResizeObserver(() => setWidth(rail.clientWidth));
+    const flags = flagsRef.current;
+    if (!rail || !flags) return;
+    const ro = new ResizeObserver(() => {
+      setWidth(rail.clientWidth);
+      setTrackWidth(flags.clientWidth);
+    });
     ro.observe(rail);
     return () => ro.disconnect();
   }, []);
+
+  const jump = (id: string) => {
+    controller.jumpToEvent(id);
+    runtime.urlSync?.flush();
+  };
 
   const paramFromEvent = (clientX: number) => {
     const rail = railRef.current!;
@@ -121,26 +148,21 @@ export function Timeline({ experience }: { experience: FourDExperience }) {
           <div className="timeline__thumb" />
         </div>
       </div>
-      <div className="timeline__flags" role="group" aria-label="Events">
-        {markers.map(({ event, u }, i) => (
-          <button
-            key={event.id}
-            type="button"
-            className="flag"
-            data-u={u}
-            data-color={i % 3}
-            data-edge={u < 0.04 ? "start" : u > 0.96 ? "end" : undefined}
-            style={{ left: `${u * 100}%` }}
-            title={`${event.title} · ${event.when}`}
-            aria-label={`Jump to ${event.title}`}
-            onClick={() => {
-              controller.jumpToEvent(event.id);
-              runtime.urlSync?.flush();
-            }}
-          >
-            <span className="flag__tip">{event.title}</span>
-          </button>
-        ))}
+      <div className="timeline__flags" role="group" aria-label="Events" ref={flagsRef}>
+        {clusters.map((c) =>
+          c.items.length === 1 ? (
+            <EventFlag key={markerKey(c.items[0])} marker={c.items[0]} onPick={jump} />
+          ) : (
+            <ClusterFlag
+              key={markerKey(c.items[0])}
+              cluster={c}
+              trackWidth={trackWidth}
+              open={openId === markerKey(c.items[0])}
+              setOpenId={setOpenId}
+              onPick={jump}
+            />
+          ),
+        )}
       </div>
       <div className="timeline__ticks" aria-hidden="true">
         {shown.map((t) => (
@@ -150,6 +172,139 @@ export function Timeline({ experience }: { experience: FourDExperience }) {
         ))}
       </div>
     </div>
+  );
+}
+
+function flagEdge(u: number): "start" | "end" | undefined {
+  return u < 0.04 ? "start" : u > 0.96 ? "end" : undefined;
+}
+
+function EventFlag({ marker: { event, u, color }, onPick }: { marker: Marker; onPick: (id: string) => void }) {
+  return (
+    <button
+      type="button"
+      className="flag"
+      data-u={u}
+      data-color={color}
+      data-edge={flagEdge(u)}
+      style={{ left: `${u * 100}%` }}
+      title={`${event.title} · ${event.when}`}
+      aria-label={`Jump to ${event.title}`}
+      onClick={() => onPick(event.id)}
+    >
+      <span className="flag__tip">{event.title}</span>
+    </button>
+  );
+}
+
+/** One flag for several close events. It opens a list of them; Escape or a click elsewhere closes it. */
+function ClusterFlag({
+  cluster,
+  trackWidth,
+  open,
+  setOpenId,
+  onPick,
+}: {
+  cluster: FlagCluster<Marker>;
+  trackWidth: number;
+  open: boolean;
+  setOpenId: (id: string | null) => void;
+  onPick: (id: string) => void;
+}) {
+  const listId = useId();
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const listRef = useRef<HTMLDivElement | null>(null);
+  const [first] = cluster.items;
+  const x = cluster.u * trackWidth;
+
+  // Centred on the flag, but kept over the track.
+  useLayoutEffect(() => {
+    const list = listRef.current;
+    if (!open || !list) return;
+    const w = list.offsetWidth;
+    list.style.left = `${Math.min(Math.max(x - w / 2, 0), Math.max(0, trackWidth - w))}px`;
+  }, [open, x, trackWidth]);
+
+  useEffect(() => {
+    if (!open) return;
+    listRef.current?.querySelector("button")?.focus();
+    const onDown = (e: PointerEvent) => {
+      const target = e.target as Node;
+      if (!listRef.current?.contains(target) && !buttonRef.current?.contains(target)) setOpenId(null);
+    };
+    document.addEventListener("pointerdown", onDown, true);
+    return () => document.removeEventListener("pointerdown", onDown, true);
+  }, [open, setOpenId]);
+
+  const close = () => {
+    setOpenId(null);
+    buttonRef.current?.focus();
+  };
+
+  return (
+    <>
+      <button
+        ref={buttonRef}
+        type="button"
+        className="flag flag--cluster"
+        data-u={cluster.end}
+        data-color={first.color}
+        data-edge={flagEdge(cluster.u)}
+        style={{ left: `${cluster.u * 100}%` }}
+        title={cluster.items.map((m) => `${m.event.title} · ${m.event.when}`).join("\n")}
+        aria-label={`${cluster.items.length} events: ${cluster.items.map((m) => m.event.title).join("; ")}`}
+        aria-expanded={open}
+        aria-controls={open ? listId : undefined}
+        onClick={() => setOpenId(open ? null : first.event.id)}
+        onKeyDown={(e) => {
+          if (e.key === "Escape" && open) {
+            e.preventDefault();
+            close();
+          }
+        }}
+      >
+        <span className="flag__count" aria-hidden="true">
+          {cluster.items.length}
+        </span>
+        {!open && (
+          <span className="flag__tip">
+            {first.event.title} +{cluster.items.length - 1}
+          </span>
+        )}
+      </button>
+      {open && (
+        <div
+          ref={listRef}
+          id={listId}
+          className="card flaglist"
+          role="group"
+          aria-label="Events here"
+          onKeyDown={(e) => {
+            if (e.key === "Escape") {
+              e.preventDefault();
+              close();
+            }
+          }}
+        >
+          {cluster.items.map((m) => (
+            <button
+              key={m.event.id}
+              type="button"
+              className="flaglist__item"
+              data-u={m.u}
+              data-color={m.color}
+              onClick={() => {
+                onPick(m.event.id);
+                close();
+              }}
+            >
+              <span className="flaglist__title">{m.event.title}</span>
+              <span className="flaglist__when">{m.event.when}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </>
   );
 }
 

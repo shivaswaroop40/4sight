@@ -16,11 +16,12 @@ import { FiltersIcon, LinkIcon, MoreIcon, TourIcon, VideoIcon } from "./icons";
 import { currentMoment, pressFilter, setUi, useUi } from "./runtime";
 import { isTouring } from "./tour/tourMachine";
 import { dispatchTour } from "./tour/tourRunner";
+import "./Actions.css";
 
 export function Actions() {
   const experience = useUi((s) => s.experience);
   return (
-    <div className="actions" role="group" aria-label="Actions">
+    <div className="actions" role="group" aria-label="Actions" data-hud-edge="top">
       <TourButton disabled={(experience?.events.length ?? 0) === 0} />
       {experience?.filters && <FiltersPopover key={experience.id} options={experience.filters.options} />}
       <MoreMenu />

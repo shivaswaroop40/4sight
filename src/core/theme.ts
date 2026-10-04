@@ -81,9 +81,10 @@ export function addOutline(
   return outline;
 }
 
-/** Disposes every geometry and material in a subtree and removes it from its parent. */
+/** Disposes every geometry, material and instance buffer in a subtree and removes it from its parent. */
 export function disposeObject(root: THREE.Object3D): void {
   root.traverse((node) => {
+    if (node instanceof THREE.InstancedMesh) node.dispose();
     const withGeometry = node as THREE.Object3D & { geometry?: THREE.BufferGeometry; material?: THREE.Material | THREE.Material[] };
     withGeometry.geometry?.dispose();
     const material = withGeometry.material;

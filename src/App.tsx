@@ -11,6 +11,7 @@ import { SceneManager } from "./renderer/SceneManager";
 import { Actions } from "./ui/Actions";
 import { ExportDialog } from "./ui/ExportDialog";
 import { ExperiencePicker, Gallery } from "./ui/Gallery";
+import { freeBand, hudElements, measureHud } from "./ui/hudBand";
 import { InfoPanel } from "./ui/InfoPanel";
 import { ObjectInfo } from "./ui/ObjectInfo";
 import { PerspectiveControls } from "./ui/PerspectiveControls";
@@ -26,6 +27,7 @@ import { useShortcuts } from "./ui/useShortcuts";
 function App() {
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const transportRef = useRef<HTMLElement | null>(null);
+  const appRef = useRef<HTMLDivElement | null>(null);
   const experience = useUi((s) => s.experience);
   useShortcuts();
 
@@ -60,25 +62,29 @@ function App() {
     if (experience) runtime.urlSync?.flush();
   }, [experience]);
 
-  // The mobile bottom sheet sits just above the transport bar, whatever its height.
+  // The mobile bottom sheet sits just above the transport bar, whatever its
+  // height, and camera presets frame their subject in the band the HUD leaves free.
   useEffect(() => {
-    const el = transportRef.current;
-    if (!el) return;
-    const ro = new ResizeObserver(() =>
-      document.documentElement.style.setProperty("--transport-h", `${el.offsetHeight}px`),
-    );
-    ro.observe(el);
+    const app = appRef.current;
+    const stage = viewportRef.current;
+    const transport = transportRef.current;
+    if (!app || !stage || !transport) return;
+    const ro = new ResizeObserver(() => {
+      document.documentElement.style.setProperty("--transport-h", `${transport.offsetHeight}px`);
+      runtime.manager?.setFreeBand(freeBand(stage.getBoundingClientRect(), measureHud(app)));
+    });
+    for (const el of [stage, ...hudElements(app)]) ro.observe(el);
     return () => ro.disconnect();
   }, [experience]);
 
   return (
-    <div className="app">
+    <div className="app" ref={appRef}>
       <div className="stage" ref={viewportRef} />
       <div className="vignette" aria-hidden="true" />
 
       <header className="topbar">
         <div className="topbar__start">
-          <div className="brand sticker">
+          <div className="brand sticker" data-hud-edge="top">
             <Mark />
             <span className="brand__word">4sight</span>
           </div>
@@ -95,7 +101,7 @@ function App() {
         <>
           <InfoPanel key={experience.id} experience={experience} />
           <ObjectInfo experience={experience} />
-          <footer className="card transport" ref={transportRef}>
+          <footer className="card transport" ref={transportRef} data-hud-edge="bottom">
             <div className="transport__row">
               <TimeControls />
               <TimeReadout experience={experience} />

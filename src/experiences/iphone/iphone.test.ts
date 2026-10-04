@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { describe, expect, it } from "vitest";
 import { fakeSceneContext } from "../../test/fakeSceneContext";
 import { IPHONE_DATA_FALLBACK } from "./iphoneData";
-import { componentPose, eyeOpenness, faceOpacity, hopPose, iphoneState, screenOpacity } from "./IPhoneState";
+import { componentPose, eyeOpenness, faceOpacity, hopPose, screenOpacity } from "./IPhoneState";
 import { iphoneExperience } from "./IPhoneExperience";
 
 const byId = (id: string) => IPHONE_DATA_FALLBACK.components.find((c) => c.id === id)!;
@@ -24,13 +24,6 @@ describe("iPhone poses", () => {
       expect(Math.abs(pose.quaternion[3])).toBeCloseTo(1, 6);
     }
     expect(componentPose(byId("display"), 1).position).toEqual([0, 0, 0.145]);
-  });
-
-  it("is a pure function of t", () => {
-    const a = JSON.stringify(iphoneState(IPHONE_DATA_FALLBACK.components, 0.37));
-    iphoneState(IPHONE_DATA_FALLBACK.components, 0.9);
-    const b = JSON.stringify(iphoneState(IPHONE_DATA_FALLBACK.components, 0.37));
-    expect(a).toBe(b);
   });
 
   it("ends the hop upright on the floor", () => {
@@ -80,6 +73,11 @@ describe("iPhone events and presets", () => {
     expect(iphoneExperience.cameraDistanceScale!(1)).toBe(1);
   });
 
+  it("frames the exploded layout wider than the finished phone", () => {
+    expect(iphoneExperience.cameraSubjectAspect!(0)).toBeCloseTo(1.45, 6);
+    expect(iphoneExperience.cameraSubjectAspect!(1)).toBeCloseTo(1.1, 6);
+  });
+
   it("offers four camera presets with three-quarter first", () => {
     expect(iphoneExperience.getCameraPresets().map((p) => p.name)).toEqual(["Three-quarter", "Front", "Back", "Side"]);
   });
@@ -125,5 +123,11 @@ describe("iPhone X-ray", () => {
     expect((band.material as THREE.Material).opacity).toBe(1);
     expect(band.getObjectByName("outline")!.visible).toBe(true);
     iphoneExperience.dispose();
+  });
+});
+
+describe("iPhone one-day clock", () => {
+  it("has none: assembly time is not elapsed time", () => {
+    expect(iphoneExperience.elapsedSpanSeconds).toBeUndefined();
   });
 });

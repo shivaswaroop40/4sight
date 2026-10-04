@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dayClock } from "./analogy";
+import { dayClock, spanClock } from "./analogy";
 
 describe("dayClock", () => {
   it("starts at midnight on the clock face and ends at midnight", () => {
@@ -27,5 +27,14 @@ describe("dayClock", () => {
   it("clamps outside [0, 1]", () => {
     expect(dayClock(-0.2)).toBe("12:00:00 am");
     expect(dayClock(1.3)).toBe("midnight");
+  });
+});
+
+describe("spanClock", () => {
+  it("counts from the start of the span, whatever its origin", () => {
+    expect(spanClock(0, 0, 100)).toBe("12:00:00 am");
+    expect(spanClock(-125, -250, 0)).toBe("12:00:00 pm");
+    expect(spanClock(1862.5, 1700, 2025)).toBe("12:00:00 pm");
+    expect(spanClock(2025, 1700, 2025)).toBe("midnight");
   });
 });

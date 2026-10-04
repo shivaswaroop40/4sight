@@ -6,6 +6,8 @@ The rule that makes everything else work:
 
 > The scene is a pure function of `(t, filter state)`. `setTime(t)` renders the scene for `t` under the filter state last passed to `filters.set`. Calling it twice with the same `t` and the same filter state produces the same scene. It never reads the previous time, never accumulates, never plays an animation. Scrubbing, reverse, jumping, and warping all fall out of this one rule for free.
 
+`src/experiences/contract.test.ts` holds every registered experience to this rule. It mounts each one in a test scene, visits sample times and every event in several orders and under each filter state, and checks that the drawn scene (transforms, visibility, materials, uniforms, instances, vertex data) and every hover card match what a fresh mount draws at that time. It also checks that `dispose` unregisters every hoverable and empties the scene. A new experience is covered as soon as it is in the registry.
+
 ## Time model
 
 Two clocks exist and the contract names both.
@@ -46,6 +48,12 @@ export interface TimeMapping {
   ticks(): TimeTick[];
   /** Human readable time for the HUD, e.g. "0.42", "380,000 years", "9.2 billion years". */
   format(time: number): string;
+  /**
+   * A length of experience time, for the playback rate ("≈ 6 years / s").
+   * Needed when a moment does not read as a length: the year 1923, or
+   * "200 million years ago". Leave unset when format already reads as one.
+   */
+  formatSpan?(duration: number): string;
 }
 
 export interface TimeState {
@@ -186,6 +194,13 @@ export interface FourDExperience {
    * after a preset, until the viewer drags, zooms, or follows an object.
    */
   cameraDistanceScale?(time: number): number;
+  /**
+   * Optional width over height of what the presets frame at time t. Presets
+   * are authored on a 1440x900 screen; on a narrower one the camera fits a
+   * subject this wide into the stage. Leave it out for a subject about as
+   * wide as it is tall (1.1); return more while the scene spreads sideways.
+   */
+  cameraSubjectAspect?(time: number): number;
 
   reset(): void;
   dispose(): void;

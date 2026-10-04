@@ -1,0 +1,315 @@
+/* Experience picker and the gallery of experiences. */
+
+/* Experience picker */
+.picker {
+  grid-column: 2;
+  justify-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  max-width: 100%;
+  padding: 8px 12px 8px 20px;
+  background: var(--cream);
+  border: var(--outline);
+  border-radius: var(--r-pill);
+  box-shadow: var(--shadow);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 1.2;
+  transition:
+    transform var(--t-fast) var(--bounce),
+    box-shadow var(--t-fast) var(--bounce),
+    background var(--t-fast) var(--ease);
+}
+
+.picker:hover {
+  background: #fff;
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+
+.picker:active {
+  transform: translate(3px, 3px);
+  box-shadow: 1px 1px 0 var(--ink);
+}
+
+.picker__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.picker__span {
+  padding: 2px 9px;
+  border: 2px solid var(--ink);
+  border-radius: var(--r-pill);
+  background: var(--mustard);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.gallery {
+  width: min(880px, calc(100vw - 48px));
+  max-width: none;
+  max-height: calc(100dvh - 48px);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  overflow: visible;
+}
+
+.gallery[open] {
+  animation: gallery-in 260ms var(--bounce);
+}
+
+.gallery::backdrop {
+  background: rgba(59, 47, 42, 0.32);
+  backdrop-filter: blur(3px);
+}
+
+.gallery__sheet {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - 48px);
+  padding: 24px 24px 0;
+  box-shadow: var(--shadow-lg);
+}
+
+.gallery__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s4);
+  padding: 0 4px 18px;
+}
+
+.gallery__title {
+  margin: 4px 0 4px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 30px;
+  line-height: 1.1;
+}
+
+.gallery__lede {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #4b3e37;
+}
+
+.gallery__close {
+  flex: none;
+}
+
+.gallery__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  /* A card clips its tab, so its automatic minimum height is zero: without this, rows shrink to fit instead of scrolling. */
+  grid-auto-rows: max-content;
+  gap: 18px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* Room for focus rings and card shadows inside the scroller. */
+  margin: 0 -8px;
+  padding: 6px 12px 28px 8px;
+}
+
+.gcard {
+  --tint: var(--terracotta);
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 16px 18px 14px;
+  border: var(--outline);
+  border-radius: var(--r);
+  background: var(--cream);
+  box-shadow: var(--shadow-sm);
+  text-align: left;
+  overflow: hidden;
+  transition:
+    transform var(--t-fast) var(--bounce),
+    box-shadow var(--t-fast) var(--bounce),
+    background var(--t-fast) var(--ease);
+}
+
+.gcard[data-color="1"] {
+  --tint: var(--mustard);
+}
+
+.gcard[data-color="2"] {
+  --tint: var(--sage);
+}
+
+.gcard[data-color="3"] {
+  --tint: var(--plum);
+}
+
+/* A strip of the card's colour along the top, like a sticker's tab. */
+.gcard::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 8px;
+  border-bottom: 2px solid var(--ink);
+  background: var(--tint);
+}
+
+.gcard:hover,
+.gcard:focus-visible {
+  background: #fff;
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow);
+}
+
+.gcard:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 var(--ink);
+}
+
+.gcard[aria-current="true"] {
+  background: #fff8ea;
+  box-shadow: var(--shadow);
+}
+
+.gcard__top {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+  min-height: 26px;
+}
+
+.gcard__now,
+.gcard__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.gcard__now::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: var(--sage);
+}
+
+.gcard__status .spinner {
+  width: 13px;
+  height: 13px;
+  margin: 0;
+  border-width: 2px;
+}
+
+.gcard__status--error {
+  color: var(--terracotta-deep);
+}
+
+.gcard__name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 1.1;
+}
+
+.gcard__tagline {
+  font-size: 15px;
+  line-height: 1.45;
+  color: #4b3e37;
+}
+
+/* Where the span sits between one second and the age of the universe. */
+.rung {
+  display: grid;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.rung__track {
+  position: relative;
+  height: 10px;
+  margin: 0 6px;
+  border: 2px solid var(--ink);
+  border-radius: var(--r-pill);
+  background:
+    repeating-linear-gradient(90deg, transparent 0 calc(100% / 6 - 2px), rgba(59, 47, 42, 0.25) 0 calc(100% / 6))
+    var(--paper);
+}
+
+.rung__dot {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--x) * 100%);
+  width: 16px;
+  height: 16px;
+  translate: -50% -50%;
+  border: 2.5px solid var(--ink);
+  border-radius: 50%;
+  background: var(--tint);
+}
+
+.rung__ends {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+@media (max-width: 899px) {
+  .picker {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: stretch;
+    gap: 6px;
+    padding: 7px 8px 7px 12px;
+    font-size: 15px;
+  }
+  .picker__span {
+    display: none;
+  }
+}
+
+@media (max-width: 599px) {
+  /* The gallery becomes a full-height sheet with one column. */
+  .gallery {
+    width: 100%;
+    max-width: none;
+    height: calc(100dvh - 12px);
+    max-height: none;
+    margin: 12px 0 0;
+  }
+  .gallery__sheet {
+    height: 100%;
+    max-height: none;
+    border-bottom: 0;
+    border-radius: var(--r-lg) var(--r-lg) 0 0;
+    box-shadow: none;
+    padding: 18px 14px 0;
+  }
+  .gallery__title {
+    font-size: 24px;
+  }
+  .gallery__grid {
+    grid-template-columns: 1fr;
+    padding-bottom: 24px;
+  }
+}

@@ -7,6 +7,7 @@ import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { FourDExperience } from "../core/types";
 import { effectiveRate, formatRate, formatWarp, passSeconds, usableWarpPresets } from "../core/warp";
 import { controller, useTime } from "./runtime";
+import "./TimeWarp.css";
 
 export function TimeWarp({ experience }: { experience: FourDExperience }) {
   const speed = useTime((s) => s.playbackSpeed);

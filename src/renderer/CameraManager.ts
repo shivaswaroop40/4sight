@@ -8,13 +8,17 @@
 //   free       the viewer's camera; nothing moves it.
 //   anchored   after a preset, until the viewer drags or zooms: it eases
 //              along the preset's line of sight to follow the experience's
-//              distance scale for the current time and the viewport's
-//              aspect ratio.
+//              distance scale for the current time and the stage fit.
 //   following  after a click on an object: the orbit target glides onto the
-//              object over PRESET_MS, then rides with it every frame, and
-//              the camera moves by the same amount, so the viewer keeps
-//              their angle and distance and can still orbit and zoom.
+//              object's centre over PRESET_MS, then rides with it every
+//              frame, and the camera moves by the same amount, so the viewer
+//              keeps their angle and distance and can still orbit and zoom.
 //              A preset, Overview or stopFollowing ends it.
+//
+// The stage fit (see stageFit.ts) carries presets authored for a desktop
+// layout to any screen: it scales their distance, and a view offset puts the
+// orbit target where the fit says, so on a phone the subject sits between
+// the top bar and the bottom sheet instead of behind them.
 //
 // Video export renders frames in a loop of its own: settle() puts the
 // camera where update() is easing it for the current time, at once, and
@@ -25,6 +29,8 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { easeInOutCubic } from "../core/interpolate";
 import { prefersReducedMotion } from "../core/reducedMotion";
 import type { CameraPreset } from "../core/types";
+import { DEFAULT_SUBJECT_ASPECT, REFERENCE_BAND, fitStage, type FreeBand, type StageFit } from "./stageFit";
+import { worldBounds } from "./worldBounds";
 
 const PRESET_MS = 600;
 
@@ -57,10 +63,14 @@ export class CameraManager {
   private tween: Tween | null = null;
   private framingState: Framing = FREE;
   private distanceScale = 1;
+  private subjectAspect = DEFAULT_SUBJECT_ASPECT;
+  private bandState: FreeBand = REFERENCE_BAND;
+  private fit: StageFit;
   private readonly camera: THREE.PerspectiveCamera;
 
   constructor(camera: THREE.PerspectiveCamera, domElement: HTMLElement) {
     this.camera = camera;
+    this.fit = this.refit();
     this.controls = new OrbitControls(camera, domElement);
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.08;
@@ -101,14 +111,7 @@ export class CameraManager {
 
   /** Frames the bounding sphere of everything visible in `root`, keeping the current viewing direction. */
   overview(root: THREE.Object3D, animate = true): void {
-    const box = new THREE.Box3();
-    root.traverseVisible((node) => {
-      const mesh = node as THREE.Mesh;
-      if (!mesh.geometry || node.name === "outline") return;
-      if (!mesh.geometry.boundingBox) mesh.geometry.computeBoundingBox();
-      const b = mesh.geometry.boundingBox!.clone().applyMatrix4(node.matrixWorld);
-      box.union(b);
-    });
+    const box = worldBounds(root);
     if (box.isEmpty()) return;
     const sphere = box.getBoundingSphere(new THREE.Sphere());
     const fov = THREE.MathUtils.degToRad(this.camera.fov);
@@ -121,8 +124,27 @@ export class CameraManager {
     this.moveTo(sphere.center.clone().addScaledVector(dir, distance), sphere.center.clone(), animate);
   }
 
-  setDistanceScale(scale: number): void {
-    this.distanceScale = scale;
+  /** What the presets frame now: see cameraDistanceScale and cameraSubjectAspect on FourDExperience. */
+  setSubject(distanceScale: number, subjectAspect = DEFAULT_SUBJECT_ASPECT): void {
+    this.distanceScale = distanceScale;
+    if (subjectAspect === this.subjectAspect) return;
+    this.subjectAspect = subjectAspect;
+    this.fit = this.refit();
+  }
+
+  get band(): FreeBand {
+    return this.bandState;
+  }
+
+  setBand(band: FreeBand): void {
+    this.bandState = band;
+    this.fit = this.refit();
+  }
+
+  /** Sets the camera's aspect ratio and updates its projection. */
+  setAspect(aspect: number): void {
+    this.camera.aspect = aspect;
+    this.fit = this.refit();
   }
 
   update(dtSeconds: number): void {
@@ -138,8 +160,7 @@ export class CameraManager {
       this.camera.position.lerp(this.anchoredPosition(f.preset), 1 - Math.exp(-dtSeconds * 5));
     } else if (f.kind === "following") {
       f.elapsed += dtSeconds * 1000;
-      // getWorldPosition refreshes the matrix, so this frame's setTime counts, not last frame's.
-      const goal = f.object.getWorldPosition(new THREE.Vector3());
+      const goal = visualCentre(f.object, new THREE.Vector3());
       const next = f.from.clone().lerp(goal, easeInOutCubic(Math.min(1, f.elapsed / PRESET_MS)));
       this.camera.position.add(next.clone().sub(this.controls.target));
       this.controls.target.copy(next);
@@ -187,24 +208,26 @@ export class CameraManager {
       this.camera.position.copy(this.anchoredPosition(f.preset));
     } else if (f.kind === "following") {
       f.elapsed = PRESET_MS;
-      const goal = f.object.getWorldPosition(new THREE.Vector3());
+      const goal = visualCentre(f.object, new THREE.Vector3());
       this.camera.position.add(goal.clone().sub(this.controls.target));
       this.controls.target.copy(goal);
     }
     this.controls.update();
   }
 
-  /**
-   * Presets are authored for a landscape viewport. On a portrait screen the
-   * horizontal field of view shrinks, so the camera backs off along the same
-   * line of sight to keep the framing.
-   */
   private anchoredPosition(preset: CameraPreset): THREE.Vector3 {
     const target = new THREE.Vector3(...preset.target);
     const offset = new THREE.Vector3(...preset.position).sub(target);
+    return target.addScaledVector(offset, this.fit.scale * this.distanceScale);
+  }
+
+  private refit(): StageFit {
     const aspect = this.camera.aspect;
-    const portrait = aspect < 1.2 ? Math.min(2.4, Math.pow(1.2 / aspect, 0.85)) : 1;
-    return target.addScaledVector(offset, portrait * this.distanceScale);
+    const fit = fitStage(aspect, this.bandState, this.subjectAspect);
+    // setViewOffset sets aspect to fullWidth / fullHeight, so the full view is aspect x 1.
+    this.camera.setViewOffset(aspect, 1, 0, 0.5 - fit.centerY, aspect, 1);
+    this.camera.updateProjectionMatrix();
+    return fit;
   }
 
   dispose(): void {
@@ -234,4 +257,15 @@ export class CameraManager {
       duration: PRESET_MS,
     };
   }
+}
+
+const bounds = new THREE.Box3();
+
+/**
+ * Where an object is on screen: the centre of what it draws. A hoverable is
+ * often placed at its parent's origin, like a continent that turns about the
+ * globe's centre or a set of instances, so its position is not where it is.
+ */
+function visualCentre(object: THREE.Object3D, out: THREE.Vector3): THREE.Vector3 {
+  return worldBounds(object, bounds).isEmpty() ? object.getWorldPosition(out) : bounds.getCenter(out);
 }
