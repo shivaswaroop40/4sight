@@ -93,7 +93,6 @@ export function useUi<T>(select: (s: UiState) => T): T {
 }
 
 let latestRequest = 0;
-const failedIds = new Set<ExperienceId>();
 
 /** The mounted experience and the exact current u. */
 export function currentMoment(): Moment | null {
@@ -106,9 +105,9 @@ export function currentMoment(): Moment | null {
  * experience keeps running while the chunk downloads, and only the latest
  * request may mount, so picking A then B quickly ends on B.
  *
- * Asking again for an experience that failed reloads the page on it: the
- * browser remembers a failed module fetch for the life of the page, so a
- * second import() of the same chunk fails without touching the network.
+ * Asking again for the experience that just failed reloads the page on it:
+ * the browser remembers a failed module fetch for the life of the page, so
+ * a second import() of the same chunk fails without touching the network.
  */
 export async function showExperience(id: ExperienceId, u = 0): Promise<void> {
   const request = ++latestRequest;
@@ -116,7 +115,7 @@ export async function showExperience(id: ExperienceId, u = 0): Promise<void> {
     setUi({ load: { status: "ready" } });
     return;
   }
-  if (failedIds.has(id)) {
+  if (ui.load.status === "failed" && ui.load.id === id) {
     window.location.replace(formatMoment(window.location.href, { id, u }));
     return;
   }
@@ -130,7 +129,6 @@ export async function showExperience(id: ExperienceId, u = 0): Promise<void> {
     if (u > 0) controller.setParam(u);
     setUi({ experience, filters, load: { status: "ready" }, hoveredId: null });
   } catch (error) {
-    failedIds.add(id);
     if (request !== latestRequest) return;
     const message = error instanceof Error ? error.message : String(error);
     setUi({ load: { status: "failed", id, message } });
