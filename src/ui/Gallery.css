@@ -112,6 +112,8 @@
 .gallery__grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  /* A card clips its tab, so its automatic minimum height is zero: without this, rows shrink to fit instead of scrolling. */
+  grid-auto-rows: max-content;
   gap: 18px;
   overflow-y: auto;
   overscroll-behavior: contain;
