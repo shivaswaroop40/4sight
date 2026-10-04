@@ -40,12 +40,6 @@ describe("mitosis timeline", () => {
   it("offers three views", () => {
     expect(exp.getCameraPresets().map((p) => p.name)).toEqual(["Front", "Three-quarter", "Down the spindle"]);
   });
-
-  it("is a pure function of time", () => {
-    const a = exp.getState(47.3);
-    exp.getState(12);
-    expect(exp.getState(47.3)).toEqual(a);
-  });
 });
 
 describe("mitosis state", () => {

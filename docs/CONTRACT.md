@@ -6,6 +6,8 @@ The rule that makes everything else work:
 
 > The scene is a pure function of `(t, filter state)`. `setTime(t)` renders the scene for `t` under the filter state last passed to `filters.set`. Calling it twice with the same `t` and the same filter state produces the same scene. It never reads the previous time, never accumulates, never plays an animation. Scrubbing, reverse, jumping, and warping all fall out of this one rule for free.
 
+`src/experiences/contract.test.ts` holds every registered experience to this rule. It mounts each one in a test scene, visits sample times and every event in several orders and under each filter state, and checks that the drawn scene (transforms, visibility, materials, uniforms, instances, vertex data) and every hover card match what a fresh mount draws at that time. It also checks that `dispose` unregisters every hoverable and empties the scene. A new experience is covered as soon as it is in the registry.
+
 ## Time model
 
 Two clocks exist and the contract names both.

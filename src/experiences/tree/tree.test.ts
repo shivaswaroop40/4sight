@@ -204,13 +204,6 @@ describe("oak story", () => {
     expect(treeExperience.getCurrentEvent(STORY.sapling)?.title).toBe("Sapling");
     expect(treeStateAt(150).stage).toBe("veteran");
   });
-
-  it("is a pure function of time", () => {
-    const a = JSON.stringify(treeStateAt(87.3));
-    treeStateAt(12);
-    expect(JSON.stringify(treeStateAt(87.3))).toBe(a);
-    expect(treeExperience.getState(42)).toEqual(treeExperience.getState(42));
-  });
 });
 
 describe("oak hover and camera", () => {

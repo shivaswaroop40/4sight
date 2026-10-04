@@ -97,11 +97,6 @@ describe("solar state", () => {
   it("spans 4.6 billion years of real elapsed time, for the one-day analogy", () => {
     expect(solarSystemExperience.elapsedSpanSeconds).toBeCloseTo(4.6e9 * 365.25 * 86_400, -3);
   });
-
-  it("is a pure function of time", () => {
-    const t = mapping.toTime(0.63);
-    expect(solarSystemExperience.getState(t)).toEqual(solarSystemExperience.getState(t));
-  });
 });
 
 describe("solar filters", () => {

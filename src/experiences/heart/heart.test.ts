@@ -152,13 +152,6 @@ describe("heart cycle", () => {
     heart.setTime(400);
     expect(heart.getHoveredObject("aortic")!.properties!["Right now"]).toBe("Open");
   });
-
-  it("is a pure function of time", () => {
-    const fresh = heart.getState(333);
-    heart.getState(700);
-    heart.getState(12);
-    expect(heart.getState(333)).toEqual(fresh);
-  });
 });
 
 describe("blood flow", () => {

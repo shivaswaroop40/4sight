@@ -43,12 +43,6 @@ describe("city timeline", () => {
   it("offers three views", () => {
     expect(exp.getCameraPresets().map((p) => p.name)).toEqual(["Aerial", "Street level", "River view"]);
   });
-
-  it("is a pure function of time", () => {
-    const a = exp.getState(1923.7);
-    exp.getState(1777);
-    expect(exp.getState(1923.7)).toEqual(a);
-  });
 });
 
 describe("city state", () => {

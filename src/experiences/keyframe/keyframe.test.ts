@@ -174,12 +174,6 @@ describe("keyframeExperience", () => {
     expect(exp.getHoveredObject("nope")).toBeNull();
   });
 
-  it("is a pure function of time", () => {
-    const a = exp.getState(6.3);
-    exp.getState(2);
-    expect(exp.getState(6.3)).toEqual(a);
-  });
-
   it("frames a subject of the authored width when the scene gives one", () => {
     expect(exp.cameraSubjectAspect).toBeUndefined();
     const wide = keyframeExperience("mock", scene({ cameraSubjectAspect: [{ t: 0, v: 1.6 }, { t: 10, v: 1.1 }] }));
