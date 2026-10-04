@@ -249,20 +249,22 @@ class ContinentsExperienceImpl implements FourDExperience {
 
   getHoveredObject(id: string): ObjectMetadata | null {
     const ma = maAt(this.time);
+    const state = continentsStateAt(this.time);
     if (id === "ocean") {
+      // The card keeps the ocean's old name exactly as long as the map label still shows it.
+      const panthalassa = state.labels.find((l) => l.id === "panthalassa")!.opacity > 0.01;
       return {
         id,
-        name: ma > 180 ? "Panthalassa" : "Ocean",
-        description:
-          ma > 180
-            ? "One ocean covers most of the planet. Its floor has long since sunk back into the mantle."
-            : "New ocean floor is made at mid-ocean ridges and sinks back into the mantle at trenches.",
+        name: panthalassa ? "Panthalassa" : "Ocean",
+        description: panthalassa
+          ? "One ocean covers most of the planet. Its floor has long since sunk back into the mantle."
+          : "New ocean floor is made at mid-ocean ridges and sinks back into the mantle at trenches.",
         properties: { "Oldest ocean floor today": "about 180 million years" },
       };
     }
     const def = BLOCKS.find((b) => b.id === id);
     if (!def) return null;
-    const block = continentsStateAt(this.time).blocks.find((b) => b.id === id)!;
+    const block = state.blocks.find((b) => b.id === id)!;
     const story = [...def.story].reverse().find(([from]) => ma <= from) ?? def.story[0];
     return {
       id,

@@ -127,6 +127,16 @@ describe("continents hover and views", () => {
     expect(exp.getHoveredObject("nowhere")).toBeNull();
   });
 
+  it("calls the ocean Panthalassa exactly while its map label is drawn", () => {
+    const labelOpacity = (time: number) => exp.getState(time).labels.find((l) => l.id === "panthalassa")!.opacity;
+    exp.setTime(-171);
+    expect(labelOpacity(-171)).toBeCloseTo(0.05, 9);
+    expect(exp.getHoveredObject("ocean")!.name).toBe("Panthalassa");
+    exp.setTime(-169);
+    expect(labelOpacity(-169)).toBe(0);
+    expect(exp.getHoveredObject("ocean")!.name).toBe("Ocean");
+  });
+
   it("offers the four ocean views and a today's-coastlines overlay, off by default", () => {
     expect(exp.getCameraPresets().map((p) => p.name)).toEqual(["Atlantic", "Indian Ocean", "Pacific", "South Pole"]);
     expect(exp.getAvailableFilters().map((f) => [f.id, f.name, f.defaultOn])).toEqual([
