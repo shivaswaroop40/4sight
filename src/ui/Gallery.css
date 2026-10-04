@@ -107,6 +107,8 @@
 
 .gallery__close {
   flex: none;
+  width: 42px;
+  height: 42px;
 }
 
 .gallery__grid {

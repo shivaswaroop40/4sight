@@ -81,19 +81,16 @@
 .exporter__action {
   justify-self: end;
   margin-top: 4px;
-  padding: 8px 16px;
-  font-size: 14px;
+}
+
+@media (min-width: 900px) {
+  .exporter__action {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
 }
 
 .exporter__action svg {
   width: 16px;
   height: 16px;
-}
-
-/* The phone-sized chip, as the shared chip rule sizes every chip below 900px. */
-@media (max-width: 899px) {
-  .exporter__action {
-    padding: 5px 10px;
-    font-size: 12px;
-  }
 }
