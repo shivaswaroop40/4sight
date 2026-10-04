@@ -74,9 +74,10 @@ describe("city state", () => {
     expect(shown(1882, "electric-lamp-1")).toBe(false);
     expect(shown(1890, "gas-lamp-8")).toBe(false);
     expect(shown(1890, "electric-lamp-8")).toBe(true);
-    for (let lamp = 1; lamp <= 8; lamp++) {
-      for (let year = 1800; year <= 1900; year += 0.05) {
-        const both = shown(year, `gas-lamp-${lamp}`) && shown(year, `electric-lamp-${lamp}`);
+    for (let year = 1800; year <= 1900; year += 0.05) {
+      const visible = new Map(exp.getState(year).objects.map((o) => [o.id, o.visible]));
+      for (let lamp = 1; lamp <= 8; lamp++) {
+        const both = visible.get(`gas-lamp-${lamp}`) && visible.get(`electric-lamp-${lamp}`);
         expect(both, `lamp ${lamp} in ${year.toFixed(2)}`).toBe(false);
       }
     }
