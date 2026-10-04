@@ -108,7 +108,7 @@ function buildSeed(): Prop {
   const spent = new THREE.Color("#5E4636");
   return {
     object: seed,
-    hover: { id: "acorns", target: seed },
+    hover: { id: "seed", target: seed },
     pose(t) {
       const buried = new THREE.Vector3(...SEED_CENTER);
       const onTop = buried.clone().setY(0.012);

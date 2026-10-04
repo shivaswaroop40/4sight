@@ -208,6 +208,15 @@ describe("oak hover and camera", () => {
     expect(hoverInfo("rings", 150)!.description).toMatch(/Narrow rings after year 84 mark the storm\.$/);
   });
 
+  it("follows the buried acorn from food store to spent shell", () => {
+    expect(hoverInfo("seed", 0.02)!.name).toBe("Acorn");
+    expect(hoverInfo("seed", 0.02)!.properties).toEqual({ Length: "about 2.5 cm" });
+    expect(hoverInfo("seed", 0.3)!.description).toMatch(/^The root has split the shell/);
+    expect(hoverInfo("seed", 2)!.name).toBe("Spent shell");
+    expect(hoverInfo("seed", 2)!.description).toMatch(/food store/);
+    expect(hoverInfo("acorns", 2)!.description).toMatch(/^Acorns ripen/);
+  });
+
   it("calls the scar a hollow once rot opens it", () => {
     expect(hoverInfo("scar", 90)!.name).toBe("Storm scar");
     expect(hoverInfo("scar", 130)!.name).toBe("Storm scar and hollow");
@@ -231,7 +240,7 @@ describe("oak hover and camera", () => {
     const ids = [...new Set(registered.values())].sort();
     expect(ids).toEqual([
       "acorns", "canopy", "hill", "jay", "owl", "rabbit", "rings", "roots", "scar",
-      "squirrel", "storm", "storm-limb", "trunk", "woodpecker", "woodpecker-hole",
+      "seed", "squirrel", "storm", "storm-limb", "trunk", "woodpecker", "woodpecker-hole",
     ]);
     for (const id of ids) expect(treeExperience.getHoveredObject(id)?.name).toBeTruthy();
     treeExperience.dispose();

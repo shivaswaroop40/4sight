@@ -236,17 +236,39 @@ export function hoverInfo(id: string, t: number): ObjectMetadata | null {
         description: "Dark topsoil full of roots, worms and fungi, over paler subsoil and clay.",
         category: "ground",
       };
+    case "seed":
+      if (t < STORY.radicle) {
+        return {
+          id,
+          name: "Acorn",
+          description: "This acorn is about 2.5 cm long. It holds enough food to start a tree.",
+          category: "seed",
+          properties: { Length: "about 2.5 cm" },
+        };
+      }
+      if (t < STORY.shoot) {
+        return {
+          id,
+          name: "Acorn",
+          description: "The root has split the shell and the food store inside still feeds it. The acorn itself stays underground.",
+          category: "seed",
+        };
+      }
+      return {
+        id,
+        name: "Spent shell",
+        description: "The seedling has drawn down the food store that was packed inside the acorn. The empty shell rots away in the soil within a couple of years.",
+        category: "seed",
+      };
     case "acorns":
       return {
         id,
         name: "Acorns",
         description: s.acorns.mast
           ? "A mast year: a huge crop, far more than jays, squirrels and mice can eat."
-          : t < 1
-            ? "This acorn is about 2.5 cm long. It holds enough food to start a tree."
-            : "Acorns ripen from green to brown in September and October, then fall.",
+          : "Acorns ripen from green to brown in September and October, then fall.",
         category: "seed",
-        properties: t < 1 ? { Length: "about 2.5 cm" } : { "Acorns from": "about 40 years", "Peak crop": "80 to 120 years" },
+        properties: { "Acorns from": "about 40 years", "Peak crop": "80 to 120 years" },
       };
     case "rings":
       return {
