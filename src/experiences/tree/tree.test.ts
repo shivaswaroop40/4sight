@@ -45,6 +45,12 @@ describe("oak time axis", () => {
     }
   });
 
+  it("puts every year label on the year it names", () => {
+    const labelled = KNOTS.filter((k) => /yrs?$/.test(k.label));
+    expect(labelled.map((k) => k.label)).toEqual(["1 yr", "6 yrs", "25 yrs", "60 yrs", "90 yrs", "150 yrs"]);
+    for (const k of labelled) expect(k.time).toBe(Number(k.label.split(" ")[0]));
+  });
+
   it("gives the first year more than a sixth of the slider", () => {
     expect(mapping.toParam(1)).toBeCloseTo(0.18, 6);
   });

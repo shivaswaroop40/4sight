@@ -38,7 +38,7 @@ export const KNOTS: SliderKnot[] = [
   { u: 0.45, time: 25, label: "25 yrs" },
   { u: 0.6, time: 60, label: "60 yrs" },
   { u: 0.7, time: 84, label: "" },
-  { u: 0.8, time: 92, label: "90 yrs" },
+  { u: 0.8, time: 90, label: "90 yrs" },
   { u: 1, time: STORY.end, label: "150 yrs" },
 ];
 
