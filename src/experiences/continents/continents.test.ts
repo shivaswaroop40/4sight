@@ -137,6 +137,17 @@ describe("continents hover and views", () => {
     expect(exp.getHoveredObject("ocean")!.name).toBe("Ocean");
   });
 
+  it("keeps the Tethys label up until Arabia closes it, as the stories say", () => {
+    const tethys = (ma: number) => exp.getState(-ma).labels.find((l) => l.id === "tethys")!.opacity;
+    expect(tethys(56)).toBe(1);
+    expect(tethys(35)).toBe(1);
+    expect(tethys(20)).toBe(0);
+    exp.setTime(-35);
+    expect(exp.getHoveredObject("africa")!.description).toBe("Crawling north into Europe, closing the old Tethys Ocean.");
+    exp.setTime(-20);
+    expect(exp.getHoveredObject("arabia")!.description).toBe("Arabia hits Asia and folds up the Zagros Mountains in Iran.");
+  });
+
   it("offers the four ocean views and a today's-coastlines overlay, off by default", () => {
     expect(exp.getCameraPresets().map((p) => p.name)).toEqual(["Atlantic", "Indian Ocean", "Pacific", "South Pole"]);
     expect(exp.getAvailableFilters().map((f) => [f.id, f.name, f.defaultOn])).toEqual([

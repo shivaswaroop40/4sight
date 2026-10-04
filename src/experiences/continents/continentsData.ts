@@ -308,8 +308,10 @@ export const MAP_LABELS: MapLabelDef[] = [
     id: "tethys",
     text: "Tethys Ocean",
     kind: "ocean",
-    anchor: { kind: "between", a: ["arabia", [56, 20]], b: ["eurasia", [102, 26]] },
-    opacity: [[75, 1], [56, 0]],
+    // Over the last stretch of the Tethys, between Arabia and Iran, so the name
+    // survives India's arrival and goes only when Arabia closes it at 20 Ma.
+    anchor: { kind: "between", a: ["arabia", [48, 27]], b: ["eurasia", [54, 33]] },
+    opacity: [[30, 1], [20, 0]],
   },
   {
     id: "atlantic",
