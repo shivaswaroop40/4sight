@@ -55,7 +55,7 @@ export interface EncodeJob {
   onFrame(encoded: number): void;
 }
 
-/** Resolves with the finished file, or null if the signal aborted first. */
+/** Resolves with the finished file, or null if the signal aborted at any point before it resolves. */
 export async function encodeVideo(job: EncodeJob): Promise<Blob | null> {
   const { plan, codec } = job;
   const frame = makeCanvas(plan.width, plan.height);
@@ -81,6 +81,8 @@ export async function encodeVideo(job: EncodeJob): Promise<Blob | null> {
     }
     if (job.signal.aborted) return null;
     await output.finalize();
+    // Cancel stays live while the file is finished; a cancel then still means no file.
+    if (job.signal.aborted) return null;
     return new Blob([target.buffer!], { type: format.mimeType });
   } finally {
     // Frees the encoder. A failure here must not hide the error that got us here.
