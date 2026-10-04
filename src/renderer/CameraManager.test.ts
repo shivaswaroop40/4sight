@@ -1,17 +1,12 @@
 import * as THREE from "three";
 import { describe, expect, it } from "vitest";
 import type { CameraPreset } from "../core/types";
+import { fakeCanvas } from "../test/fakeCanvas";
 import { CameraManager } from "./CameraManager";
 import { NO_PRESS, stepPress, type PressInput } from "./pointerGesture";
 
 const FRONT: CameraPreset = { id: "front", name: "Front", position: [0, 0, 10], target: [0, 0, 0] };
 const SIDE: CameraPreset = { id: "side", name: "Side", position: [10, 0, 0], target: [0, 0, 0] };
-
-/** OrbitControls only wires listeners and styles onto its element. */
-function fakeCanvas(): HTMLElement {
-  const listeners = { addEventListener() {}, removeEventListener() {} };
-  return { ...listeners, style: {}, clientHeight: 900, getRootNode: () => listeners, ownerDocument: listeners } as unknown as HTMLElement;
-}
 
 function setup() {
   const camera = new THREE.PerspectiveCamera(45, 16 / 9);

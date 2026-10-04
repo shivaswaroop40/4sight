@@ -1,7 +1,9 @@
-import type * as THREE from "three";
+import * as THREE from "three";
 import { describe, expect, it } from "vitest";
+import { CameraManager } from "../../renderer/CameraManager";
+import { fakeCanvas } from "../../test/fakeCanvas";
 import { fakeSceneContext } from "../../test/fakeSceneContext";
-import { EVENTS, KNOTS } from "./solarData";
+import { BODIES, EVENTS, KNOTS } from "./solarData";
 import { knotMapping } from "../../core/mappings";
 import { formatYears } from "./solarMapping";
 import { solarStateAt } from "./SolarSystemState";
@@ -92,6 +94,42 @@ describe("solar state", () => {
 
   it("offers named camera views, none duplicating the Overview button", () => {
     expect(solarSystemExperience.getCameraPresets().map((p) => p.name)).toEqual(["Tilted", "Top", "Edge-on"]);
+  });
+
+  it("keeps Neptune's whole orbit on a 390x844 phone in every preset, all the way through", () => {
+    const neptune = BODIES.find((b) => b.id === "neptune")!;
+    const reach = neptune.orbit + neptune.size;
+    const offscreen: Record<string, number> = {};
+    for (const preset of solarSystemExperience.getCameraPresets()) {
+      for (const u of [0, 0.5, 1]) {
+        const camera = new THREE.PerspectiveCamera(45, 390 / 844, 0.01, 1e6);
+        const cameras = new CameraManager(camera, fakeCanvas());
+        cameras.setBand({ top: 114 / 844, bottom: 554 / 844 });
+        cameras.setSubject(1, solarSystemExperience.cameraSubjectAspect?.(mapping.toTime(u)));
+        cameras.applyPreset(preset, false);
+        cameras.settle();
+        camera.updateMatrixWorld();
+        let count = 0;
+        for (let i = 0; i < 360; i++) {
+          const a = (i / 360) * Math.PI * 2;
+          const x = ((new THREE.Vector3(Math.cos(a) * reach, 0, Math.sin(a) * reach).project(camera).x + 1) / 2) * 390;
+          if (x < 0 || x > 390) count++;
+        }
+        offscreen[`${preset.id} u=${u}`] = count;
+        cameras.dispose();
+      }
+    }
+    expect(offscreen).toEqual({
+      "tilted u=0": 0,
+      "tilted u=0.5": 0,
+      "tilted u=1": 0,
+      "top u=0": 0,
+      "top u=0.5": 0,
+      "top u=1": 0,
+      "edge-on u=0": 0,
+      "edge-on u=0.5": 0,
+      "edge-on u=1": 0,
+    });
   });
 
   it("spans 4.6 billion years of real elapsed time, for the one-day analogy", () => {
