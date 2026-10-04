@@ -192,7 +192,10 @@ describe("oak story", () => {
   it("stages the life from acorn to veteran", () => {
     expect(treeStateAt(0).stage).toBe("acorn");
     expect(treeStateAt(0.3).stage).toBe("germinating");
-    expect(treeStateAt(6).stage).toBe("sapling");
+    expect(treeStateAt(3).stage).toBe("seedling");
+    expect(treeStateAt(STORY.sapling - 0.01).stage).toBe("seedling");
+    expect(treeStateAt(STORY.sapling).stage).toBe("sapling");
+    expect(treeExperience.getCurrentEvent(STORY.sapling)?.title).toBe("Sapling");
     expect(treeStateAt(150).stage).toBe("veteran");
   });
 

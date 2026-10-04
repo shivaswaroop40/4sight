@@ -35,7 +35,7 @@ export interface TreeState {
 function stageAt(t: number): Stage {
   if (t < STORY.radicle) return "acorn";
   if (t < STORY.shoot) return "germinating";
-  if (t < 3) return "seedling";
+  if (t < STORY.sapling) return "seedling";
   if (t < 15) return "sapling";
   if (t < STORY.firstAcorns) return "young tree";
   if (t < 120) return "mature tree";
