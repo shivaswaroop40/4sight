@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { freeBand, type HudPiece } from "./hudBand";
+import { freeBand, measureHud, type HudPiece } from "./hudBand";
 
 const PHONE = { top: 0, bottom: 844, left: 0, right: 390 };
 const DESKTOP = { top: 0, bottom: 900, left: 0, right: 1440 };
@@ -26,5 +26,27 @@ describe("freeBand", () => {
 
   it("is the whole stage when nothing is declared", () => {
     expect(freeBand(PHONE, [])).toEqual({ top: 0, bottom: 1 });
+  });
+});
+
+function piece(hudEdge: string, top: number, bottom: number): HTMLElement {
+  return {
+    dataset: { hudEdge },
+    getBoundingClientRect: () => ({ top, bottom, left: 12, right: 378 }),
+    querySelector: () => null,
+    offsetHeight: bottom - top,
+    clientHeight: bottom - top,
+  } as unknown as HTMLElement;
+}
+
+describe("measureHud", () => {
+  it("measures top and bottom pieces and ignores any other declared edge", () => {
+    const root = {
+      querySelectorAll: () => [piece("top", 12, 56), piece("left", 100, 300), piece("bottom", 600, 832), piece("", 0, 844)],
+    } as unknown as ParentNode;
+    expect(measureHud(root)).toEqual([
+      { edge: "top", top: 12, bottom: 56, left: 12, right: 378 },
+      { edge: "bottom", top: 600, bottom: 832, left: 12, right: 378 },
+    ]);
   });
 });
