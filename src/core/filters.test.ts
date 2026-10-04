@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { defaultFilterState, isDefaultFilterState, toggleFilter } from "./filters";
+import { experiences } from "../experiences/index";
+import { defaultFilterState, filterProblems, isDefaultFilterState, isFilterOn, toggleFilter } from "./filters";
 import type { VisualizationFilter } from "./types";
 
 const FILTERS: VisualizationFilter[] = [
@@ -45,5 +46,47 @@ describe("filter state", () => {
     expect(isDefaultFilterState(FILTERS, toggleFilter(FILTERS, toggleFilter(FILTERS, DEFAULTS, "xray"), "xray"))).toBe(
       true,
     );
+  });
+
+  it("reads a filter the state leaves out as its default", () => {
+    expect(["gas", "xray", "true", "heat", "nope"].map((id) => isFilterOn(FILTERS, {}, id))).toEqual([
+      true,
+      false,
+      true,
+      false,
+      false,
+    ]);
+    expect(isFilterOn(FILTERS, { gas: false, xray: true }, "gas")).toBe(false);
+    expect(isFilterOn(FILTERS, { gas: false, xray: true }, "xray")).toBe(true);
+  });
+});
+
+describe("filter rules", () => {
+  it("accepts unique ids and one default per group", () => {
+    expect(filterProblems(FILTERS)).toEqual([]);
+    expect(filterProblems([])).toEqual([]);
+  });
+
+  it("names a repeated id and a group without exactly one default", () => {
+    expect(
+      filterProblems([
+        { id: "a", name: "A", defaultOn: true },
+        { id: "a", name: "A again", defaultOn: false },
+        { id: "x", name: "X", group: "none", defaultOn: false },
+        { id: "y", name: "Y", group: "two", defaultOn: true },
+        { id: "z", name: "Z", group: "two", defaultOn: true },
+      ]),
+    ).toEqual([
+      'Filter id "a" is used twice.',
+      'Filter group "none" has 0 options on by default, not 1.',
+      'Filter group "two" has 2 options on by default, not 1.',
+    ]);
+  });
+
+  it("holds for every registered experience", async () => {
+    const problems = await Promise.all(
+      experiences.map(async (entry) => [entry.id, filterProblems((await entry.load()).filters?.options ?? [])]),
+    );
+    expect(problems).toEqual(experiences.map((entry) => [entry.id, []]));
   });
 });

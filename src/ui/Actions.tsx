@@ -8,9 +8,9 @@
 // also closes on Tab; the filters popover closes once focus leaves it.
 
 import { useCallback, useEffect, useId, useRef, useState, type RefObject } from "react";
-import { isDefaultFilterState } from "../core/filters";
+import { isDefaultFilterState, isFilterOn } from "../core/filters";
 import { formatMoment } from "../core/moment";
-import type { FilterState, FourDExperience, VisualizationFilter } from "../core/types";
+import type { FilterState, VisualizationFilter } from "../core/types";
 import { checkExportSupport, startExport } from "./exportRunner";
 import { FiltersIcon, LinkIcon, MoreIcon, TourIcon, VideoIcon } from "./icons";
 import { currentMoment, pressFilter, setUi, useUi } from "./runtime";
@@ -19,11 +19,10 @@ import { dispatchTour } from "./tour/tourRunner";
 
 export function Actions() {
   const experience = useUi((s) => s.experience);
-  const hasFilters = (experience?.getAvailableFilters().length ?? 0) > 0;
   return (
     <div className="actions" role="group" aria-label="Actions">
       <TourButton disabled={(experience?.events.length ?? 0) === 0} />
-      {experience && hasFilters && <FiltersPopover key={experience.id} experience={experience} />}
+      {experience?.filters && <FiltersPopover key={experience.id} options={experience.filters.options} />}
       <MoreMenu />
     </div>
   );
@@ -98,8 +97,7 @@ function sections(filters: readonly VisualizationFilter[]): FilterSection[] {
   return out;
 }
 
-function FiltersPopover({ experience }: { experience: FourDExperience }) {
-  const filters = experience.getAvailableFilters();
+function FiltersPopover({ options: filters }: { options: readonly VisualizationFilter[] }) {
   const state = useUi((s) => s.filters);
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
@@ -146,7 +144,7 @@ function FiltersPopover({ experience }: { experience: FourDExperience }) {
           </p>
           {sections(filters).map((section) =>
             section.kind === "switch" ? (
-              <FilterRow key={section.filter.id} filter={section.filter} kind="switch" on={state[section.filter.id] === true} />
+              <FilterRow key={section.filter.id} filter={section.filter} kind="switch" on={isFilterOn(filters, state, section.filter.id)} />
             ) : (
               <FilterRadios key={section.group} group={section.group} options={section.options} state={state} />
             ),
@@ -205,7 +203,7 @@ function FilterRadios({ group, options, state }: { group: string; options: Visua
         {group}
       </p>
       {options.map((option) => {
-        const on = state[option.id] === true;
+        const on = isFilterOn(options, state, option.id);
         return <FilterRow key={option.id} filter={option} kind="radio" on={on} tabIndex={on ? 0 : -1} />;
       })}
     </div>

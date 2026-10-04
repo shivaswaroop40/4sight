@@ -7,12 +7,13 @@
 // Two filters hide the gas and dust and the orbit guide lines.
 
 import * as THREE from "three";
-import { defaultFilterState } from "../../core/filters";
+import { isFilterOn } from "../../core/filters";
 import { lerp } from "../../core/interpolate";
 import { eventAt } from "../../core/Timeline";
 import { YEAR_SECONDS } from "../../core/timescale";
 import type {
   CameraPreset,
+  ExperienceFilters,
   FilterState,
   FourDExperience,
   ObjectMetadata,
@@ -76,11 +77,18 @@ class SolarSystemExperience implements FourDExperience {
   private corona: THREE.Sprite | null = null;
   private disposables: { dispose(): void }[] = [];
   private currentP = 0;
-  private filters: FilterState = defaultFilterState(FILTERS);
+  private filterState: FilterState = {};
+
+  filters: ExperienceFilters = {
+    options: FILTERS,
+    set: (state: FilterState) => {
+      this.filterState = state;
+    },
+  };
 
   mount(ctx: SceneContext): void {
     this.ctx = ctx;
-    this.filters = defaultFilterState(FILTERS);
+    this.filterState = {};
     const root = new THREE.Group();
     this.root = root;
     ctx.scene.add(root);
@@ -201,7 +209,7 @@ class SolarSystemExperience implements FourDExperience {
     if (!this.field) return;
     const state = solarStateAt(p);
     this.field.update(state);
-    this.field.points.visible = this.filters["gas-and-dust"];
+    this.field.points.visible = isFilterOn(FILTERS, this.filterState, "gas-and-dust");
     for (const [i, view] of this.views.entries()) {
       this.applyBody(view, state, i);
     }
@@ -232,14 +240,6 @@ class SolarSystemExperience implements FourDExperience {
       category: def.kind,
       properties: def.properties,
     };
-  }
-
-  getAvailableFilters(): VisualizationFilter[] {
-    return FILTERS;
-  }
-
-  setFilters(state: FilterState): void {
-    this.filters = state;
   }
 
   getCameraPresets(): CameraPreset[] {
@@ -319,7 +319,7 @@ class SolarSystemExperience implements FourDExperience {
     }
     if (view.orbit) {
       (view.orbit.material as THREE.LineBasicMaterial).opacity = 0.2 * state.orbits;
-      view.orbit.visible = state.orbits > 0.001 && this.filters.orbits;
+      view.orbit.visible = state.orbits > 0.001 && isFilterOn(FILTERS, this.filterState, "orbits");
     }
   }
 

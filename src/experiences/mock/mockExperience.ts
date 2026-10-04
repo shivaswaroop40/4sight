@@ -145,10 +145,6 @@ class MockExperience implements FourDExperience {
     return OBJECTS[id] ?? null;
   }
 
-  getAvailableFilters() {
-    return [];
-  }
-
   getCameraPresets(): CameraPreset[] {
     return PRESETS;
   }

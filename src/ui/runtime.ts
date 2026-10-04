@@ -8,7 +8,7 @@
 // Components subscribe to exactly the fields they render.
 
 import { useSyncExternalStore } from "react";
-import { defaultFilterState, toggleFilter } from "../core/filters";
+import { defaultFilterState, filterProblems, toggleFilter } from "../core/filters";
 import { formatMoment, type Moment } from "../core/moment";
 import { TimeController } from "../core/TimeController";
 import type { ExperienceId, FilterState, FourDExperience, TimeState } from "../core/types";
@@ -135,8 +135,11 @@ export async function showExperience(id: ExperienceId, u = 0): Promise<void> {
   }
   const manager = runtime.manager;
   if (request !== latestRequest || !manager) return;
-  const filters = defaultFilterState(experience.getAvailableFilters());
+  const options = experience.filters?.options ?? [];
+  const filters = defaultFilterState(options);
   try {
+    const problems = import.meta.env.DEV ? filterProblems(options) : [];
+    if (problems.length > 0) throw new Error(problems.join(" "));
     manager.mount(experience, filters, ui.experience !== null);
   } catch (error) {
     const current = manager.current;
@@ -155,7 +158,7 @@ function failed(id: ExperienceId, u: number, stage: "chunk" | "mount", error: un
 export function pressFilter(id: string): void {
   const experience = ui.experience;
   if (!experience) return;
-  const filters = toggleFilter(experience.getAvailableFilters(), ui.filters, id);
+  const filters = toggleFilter(experience.filters?.options ?? [], ui.filters, id);
   if (filters === ui.filters) return;
   runtime.manager?.setFilters(filters);
   setUi({ filters });

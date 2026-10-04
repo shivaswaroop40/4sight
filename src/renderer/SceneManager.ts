@@ -140,7 +140,7 @@ export class SceneManager {
     this.setHovered(null);
     try {
       experience.mount(this.context);
-      experience.setFilters?.(filters);
+      experience.filters?.set(filters);
       this.timeController.attach(experience);
       this.scene.updateMatrixWorld(true);
       this.warmUp();
@@ -198,7 +198,7 @@ export class SceneManager {
   /** Re-renders the current moment under new filters. Time does not move. */
   setFilters(filters: FilterState): void {
     if (!this.experience) return;
-    this.experience.setFilters?.(filters);
+    this.experience.filters?.set(filters);
     this.experience.setTime(this.timeController.state.time);
   }
 
