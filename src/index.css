@@ -31,8 +31,8 @@
   --s5: 24px;
   --s6: 32px;
 
-  --font-display: "Fredoka", "Nunito", ui-rounded, system-ui, sans-serif;
-  --font-body: "Nunito", ui-rounded, system-ui, sans-serif;
+  --font-display: "Tilt Warp", system-ui, sans-serif;
+  --font-body: "Onest", system-ui, sans-serif;
 
   --bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
@@ -41,6 +41,8 @@
 
   color-scheme: light;
   font-family: var(--font-body);
+  /* Tilt Warp ships one weight; a bold request would be smeared, not drawn. */
+  font-synthesis-weight: none;
   color: var(--ink);
   background: var(--paper);
   -webkit-font-smoothing: antialiased;
@@ -73,7 +75,7 @@ button {
 .caps {
   font-family: var(--font-body);
   font-size: 11px;
-  font-weight: 900;
+  font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ink-soft);
@@ -165,7 +167,7 @@ button {
 
 .brand__word {
   font-family: var(--font-display);
-  font-weight: 700;
+  font-weight: 400;
   font-size: 24px;
   letter-spacing: 0.01em;
   line-height: 1;
@@ -179,7 +181,7 @@ button {
   border: 2px solid var(--ink);
   border-radius: var(--r-pill);
   background: var(--cream);
-  font-weight: 800;
+  font-weight: 600;
   font-size: 13px;
   white-space: nowrap;
   box-shadow: var(--shadow-sm);
@@ -240,7 +242,7 @@ button {
   border-radius: var(--r-pill);
   background: var(--mustard);
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 

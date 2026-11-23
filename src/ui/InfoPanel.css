@@ -37,13 +37,13 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 400;
   font-size: 15px;
 }
 
 .info__count {
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 600;
   color: var(--ink-soft);
   font-variant-numeric: tabular-nums;
 }
@@ -60,7 +60,7 @@
 .info__title {
   margin: 10px 0 6px;
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 400;
   font-size: 26px;
   line-height: 1.12;
   letter-spacing: -0.005em;

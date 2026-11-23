@@ -17,7 +17,7 @@
 
 .readout__label {
   font-size: 11px;
-  font-weight: 900;
+  font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ink-soft);
@@ -27,8 +27,8 @@
 }
 
 .readout__time {
-  font-family: var(--font-body);
-  font-weight: 900;
+  font-family: var(--font-display);
+  font-weight: 400;
   font-size: 30px;
   line-height: 1.05;
   font-variant-numeric: tabular-nums;
@@ -39,8 +39,9 @@
 }
 
 .readout__analogy {
-  font-size: 13px;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 14px;
   color: var(--ink-soft);
   white-space: nowrap;
   overflow: hidden;
@@ -48,7 +49,7 @@
 }
 
 .readout__analogy b {
-  font-weight: 900;
+  font-weight: 400;
   color: var(--ink);
   font-variant-numeric: tabular-nums;
 }

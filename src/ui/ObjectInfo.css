@@ -18,7 +18,7 @@
 
 .tip__name {
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 400;
   font-size: 17px;
 }
 
@@ -44,7 +44,7 @@
 }
 
 .tip__props dt {
-  font-weight: 800;
+  font-weight: 600;
   color: var(--ink-soft);
 }
 

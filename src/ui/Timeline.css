@@ -165,7 +165,7 @@
   background: var(--cream);
   box-shadow: var(--shadow-sm);
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 600;
   white-space: nowrap;
   opacity: 0;
   scale: 0.9;
@@ -203,7 +203,7 @@
   top: 4px;
   width: 18px;
   font-size: 10px;
-  font-weight: 900;
+  font-weight: 700;
   line-height: 11px;
   text-align: center;
   font-variant-numeric: tabular-nums;
@@ -279,7 +279,7 @@
 
 .flaglist__title {
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .flaglist__when {
@@ -301,7 +301,7 @@
   top: 0;
   translate: -50% 0;
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--ink-soft);

@@ -22,7 +22,7 @@
   max-width: calc(100vw - 24px);
   padding: 6px 6px 6px 16px;
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 600;
   box-shadow: var(--shadow-sm);
   animation: pop-in var(--t) var(--bounce);
 }
@@ -100,7 +100,7 @@
 }
 
 .follow__label b {
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .follow__hidden {
@@ -127,7 +127,7 @@
 
 .tourbar__count {
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 600;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
@@ -242,7 +242,7 @@
 
 .notice__title {
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 400;
   font-size: 20px;
 }
 

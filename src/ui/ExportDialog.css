@@ -41,7 +41,7 @@
 .exporter__title {
   margin: 0;
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 400;
   font-size: 26px;
   line-height: 1.1;
 }
@@ -74,7 +74,7 @@
 .exporter__status {
   margin: 0;
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
