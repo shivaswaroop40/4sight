@@ -30,9 +30,8 @@
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 8px;
-  height: 14px;
-  border: var(--border);
+  bottom: 12px;
+  height: 6px;
   border-radius: var(--r-pill);
   background: var(--surface-line);
   overflow: hidden;
@@ -48,35 +47,25 @@
 
 .timeline__notch {
   position: absolute;
-  top: 2px;
-  bottom: 2px;
+  top: 0;
+  bottom: 0;
   width: 2px;
   margin-left: -1px;
-  border-radius: 2px;
-  background: color-mix(in srgb, var(--ink) 35%, transparent);
+  background: color-mix(in srgb, var(--ink) 30%, transparent);
 }
 
 .timeline__thumb {
   position: absolute;
   left: calc(var(--u) * 100%);
-  bottom: 1px;
-  width: 28px;
-  height: 28px;
-  margin-left: -14px;
-  border: 3px solid var(--ink);
+  bottom: 3px;
+  width: 24px;
+  height: 24px;
+  margin-left: -12px;
+  border: 3px solid var(--accent);
   border-radius: 50%;
   background: var(--surface);
-  box-shadow: 3px 3px 0 var(--ink);
   pointer-events: none;
   transition: scale var(--t-fast) var(--bounce);
-}
-
-.timeline__thumb::after {
-  content: "";
-  position: absolute;
-  inset: 6px;
-  border-radius: 50%;
-  background: var(--accent);
 }
 
 .timeline__rail:hover .timeline__thumb,
@@ -96,7 +85,7 @@
 
 .flag {
   position: absolute;
-  bottom: 22px;
+  bottom: 18px;
   width: 24px;
   height: 30px;
   margin-left: -3px;
@@ -116,7 +105,7 @@
   width: 2.5px;
   height: 24px;
   border-radius: 2px;
-  background: var(--ink);
+  background: var(--accent);
 }
 
 .flag::after {
@@ -127,7 +116,7 @@
   top: 4px;
   width: 13px;
   height: 11px;
-  border: 2px solid var(--ink);
+  border: 2px solid var(--accent);
   border-left: 0;
   border-radius: 0 4px 4px 0;
   background: var(--surface);
@@ -137,16 +126,9 @@
   transform-origin: left center;
 }
 
-.flag[data-passed="1"][data-color="0"]::after {
-  background: var(--cat-0);
-}
-
-.flag[data-passed="1"][data-color="1"]::after {
-  background: var(--cat-1);
-}
-
-.flag[data-passed="1"][data-color="2"]::after {
-  background: var(--cat-2);
+.flag[data-passed="1"]::after {
+  border-color: var(--flag);
+  background: var(--flag);
 }
 
 .flag:hover::after,
@@ -160,8 +142,8 @@
   left: 3px;
   translate: -50% 0;
   padding: 4px 10px;
-  border: 2px solid var(--ink);
-  border-radius: 10px;
+  border: var(--border);
+  border-radius: var(--r-sm);
   background: var(--surface);
   box-shadow: var(--shadow-float);
   font-size: 12px;
@@ -229,7 +211,8 @@
   max-height: 240px;
   overflow-y: auto;
   padding: 6px;
-  border-radius: 14px;
+  border-radius: var(--r);
+  box-shadow: var(--shadow-float);
   pointer-events: auto;
   animation: tip-in 160ms var(--bounce);
 }
@@ -241,7 +224,7 @@
   align-items: center;
   padding: 6px 10px 6px 8px;
   border: 0;
-  border-radius: 9px;
+  border-radius: var(--r-sm);
   background: none;
   color: var(--ink);
   font: inherit;
@@ -254,22 +237,15 @@
   grid-row: 1 / 3;
   width: 11px;
   height: 10px;
-  border: 2px solid var(--ink);
+  border: 2px solid var(--accent);
   border-left-width: 2.5px;
   border-radius: 0 3px 3px 0;
   background: var(--surface);
 }
 
-.flaglist__item[data-passed="1"][data-color="0"]::before {
-  background: var(--cat-0);
-}
-
-.flaglist__item[data-passed="1"][data-color="1"]::before {
-  background: var(--cat-1);
-}
-
-.flaglist__item[data-passed="1"][data-color="2"]::before {
-  background: var(--cat-2);
+.flaglist__item[data-passed="1"]::before {
+  border-color: var(--flag);
+  background: var(--flag);
 }
 
 .flaglist__item:hover,
@@ -285,7 +261,7 @@
 .flaglist__when {
   grid-column: 2;
   font-size: 11.5px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--ink-muted);
 }
 
