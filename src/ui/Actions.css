@@ -59,7 +59,7 @@
 .menu {
   position: absolute;
   top: calc(100% + 10px);
-  left: -4px;
+  left: -1px;
   min-width: 190px;
   padding: 6px;
   display: grid;
@@ -119,7 +119,7 @@
 .filters {
   position: absolute;
   top: calc(100% + 10px);
-  left: -4px;
+  left: -1px;
   width: 300px;
   max-width: calc(100vw - 24px);
   max-height: calc(100dvh - 140px);
@@ -238,7 +238,7 @@
   .menu,
   .filters {
     left: auto;
-    right: -4px;
+    right: -1px;
   }
   .actions__btn--tour {
     width: 44px;
