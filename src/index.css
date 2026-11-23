@@ -1,23 +1,27 @@
-/* 4sight: warm picture-book theme. Same palette as src/core/theme.ts. */
+/* 4sight chrome: Sunprint, flat cream surfaces on a tangerine ground. The 3D scenes keep their own palette in src/core/theme.ts. */
 
 :root {
-  --paper: #f3e9d7;
-  --paper-deep: #e9dbc2;
-  --cream: #fbf5ea;
-  --ink: #3b2f2a;
-  --ink-soft: #7a6a5f;
-  --ink-faint: #b3a391;
-  --terracotta: #e07a5f;
-  --terracotta-deep: #c9644a;
-  --mustard: #f2cc8f;
-  --sage: #81b29a;
-  --plum: #9c6b98;
+  --ground: #ff6a26;
+  --ink: #0e1f1b;
+  --ink-muted: #2a1406;
+  --ink-disabled: color-mix(in srgb, var(--ink) 65%, var(--surface));
+  --surface: #fff4e6;
+  --surface-line: #dccdbe;
+  --tint: color-mix(in srgb, var(--ground) 14%, var(--surface));
+  --plate: #f7ede2;
+  --accent: #006b63;
+  --accent-tint: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  --on-accent: #ffffff;
+  --flag: #00a99a;
+  --danger: #a8320a;
+  --cat-0: var(--accent);
+  --cat-1: var(--ground);
+  --cat-2: var(--flag);
+  --cat-3: var(--ink);
+  --scrim: color-mix(in srgb, var(--ink) 45%, transparent);
 
-  --line: 2.5px;
-  --outline: var(--line) solid var(--ink);
-  --shadow-sm: 2px 2px 0 var(--ink);
-  --shadow: 4px 4px 0 var(--ink);
-  --shadow-lg: 6px 6px 0 var(--ink);
+  --border: 1px solid var(--surface-line);
+  --shadow-float: 0 6px 20px color-mix(in srgb, var(--ink) 12%, transparent);
 
   --r-sm: 12px;
   --r: 16px;
@@ -44,7 +48,7 @@
   /* Tilt Warp ships one weight; a bold request would be smeared, not drawn. */
   font-synthesis-weight: none;
   color: var(--ink);
-  background: var(--paper);
+  background: var(--ground);
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
 }
@@ -68,7 +72,7 @@ button {
 }
 
 :focus-visible {
-  outline: 3px solid var(--terracotta);
+  outline: 3px solid var(--ink);
   outline-offset: 3px;
 }
 
@@ -78,7 +82,7 @@ button {
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--ink-soft);
+  color: var(--ink-muted);
 }
 
 /* ---------- Stage ---------- */
@@ -92,7 +96,7 @@ button {
 .stage {
   position: absolute;
   inset: 0;
-  background: var(--paper);
+  background: var(--plate);
 }
 
 .stage canvas {
@@ -105,17 +109,17 @@ button {
 /* ---------- Shared surfaces ---------- */
 
 .card {
-  background: var(--cream);
-  border: var(--outline);
+  background: var(--surface);
+  border: var(--border);
   border-radius: var(--r-lg);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-float);
 }
 
 .sticker {
-  background: var(--cream);
-  border: var(--outline);
+  background: var(--surface);
+  border: var(--border);
   border-radius: var(--r);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-float);
 }
 
 /* ---------- Top bar ---------- */
@@ -169,11 +173,11 @@ button {
   padding: 6px 12px;
   border: 2px solid var(--ink);
   border-radius: var(--r-pill);
-  background: var(--cream);
+  background: var(--surface);
   font-weight: 600;
   font-size: 13px;
   white-space: nowrap;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-float);
   transition:
     transform var(--t-fast) var(--bounce),
     box-shadow var(--t-fast) var(--bounce),
@@ -181,7 +185,7 @@ button {
 }
 
 .chip:hover {
-  background: #fff;
+  background: var(--tint);
   transform: translate(-1px, -1px);
   box-shadow: 3px 3px 0 var(--ink);
 }
@@ -192,11 +196,12 @@ button {
 }
 
 .chip--accent {
-  background: var(--sage);
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
 .chip--accent:hover {
-  background: #8fc0a8;
+  background: color-mix(in srgb, var(--accent) 85%, var(--ink));
 }
 
 .spinner {
@@ -229,7 +234,7 @@ button {
   padding: 3px 10px;
   border: 2px solid var(--ink);
   border-radius: var(--r-pill);
-  background: var(--mustard);
+  background: var(--accent-tint);
   font-size: 12px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
@@ -278,10 +283,10 @@ button {
   place-items: center;
   width: 46px;
   height: 46px;
-  border: var(--outline);
+  border: var(--border);
   border-radius: 14px;
-  background: var(--cream);
-  box-shadow: var(--shadow-sm);
+  background: var(--surface);
+  box-shadow: var(--shadow-float);
   transition:
     transform var(--t-fast) var(--bounce),
     box-shadow var(--t-fast) var(--bounce),
@@ -291,7 +296,7 @@ button {
 .btn:hover {
   transform: translate(-1px, -1px);
   box-shadow: 3px 3px 0 var(--ink);
-  background: #fff;
+  background: var(--tint);
 }
 
 .btn:active {
@@ -303,13 +308,13 @@ button {
   width: 56px;
   height: 56px;
   border-radius: 18px;
-  background: var(--terracotta);
-  color: var(--cream);
-  box-shadow: var(--shadow);
+  background: var(--ink);
+  color: var(--surface);
+  box-shadow: var(--shadow-float);
 }
 
 .btn--primary:hover {
-  background: #e98a70;
+  background: color-mix(in srgb, var(--ink) 85%, var(--surface));
   box-shadow: 5px 5px 0 var(--ink);
 }
 
@@ -324,12 +329,12 @@ button {
 }
 
 .btn--on {
-  background: var(--plum);
-  color: var(--cream);
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
 .btn--on:hover {
-  background: #aa7aa6;
+  background: color-mix(in srgb, var(--accent) 85%, var(--ink));
 }
 
 /* ---------- Responsive ---------- */

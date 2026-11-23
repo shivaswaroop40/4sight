@@ -15,7 +15,7 @@
 }
 
 .exporter::backdrop {
-  background: rgba(59, 47, 42, 0.32);
+  background: var(--scrim);
   backdrop-filter: blur(3px);
 }
 
@@ -23,7 +23,7 @@
   display: grid;
   gap: 10px;
   padding: 20px 22px 22px;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-float);
 }
 
 .exporter__eyebrow {
@@ -51,23 +51,23 @@
   font-size: 14px;
   font-weight: 700;
   line-height: 1.45;
-  color: var(--ink-soft);
+  color: var(--ink-muted);
   overflow-wrap: anywhere;
 }
 
 .exporter__bar {
   position: relative;
   height: 16px;
-  border: var(--outline);
+  border: var(--border);
   border-radius: var(--r-pill);
-  background: var(--paper);
+  background: var(--surface-line);
   overflow: hidden;
 }
 
 .exporter__fill {
   position: absolute;
   inset: 0;
-  background: var(--terracotta);
+  background: var(--accent);
   transform-origin: left;
 }
 

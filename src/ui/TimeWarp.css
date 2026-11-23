@@ -16,7 +16,7 @@
 .warp__rate {
   font-size: 13px;
   font-weight: 600;
-  color: var(--terracotta-deep);
+  color: var(--accent);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -25,8 +25,8 @@
   position: relative;
   display: inline-flex;
   padding: 4px;
-  background: var(--paper);
-  border: var(--outline);
+  background: var(--surface);
+  border: var(--border);
   border-radius: var(--r-pill);
 }
 
@@ -36,9 +36,9 @@
   bottom: 4px;
   left: 0;
   border-radius: var(--r-pill);
-  background: var(--sage);
+  background: var(--accent);
   border: 2px solid var(--ink);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-float);
   transition:
     transform 300ms var(--bounce),
     width 300ms var(--bounce);
@@ -55,13 +55,16 @@
   font-weight: 700;
   font-size: 13px;
   font-variant-numeric: tabular-nums;
-  color: var(--ink-soft);
+  color: var(--ink-muted);
   transition: color var(--t-fast) var(--ease);
 }
 
-.pills__pill:hover,
-.pills__pill[aria-checked="true"] {
+.pills__pill:hover {
   color: var(--ink);
+}
+
+.pills__pill[aria-checked="true"] {
+  color: var(--on-accent);
 }
 
 @media (max-width: 899px) {

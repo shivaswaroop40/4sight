@@ -23,17 +23,17 @@
   padding: 6px 6px 6px 16px;
   font-size: 14px;
   font-weight: 600;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-float);
   animation: pop-in var(--t) var(--bounce);
 }
 
 .toast--error {
-  background: #f8d9cc;
+  background: var(--tint);
 }
 
 .toast--ok {
   padding: 8px 18px 8px 14px;
-  background: var(--sage);
+  background: var(--surface);
 }
 
 .toast--ok svg {
@@ -47,7 +47,7 @@
   padding: 5px 10px;
   border: 2px solid var(--ink);
   border-radius: var(--r-sm);
-  background: var(--cream);
+  background: var(--surface);
   font: inherit;
   font-size: 13px;
   font-weight: 700;
@@ -63,12 +63,12 @@
   border: 0;
   border-radius: 50%;
   background: none;
-  color: var(--ink-soft);
+  color: var(--ink-muted);
 }
 
 .toast__dismiss:hover {
   color: var(--ink);
-  background: rgba(59, 47, 42, 0.08);
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
 }
 
 .toast .chip svg,
@@ -82,7 +82,7 @@
   flex-wrap: nowrap;
   gap: 8px;
   padding: 4px 4px 4px 12px;
-  background: var(--mustard);
+  background: var(--surface);
 }
 
 .follow > svg {
@@ -108,9 +108,9 @@
   padding: 1px 8px;
   border: 2px solid var(--ink);
   border-radius: var(--r-pill);
-  background: var(--cream);
+  background: var(--surface);
   font-size: 12px;
-  color: var(--ink-soft);
+  color: var(--ink-muted);
 }
 
 /* Guided tour: where it is, with Next and Exit. */
@@ -121,7 +121,7 @@
   max-width: calc(100vw - 24px);
   padding: 5px 6px 5px 16px;
   border-radius: var(--r-pill);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-float);
   animation: pop-in var(--t) var(--bounce);
 }
 
@@ -143,19 +143,19 @@
   height: 10px;
   border: 2px solid var(--ink);
   border-radius: 50%;
-  background: var(--cream);
+  background: var(--surface);
   transition:
     background var(--t) var(--ease),
     scale var(--t) var(--bounce);
 }
 
 .tourbar__dot[data-state="past"] {
-  background: var(--terracotta);
+  background: var(--accent);
 }
 
 .tourbar__dot[data-state="here"],
 .tourbar__dot[data-state="heading"] {
-  background: var(--mustard);
+  background: var(--accent);
   scale: 1.35;
 }
 
@@ -167,7 +167,7 @@
 @keyframes dot-pulse {
   from {
     scale: 0.9;
-    background: var(--cream);
+    background: var(--surface);
   }
 }
 
@@ -190,7 +190,7 @@
 .tourbar__hold {
   position: absolute;
   inset: 0;
-  background: var(--sage);
+  background: var(--accent-tint);
   transform-origin: left;
   animation: hold-fill linear both;
 }
@@ -210,12 +210,12 @@
   border: 0;
   border-radius: 50%;
   background: none;
-  color: var(--ink-soft);
+  color: var(--ink-muted);
 }
 
 .tourbar__icon:hover {
   color: var(--ink);
-  background: rgba(59, 47, 42, 0.08);
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
 }
 
 /* First load: the stage has nothing to show yet. */
@@ -250,7 +250,7 @@
   margin: 0;
   font-size: 13px;
   line-height: 1.45;
-  color: var(--ink-soft);
+  color: var(--ink-muted);
   overflow-wrap: anywhere;
 }
 

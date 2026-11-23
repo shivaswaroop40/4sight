@@ -32,16 +32,16 @@
   right: 0;
   bottom: 8px;
   height: 14px;
-  border: var(--outline);
+  border: var(--border);
   border-radius: var(--r-pill);
-  background: var(--paper);
+  background: var(--surface-line);
   overflow: hidden;
 }
 
 .timeline__fill {
   position: absolute;
   inset: 0;
-  background: var(--terracotta);
+  background: var(--accent);
   transform-origin: left;
   transform: scaleX(var(--u));
 }
@@ -53,7 +53,7 @@
   width: 2px;
   margin-left: -1px;
   border-radius: 2px;
-  background: rgba(59, 47, 42, 0.35);
+  background: color-mix(in srgb, var(--ink) 35%, transparent);
 }
 
 .timeline__thumb {
@@ -65,7 +65,7 @@
   margin-left: -14px;
   border: 3px solid var(--ink);
   border-radius: 50%;
-  background: var(--cream);
+  background: var(--surface);
   box-shadow: 3px 3px 0 var(--ink);
   pointer-events: none;
   transition: scale var(--t-fast) var(--bounce);
@@ -76,7 +76,7 @@
   position: absolute;
   inset: 6px;
   border-radius: 50%;
-  background: var(--terracotta);
+  background: var(--accent);
 }
 
 .timeline__rail:hover .timeline__thumb,
@@ -130,7 +130,7 @@
   border: 2px solid var(--ink);
   border-left: 0;
   border-radius: 0 4px 4px 0;
-  background: var(--cream);
+  background: var(--surface);
   transition:
     transform var(--t-fast) var(--bounce),
     background var(--t-fast) var(--ease);
@@ -138,15 +138,15 @@
 }
 
 .flag[data-passed="1"][data-color="0"]::after {
-  background: var(--terracotta);
+  background: var(--cat-0);
 }
 
 .flag[data-passed="1"][data-color="1"]::after {
-  background: var(--mustard);
+  background: var(--cat-1);
 }
 
 .flag[data-passed="1"][data-color="2"]::after {
-  background: var(--sage);
+  background: var(--cat-2);
 }
 
 .flag:hover::after,
@@ -162,8 +162,8 @@
   padding: 4px 10px;
   border: 2px solid var(--ink);
   border-radius: 10px;
-  background: var(--cream);
-  box-shadow: var(--shadow-sm);
+  background: var(--surface);
+  box-shadow: var(--shadow-float);
   font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
@@ -257,24 +257,24 @@
   border: 2px solid var(--ink);
   border-left-width: 2.5px;
   border-radius: 0 3px 3px 0;
-  background: var(--cream);
+  background: var(--surface);
 }
 
 .flaglist__item[data-passed="1"][data-color="0"]::before {
-  background: var(--terracotta);
+  background: var(--cat-0);
 }
 
 .flaglist__item[data-passed="1"][data-color="1"]::before {
-  background: var(--mustard);
+  background: var(--cat-1);
 }
 
 .flaglist__item[data-passed="1"][data-color="2"]::before {
-  background: var(--sage);
+  background: var(--cat-2);
 }
 
 .flaglist__item:hover,
 .flaglist__item:focus-visible {
-  background: var(--paper);
+  background: var(--tint);
 }
 
 .flaglist__title {
@@ -286,7 +286,7 @@
   grid-column: 2;
   font-size: 11.5px;
   font-weight: 600;
-  color: var(--ink-soft);
+  color: var(--ink-muted);
 }
 
 /* Tick labels */
@@ -304,7 +304,7 @@
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--ink-soft);
+  color: var(--ink-muted);
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }

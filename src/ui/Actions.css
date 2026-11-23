@@ -7,10 +7,10 @@
   align-items: center;
   gap: 2px;
   padding: 4px;
-  background: var(--cream);
-  border: var(--outline);
+  background: var(--surface);
+  border: var(--border);
   border-radius: var(--r-pill);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-float);
 }
 
 .actions__btn {
@@ -27,7 +27,7 @@
 
 .actions__btn:hover,
 .actions__btn[aria-expanded="true"] {
-  background: var(--paper-deep);
+  background: var(--tint);
 }
 
 .actions__btn--tour {
@@ -41,7 +41,8 @@
 }
 
 .actions__btn--tour[aria-pressed="true"] {
-  background: var(--mustard);
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
 .actions__btn:disabled {
@@ -85,7 +86,7 @@
 
 .menu__item:hover,
 .menu__item:focus-visible {
-  background: var(--paper);
+  background: var(--tint);
 }
 
 .menu__item:focus-visible {
@@ -110,7 +111,7 @@
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: var(--terracotta);
+  background: var(--accent);
   border: 2px solid var(--ink);
 }
 
@@ -139,7 +140,7 @@
   gap: 2px;
   margin-top: 6px;
   padding-top: 8px;
-  border-top: 2px dashed var(--paper-deep);
+  border-top: 2px dashed var(--surface-line);
 }
 
 .filters__row {
@@ -156,7 +157,7 @@
 
 .filters__row:hover,
 .filters__row:focus-visible {
-  background: var(--paper);
+  background: var(--tint);
 }
 
 .filters__row:focus-visible {
@@ -179,7 +180,7 @@
   font-size: 12.5px;
   font-weight: 600;
   line-height: 1.3;
-  color: var(--ink-soft);
+  color: var(--ink-muted);
 }
 
 .switch {
@@ -189,7 +190,7 @@
   height: 26px;
   border: 2px solid var(--ink);
   border-radius: var(--r-pill);
-  background: var(--paper-deep);
+  background: var(--surface-line);
   transition: background var(--t-fast) var(--ease);
 }
 
@@ -202,12 +203,12 @@
   height: 18px;
   border: 2px solid var(--ink);
   border-radius: 50%;
-  background: var(--cream);
+  background: var(--surface);
   transition: transform var(--t) var(--bounce);
 }
 
 [aria-checked="true"] > .switch {
-  background: var(--sage);
+  background: var(--accent);
 }
 
 [aria-checked="true"] > .switch::after {
@@ -220,11 +221,11 @@
   height: 22px;
   border: 2px solid var(--ink);
   border-radius: 50%;
-  background: var(--cream);
+  background: var(--surface);
 }
 
 [aria-checked="true"] > .radio {
-  background: radial-gradient(circle, var(--ink) 0 4px, var(--sage) 5px);
+  background: radial-gradient(circle, var(--ink) 0 4px, var(--accent) 5px);
 }
 
 @media (max-width: 899px) {

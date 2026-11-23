@@ -10,10 +10,10 @@
   min-width: 0;
   max-width: 100%;
   padding: 8px 12px 8px 20px;
-  background: var(--cream);
-  border: var(--outline);
+  background: var(--surface);
+  border: var(--border);
   border-radius: var(--r-pill);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-float);
   font-weight: 600;
   font-size: 17px;
   line-height: 1.2;
@@ -24,7 +24,7 @@
 }
 
 .picker:hover {
-  background: #fff;
+  background: var(--tint);
   transform: translate(-1px, -1px);
   box-shadow: 5px 5px 0 var(--ink);
 }
@@ -46,7 +46,7 @@
   padding: 2px 9px;
   border: 2px solid var(--ink);
   border-radius: var(--r-pill);
-  background: var(--mustard);
+  background: var(--accent-tint);
   font-family: var(--font-body);
   font-size: 12px;
   font-weight: 600;
@@ -69,7 +69,7 @@
 }
 
 .gallery::backdrop {
-  background: rgba(59, 47, 42, 0.32);
+  background: var(--scrim);
   backdrop-filter: blur(3px);
 }
 
@@ -78,7 +78,7 @@
   flex-direction: column;
   max-height: calc(100dvh - 48px);
   padding: 24px 24px 0;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-float);
 }
 
 .gallery__head {
@@ -101,7 +101,7 @@
   margin: 0;
   font-size: 15px;
   line-height: 1.5;
-  color: #4b3e37;
+  color: var(--ink-muted);
 }
 
 .gallery__close {
@@ -124,16 +124,16 @@
 }
 
 .gcard {
-  --tint: var(--terracotta);
+  --hue: var(--cat-0);
   position: relative;
   display: grid;
   align-content: start;
   gap: 8px;
   padding: 16px 18px 14px;
-  border: var(--outline);
+  border: var(--border);
   border-radius: var(--r);
-  background: var(--cream);
-  box-shadow: var(--shadow-sm);
+  background: var(--surface);
+  box-shadow: var(--shadow-float);
   text-align: left;
   overflow: hidden;
   transition:
@@ -143,15 +143,15 @@
 }
 
 .gcard[data-color="1"] {
-  --tint: var(--mustard);
+  --hue: var(--cat-1);
 }
 
 .gcard[data-color="2"] {
-  --tint: var(--sage);
+  --hue: var(--cat-2);
 }
 
 .gcard[data-color="3"] {
-  --tint: var(--plum);
+  --hue: var(--cat-3);
 }
 
 /* A strip of the card's colour along the top, like a sticker's tab. */
@@ -161,14 +161,14 @@
   inset: 0 0 auto;
   height: 8px;
   border-bottom: 2px solid var(--ink);
-  background: var(--tint);
+  background: var(--hue);
 }
 
 .gcard:hover,
 .gcard:focus-visible {
-  background: #fff;
+  background: var(--tint);
   transform: translate(-2px, -2px);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-float);
 }
 
 .gcard:active {
@@ -177,8 +177,8 @@
 }
 
 .gcard[aria-current="true"] {
-  background: #fff8ea;
-  box-shadow: var(--shadow);
+  background: var(--accent-tint);
+  box-shadow: var(--shadow-float);
 }
 
 .gcard__top {
@@ -199,7 +199,7 @@
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--ink-soft);
+  color: var(--ink-muted);
 }
 
 .gcard__now::before {
@@ -208,7 +208,7 @@
   height: 9px;
   border: 2px solid var(--ink);
   border-radius: 50%;
-  background: var(--sage);
+  background: var(--accent);
 }
 
 .gcard__status .spinner {
@@ -219,7 +219,7 @@
 }
 
 .gcard__status--error {
-  color: var(--terracotta-deep);
+  color: var(--danger);
 }
 
 .gcard__name {
@@ -232,7 +232,7 @@
 .gcard__tagline {
   font-size: 15px;
   line-height: 1.45;
-  color: #4b3e37;
+  color: var(--ink-muted);
 }
 
 /* Where the span sits between one second and the age of the universe. */
@@ -249,8 +249,8 @@
   border: 2px solid var(--ink);
   border-radius: var(--r-pill);
   background:
-    repeating-linear-gradient(90deg, transparent 0 calc(100% / 6 - 2px), rgba(59, 47, 42, 0.25) 0 calc(100% / 6))
-    var(--paper);
+    repeating-linear-gradient(90deg, transparent 0 calc(100% / 6 - 2px), color-mix(in srgb, var(--ink) 25%, transparent) 0 calc(100% / 6))
+    var(--plate);
 }
 
 .rung__dot {
@@ -262,7 +262,7 @@
   translate: -50% -50%;
   border: 2.5px solid var(--ink);
   border-radius: 50%;
-  background: var(--tint);
+  background: var(--hue);
 }
 
 .rung__ends {
@@ -272,7 +272,7 @@
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--ink-soft);
+  color: var(--ink-muted);
 }
 
 @media (max-width: 899px) {

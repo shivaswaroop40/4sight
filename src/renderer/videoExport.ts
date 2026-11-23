@@ -27,7 +27,7 @@ const CONTAINERS = { avc: "mp4", vp9: "webm" } as const;
 export type ExportCodec = keyof typeof CONTAINERS;
 
 /** .stage's background in index.css. */
-const PAPER = "#f3e9d7";
+const PAPER = "#f7ede2";
 
 /** A bitrate target, not a constant quantizer: at constant quality Solar System's gas came out at 18 Mbit/s. */
 const QUALITY = new Quality({ quality: "high", preferBitrate: true });
