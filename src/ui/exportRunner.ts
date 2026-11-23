@@ -76,7 +76,6 @@ export async function startExport(): Promise<void> {
         controller.setParam(frameParam(plan, i));
         return held.render();
       },
-      scale: plan.width / viewport.width,
       signal: cancel.signal,
       onFrame: (frame) => setUi({ exporting: { phase: "rendering", frame, plan } }),
     });

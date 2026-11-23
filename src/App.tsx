@@ -80,7 +80,6 @@ function App() {
   return (
     <div className="app" ref={appRef}>
       <div className="stage" ref={viewportRef} />
-      <div className="vignette" aria-hidden="true" />
 
       <header className="topbar">
         <div className="topbar__start">

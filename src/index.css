@@ -92,8 +92,7 @@ button {
 .stage {
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(ellipse 70% 60% at 50% 42%, #fdf8ef 0%, var(--paper) 55%, var(--paper-deep) 100%);
+  background: var(--paper);
 }
 
 .stage canvas {
@@ -101,16 +100,6 @@ button {
   width: 100%;
   height: 100%;
   touch-action: none;
-}
-
-/* Soft warm edge vignette plus a faint dot grid, like printed paper. */
-.vignette {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse 85% 80% at 50% 45%, transparent 60%, rgba(120, 90, 60, 0.14) 100%),
-    radial-gradient(circle, rgba(59, 47, 42, 0.07) 1px, transparent 1.4px) 0 0 / 22px 22px;
 }
 
 /* ---------- Shared surfaces ---------- */
