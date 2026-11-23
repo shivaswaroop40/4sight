@@ -6,7 +6,7 @@
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  padding: 4px;
+  padding: 3px;
   background: var(--surface);
   border: var(--border);
   border-radius: var(--r-pill);
@@ -15,8 +15,8 @@
 .actions__btn {
   display: grid;
   place-items: center;
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   padding: 0;
   border: 0;
   border-radius: 50%;
@@ -74,7 +74,8 @@
   align-items: center;
   gap: 10px;
   width: 100%;
-  padding: 9px 12px;
+  min-height: 44px;
+  padding: 0 12px;
   border: 0;
   border-radius: var(--r-sm);
   background: none;
@@ -149,7 +150,8 @@
   align-items: center;
   gap: 14px;
   width: 100%;
-  padding: 9px 12px;
+  min-height: 44px;
+  padding: 8px 12px;
   border: 0;
   border-radius: var(--r-sm);
   background: none;
@@ -239,7 +241,7 @@
     right: -4px;
   }
   .actions__btn--tour {
-    width: 38px;
+    width: 44px;
     padding: 0;
   }
   .actions__label {

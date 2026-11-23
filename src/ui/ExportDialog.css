@@ -81,13 +81,6 @@
   margin-top: 4px;
 }
 
-@media (min-width: 900px) {
-  .exporter__action {
-    padding: 8px 16px;
-    font-size: 14px;
-  }
-}
-
 .exporter__action svg {
   width: 16px;
   height: 16px;

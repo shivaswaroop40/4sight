@@ -9,7 +9,8 @@
   gap: 10px;
   min-width: 0;
   max-width: 100%;
-  padding: 8px 12px 8px 20px;
+  min-height: 52px;
+  padding: 0 14px 0 20px;
   background: var(--surface);
   border: var(--border);
   border-radius: var(--r-pill);
@@ -100,8 +101,8 @@
 
 .gallery__close {
   flex: none;
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
 }
 
 .gallery__grid {
@@ -264,7 +265,7 @@
     grid-row: 1;
     justify-self: stretch;
     gap: 6px;
-    padding: 7px 8px 7px 12px;
+    padding: 0 10px 0 14px;
     font-size: 15px;
   }
   .picker__span {

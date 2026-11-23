@@ -24,7 +24,7 @@
 .pills {
   position: relative;
   display: inline-flex;
-  padding: 4px;
+  padding: 3px;
   background: var(--surface);
   border: var(--border);
   border-radius: var(--r-pill);
@@ -32,8 +32,8 @@
 
 .pills__indicator {
   position: absolute;
-  top: 4px;
-  bottom: 4px;
+  top: 3px;
+  bottom: 3px;
   left: 0;
   border-radius: var(--r-pill);
   background: var(--accent);
@@ -46,7 +46,8 @@
   position: relative;
   z-index: 1;
   min-width: 44px;
-  padding: 6px 10px;
+  min-height: 44px;
+  padding: 0 10px;
   border: 0;
   background: none;
   border-radius: var(--r-pill);
@@ -80,6 +81,6 @@
   .pills__pill {
     flex: 1;
     min-width: 0;
-    padding: 6px 2px;
+    padding: 0 2px;
   }
 }

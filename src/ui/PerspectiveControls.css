@@ -6,8 +6,8 @@
   justify-self: end;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 5px 5px 5px 12px;
+  gap: 4px;
+  padding: 3px 3px 3px 14px;
   background: var(--surface);
   border: var(--border);
   border-radius: var(--r-pill);
@@ -36,7 +36,7 @@
 @media (max-width: 899px) {
   .views {
     max-width: 100%;
-    padding: 4px;
+    padding: 3px;
     gap: 4px;
     overflow-x: auto;
     scrollbar-width: none;
@@ -56,7 +56,7 @@
     border: 0;
   }
   .views .chip {
-    padding: 5px 8px;
+    padding: 0 10px;
   }
   .views .chip--accent svg {
     display: none;
