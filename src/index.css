@@ -30,6 +30,12 @@
   --r: 14px;
   --r-lg: 18px;
   --r-pill: 999px;
+  --r-plate: 22px;
+
+  /* The tangerine band around the stage plate. --topbar-bottom and --transport-h are measured in App.tsx. */
+  --frame: 16px;
+  --plate-top: calc(var(--topbar-bottom, 68px) + var(--frame));
+  --plate-bottom: calc(var(--transport-h, 150px) + var(--frame) * 2);
 
   --s1: 4px;
   --s2: 8px;
@@ -98,7 +104,12 @@ button {
 
 .stage {
   position: absolute;
-  inset: 0;
+  top: var(--plate-top);
+  right: var(--frame);
+  bottom: var(--plate-bottom);
+  left: var(--frame);
+  border-radius: var(--r-plate);
+  overflow: hidden;
   background: var(--plate);
 }
 
@@ -129,9 +140,9 @@ button {
 .topbar {
   position: absolute;
   z-index: 2;
-  top: var(--s5);
-  left: var(--s5);
-  right: var(--s5);
+  top: var(--frame);
+  left: var(--frame);
+  right: var(--frame);
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: start;
@@ -257,11 +268,9 @@ button {
 
 .transport {
   position: absolute;
-  left: var(--s5);
-  right: var(--s5);
-  bottom: var(--s5);
-  max-width: 1180px;
-  margin: 0 auto;
+  left: var(--frame);
+  right: var(--frame);
+  bottom: var(--frame);
   padding: 16px 22px 12px;
   display: grid;
   gap: 6px;
@@ -326,9 +335,9 @@ button {
 @media (max-width: 899px) {
   :root {
     --s5: 12px;
+    --frame: 12px;
   }
   .topbar {
-    top: 12px;
     grid-template-columns: auto minmax(0, 1fr) auto;
     gap: 10px;
   }

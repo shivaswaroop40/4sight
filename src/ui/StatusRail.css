@@ -4,6 +4,7 @@
 .rail {
   grid-column: 1 / -1;
   justify-self: center;
+  margin-top: var(--s2);
   display: grid;
   justify-items: center;
   gap: var(--s2);
