@@ -1,8 +1,8 @@
 // src/core/theme.ts
 //
-// The 4sight look, shared by every lane: a warm beige picture-book palette,
-// toon shading, and ink outlines. The CSS custom properties in src/index.css
-// use the same values.
+// The 3D look, shared by every lane: a warm beige picture-book palette, toon
+// shading, ink outlines, and the faces canvas labels are set in. The chrome
+// in src/index.css has its own palette and shares only the faces.
 //
 //   import { THEME, makeToonMaterial, addOutline, disposeObject } from "../../core/theme";
 //   const mesh = new THREE.Mesh(geometry, makeToonMaterial(THEME.terracotta));
