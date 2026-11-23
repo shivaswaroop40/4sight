@@ -15,7 +15,7 @@
 }
 
 .exporter::backdrop {
-  background: rgba(59, 47, 42, 0.32);
+  background: var(--scrim);
   backdrop-filter: blur(3px);
 }
 
@@ -23,7 +23,6 @@
   display: grid;
   gap: 10px;
   padding: 20px 22px 22px;
-  box-shadow: var(--shadow-lg);
 }
 
 .exporter__eyebrow {
@@ -41,7 +40,7 @@
 .exporter__title {
   margin: 0;
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 400;
   font-size: 26px;
   line-height: 1.1;
 }
@@ -49,45 +48,37 @@
 .exporter__detail {
   margin: -4px 0 4px;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 500;
   line-height: 1.45;
-  color: var(--ink-soft);
+  color: var(--ink-muted);
   overflow-wrap: anywhere;
 }
 
 .exporter__bar {
   position: relative;
-  height: 16px;
-  border: var(--outline);
+  height: 10px;
   border-radius: var(--r-pill);
-  background: var(--paper);
+  background: var(--surface-line);
   overflow: hidden;
 }
 
 .exporter__fill {
   position: absolute;
   inset: 0;
-  background: var(--terracotta);
+  background: var(--accent);
   transform-origin: left;
 }
 
 .exporter__status {
   margin: 0;
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
 .exporter__action {
   justify-self: end;
   margin-top: 4px;
-}
-
-@media (min-width: 900px) {
-  .exporter__action {
-    padding: 8px 16px;
-    font-size: 14px;
-  }
 }
 
 .exporter__action svg {

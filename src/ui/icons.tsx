@@ -99,9 +99,9 @@ export const MoreIcon = () => (
 export const FiltersIcon = () => (
   <Icon>
     <path d="M4 7h16M4 12h16M4 17h16" />
-    <circle cx="9" cy="7" r="2.3" fill="var(--cream)" />
-    <circle cx="15.5" cy="12" r="2.3" fill="var(--cream)" />
-    <circle cx="7.5" cy="17" r="2.3" fill="var(--cream)" />
+    <circle cx="9" cy="7" r="2.3" fill="var(--surface)" />
+    <circle cx="15.5" cy="12" r="2.3" fill="var(--surface)" />
+    <circle cx="7.5" cy="17" r="2.3" fill="var(--surface)" />
   </Icon>
 );
 
@@ -123,7 +123,7 @@ export const VideoIcon = () => (
 export const TourIcon = () => (
   <Icon>
     <path d="M6.5 20.5V4" />
-    <path d="M6.5 4.5h11l-2.8 4.2 2.8 4.3h-11" fill="var(--mustard)" />
+    <path d="M6.5 4.5h11l-2.8 4.2 2.8 4.3h-11" fill="var(--flag)" />
   </Icon>
 );
 
@@ -137,16 +137,16 @@ export const NextIcon = () => (
 /** The 4sight mark: a clock face whose hand sweeps through four ticks. */
 export const Mark = () => (
   <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true">
-    <circle cx="16" cy="16" r="13" fill="var(--terracotta)" stroke="var(--ink)" strokeWidth="2.6" />
-    <circle cx="16" cy="16" r="7.5" fill="var(--mustard)" stroke="var(--ink)" strokeWidth="2.2" />
-    <path d="M16 16V10.5M16 16l3.8 2.2" stroke="var(--ink)" strokeWidth="2.4" strokeLinecap="round" />
+    <circle cx="16" cy="16" r="13" fill="var(--ink)" />
+    <circle cx="16" cy="16" r="7.5" fill="var(--ground)" />
+    <path d="M16 16V10.5M16 16l3.8 2.2" stroke="var(--surface)" strokeWidth="2.4" strokeLinecap="round" />
     {[0, 90, 180, 270].map((a) => (
       <circle
         key={a}
         cx={16 + 10.2 * Math.sin((a * Math.PI) / 180)}
         cy={16 - 10.2 * Math.cos((a * Math.PI) / 180)}
         r="1.3"
-        fill="var(--cream)"
+        fill="var(--flag)"
       />
     ))}
   </svg>

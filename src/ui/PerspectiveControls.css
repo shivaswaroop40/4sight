@@ -6,12 +6,11 @@
   justify-self: end;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 5px 5px 5px 12px;
-  background: var(--cream);
-  border: var(--outline);
+  gap: 4px;
+  padding: 3px 3px 3px 14px;
+  background: var(--surface);
+  border: var(--border);
   border-radius: var(--r-pill);
-  box-shadow: var(--shadow);
 }
 
 .views__label {
@@ -20,10 +19,10 @@
   gap: 5px;
   margin-right: 4px;
   font-size: 11px;
-  font-weight: 900;
+  font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--ink-soft);
+  color: var(--ink-muted);
 }
 
 @media (max-width: 1100px) {
@@ -37,7 +36,7 @@
 @media (max-width: 899px) {
   .views {
     max-width: 100%;
-    padding: 4px;
+    padding: 3px;
     gap: 4px;
     overflow-x: auto;
     scrollbar-width: none;
@@ -55,10 +54,9 @@
     padding: 0;
     background: none;
     border: 0;
-    box-shadow: none;
   }
   .views .chip {
-    padding: 5px 8px;
+    padding: 0 10px;
   }
   .views .chip--accent svg {
     display: none;

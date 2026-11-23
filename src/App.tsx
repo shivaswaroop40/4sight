@@ -62,16 +62,20 @@ function App() {
     if (experience) runtime.urlSync?.flush();
   }, [experience]);
 
-  // The mobile bottom sheet sits just above the transport bar, whatever its
-  // height, and camera presets frame their subject in the band the HUD leaves free.
+  // The stage plate sits between the top bar and the transport bar, whatever
+  // their heights, and camera presets frame their subject in the band the HUD leaves free.
   useEffect(() => {
     const app = appRef.current;
     const stage = viewportRef.current;
     const transport = transportRef.current;
     if (!app || !stage || !transport) return;
     const ro = new ResizeObserver(() => {
-      document.documentElement.style.setProperty("--transport-h", `${transport.offsetHeight}px`);
-      runtime.manager?.setFreeBand(freeBand(stage.getBoundingClientRect(), measureHud(app)));
+      const hud = measureHud(app);
+      const topbarBottom = Math.max(0, ...hud.filter((p) => p.edge === "top").map((p) => p.bottom));
+      const root = document.documentElement.style;
+      root.setProperty("--transport-h", `${transport.offsetHeight}px`);
+      root.setProperty("--topbar-bottom", `${topbarBottom}px`);
+      runtime.manager?.setFreeBand(freeBand(stage.getBoundingClientRect(), hud));
     });
     for (const el of [stage, ...hudElements(app)]) ro.observe(el);
     return () => ro.disconnect();
@@ -80,11 +84,10 @@ function App() {
   return (
     <div className="app" ref={appRef}>
       <div className="stage" ref={viewportRef} />
-      <div className="vignette" aria-hidden="true" />
 
       <header className="topbar">
         <div className="topbar__start">
-          <div className="brand sticker" data-hud-edge="top">
+          <div className="brand" data-hud-edge="top">
             <Mark />
             <span className="brand__word">4sight</span>
           </div>

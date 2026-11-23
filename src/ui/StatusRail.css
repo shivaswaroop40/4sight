@@ -4,6 +4,7 @@
 .rail {
   grid-column: 1 / -1;
   justify-self: center;
+  margin-top: var(--s2);
   display: grid;
   justify-items: center;
   gap: var(--s2);
@@ -20,55 +21,56 @@
   gap: 10px;
   flex-wrap: wrap;
   max-width: calc(100vw - 24px);
-  padding: 6px 6px 6px 16px;
+  padding: 3px 3px 3px 16px;
   font-size: 14px;
-  font-weight: 800;
-  box-shadow: var(--shadow-sm);
+  font-weight: 600;
   animation: pop-in var(--t) var(--bounce);
 }
 
 .toast--error {
-  background: #f8d9cc;
+  background: var(--tint);
 }
 
 .toast--ok {
-  padding: 8px 18px 8px 14px;
-  background: var(--sage);
+  padding: 12px 18px 12px 14px;
+  background: var(--surface);
 }
 
 .toast--ok svg {
   width: 18px;
   height: 18px;
+  color: var(--accent);
 }
 
 .toast__url {
   flex: 1 1 220px;
   min-width: 0;
-  padding: 5px 10px;
-  border: 2px solid var(--ink);
+  min-height: 44px;
+  padding: 0 10px;
+  border: var(--border);
   border-radius: var(--r-sm);
-  background: var(--cream);
+  background: var(--plate);
   font: inherit;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--ink);
 }
 
 .toast__dismiss {
   display: grid;
   place-items: center;
-  width: 30px;
-  height: 30px;
+  width: 44px;
+  height: 44px;
   padding: 0;
   border: 0;
   border-radius: 50%;
   background: none;
-  color: var(--ink-soft);
+  color: var(--ink-muted);
 }
 
 .toast__dismiss:hover {
   color: var(--ink);
-  background: rgba(59, 47, 42, 0.08);
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
 }
 
 .toast .chip svg,
@@ -81,14 +83,15 @@
 .follow {
   flex-wrap: nowrap;
   gap: 8px;
-  padding: 4px 4px 4px 12px;
-  background: var(--mustard);
+  padding: 3px 3px 3px 14px;
+  background: var(--surface);
 }
 
 .follow > svg {
   flex: none;
   width: 18px;
   height: 18px;
+  color: var(--accent);
 }
 
 .follow__label {
@@ -96,21 +99,21 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .follow__label b {
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .follow__hidden {
   flex: none;
   padding: 1px 8px;
-  border: 2px solid var(--ink);
+  border: var(--border);
   border-radius: var(--r-pill);
-  background: var(--cream);
+  background: var(--plate);
   font-size: 12px;
-  color: var(--ink-soft);
+  color: var(--ink-muted);
 }
 
 /* Guided tour: where it is, with Next and Exit. */
@@ -119,15 +122,14 @@
   align-items: center;
   gap: 10px;
   max-width: calc(100vw - 24px);
-  padding: 5px 6px 5px 16px;
+  padding: 3px 3px 3px 16px;
   border-radius: var(--r-pill);
-  box-shadow: var(--shadow-sm);
   animation: pop-in var(--t) var(--bounce);
 }
 
 .tourbar__count {
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 600;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
@@ -141,21 +143,23 @@
 .tourbar__dot {
   width: 10px;
   height: 10px;
-  border: 2px solid var(--ink);
+  border: 2px solid var(--ink-disabled);
   border-radius: 50%;
-  background: var(--cream);
+  background: var(--surface);
   transition:
     background var(--t) var(--ease),
     scale var(--t) var(--bounce);
 }
 
 .tourbar__dot[data-state="past"] {
-  background: var(--terracotta);
+  border-color: var(--flag);
+  background: var(--flag);
 }
 
 .tourbar__dot[data-state="here"],
 .tourbar__dot[data-state="heading"] {
-  background: var(--mustard);
+  border-color: var(--accent);
+  background: var(--accent);
   scale: 1.35;
 }
 
@@ -167,19 +171,13 @@
 @keyframes dot-pulse {
   from {
     scale: 0.9;
-    background: var(--cream);
+    background: var(--surface);
   }
 }
 
 .tourbar__next {
   position: relative;
   overflow: hidden;
-}
-
-@media (min-width: 900px) {
-  .tourbar__next {
-    padding: 5px 10px 5px 12px;
-  }
 }
 
 .tourbar__next > :not(.tourbar__hold) {
@@ -190,7 +188,7 @@
 .tourbar__hold {
   position: absolute;
   inset: 0;
-  background: var(--sage);
+  background: var(--accent-tint);
   transform-origin: left;
   animation: hold-fill linear both;
 }
@@ -204,18 +202,18 @@
 .tourbar__icon {
   display: grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   padding: 0;
   border: 0;
   border-radius: 50%;
   background: none;
-  color: var(--ink-soft);
+  color: var(--ink-muted);
 }
 
 .tourbar__icon:hover {
   color: var(--ink);
-  background: rgba(59, 47, 42, 0.08);
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
 }
 
 /* First load: the stage has nothing to show yet. */
@@ -231,6 +229,7 @@
   gap: 10px;
   padding: 20px 26px;
   text-align: center;
+  box-shadow: var(--shadow-float);
   animation: pop-in var(--t) var(--ease);
 }
 
@@ -242,7 +241,7 @@
 
 .notice__title {
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 400;
   font-size: 20px;
 }
 
@@ -250,7 +249,7 @@
   margin: 0;
   font-size: 13px;
   line-height: 1.45;
-  color: var(--ink-soft);
+  color: var(--ink-muted);
   overflow-wrap: anywhere;
 }
 

@@ -16,7 +16,7 @@ import { controller, runtime } from "./runtime";
 import "./Timeline.css";
 
 const NUDGE = 0.01;
-/** A flag's hit area is 24 px wide: closer than that, two flags overlap. */
+/** Flags closer than this share one. Each flag's hit area is 44 px wide, so neighbours up to 44 px apart overlap at the edges. */
 const FLAG_GAP = 24;
 
 interface Marker {

@@ -1,28 +1,41 @@
-/* 4sight: warm picture-book theme. Same palette as src/core/theme.ts. */
+/* 4sight chrome: Sunprint, flat cream surfaces on a tangerine ground. The 3D scenes keep their own palette in src/core/theme.ts. */
 
 :root {
-  --paper: #f3e9d7;
-  --paper-deep: #e9dbc2;
-  --cream: #fbf5ea;
-  --ink: #3b2f2a;
-  --ink-soft: #7a6a5f;
-  --ink-faint: #b3a391;
-  --terracotta: #e07a5f;
-  --terracotta-deep: #c9644a;
-  --mustard: #f2cc8f;
-  --sage: #81b29a;
-  --plum: #9c6b98;
+  --ground: #ff6a26;
+  --ink: #0e1f1b;
+  --ink-muted: #2a1406;
+  --ink-strong: color-mix(in srgb, var(--ink) 82%, var(--surface));
+  --ink-disabled: color-mix(in srgb, var(--ink) 65%, var(--surface));
+  --surface: #fff4e6;
+  --surface-line: #dccdbe;
+  --tint: color-mix(in srgb, var(--ground) 14%, var(--surface));
+  --tint-strong: color-mix(in srgb, var(--ground) 26%, var(--surface));
+  --plate: #f7ede2;
+  --accent: #006b63;
+  --accent-strong: color-mix(in srgb, var(--accent) 80%, var(--ink));
+  --accent-tint: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  --on-accent: #ffffff;
+  --flag: #00a99a;
+  --danger: #a8320a;
+  --cat-0: var(--accent);
+  --cat-1: var(--ground);
+  --cat-2: var(--flag);
+  --cat-3: var(--ink);
+  --scrim: color-mix(in srgb, var(--ink) 45%, transparent);
 
-  --line: 2.5px;
-  --outline: var(--line) solid var(--ink);
-  --shadow-sm: 2px 2px 0 var(--ink);
-  --shadow: 4px 4px 0 var(--ink);
-  --shadow-lg: 6px 6px 0 var(--ink);
+  --border: 1px solid var(--surface-line);
+  --shadow-float: 0 6px 20px color-mix(in srgb, var(--ink) 12%, transparent);
 
-  --r-sm: 12px;
-  --r: 16px;
-  --r-lg: 20px;
+  --r-sm: 10px;
+  --r: 14px;
+  --r-lg: 18px;
   --r-pill: 999px;
+  --r-plate: 22px;
+
+  /* The tangerine band around the stage plate. --topbar-bottom and --transport-h are measured in App.tsx. */
+  --frame: 16px;
+  --plate-top: calc(var(--topbar-bottom, 68px) + var(--frame));
+  --plate-bottom: calc(var(--transport-h, 150px) + var(--frame) * 2);
 
   --s1: 4px;
   --s2: 8px;
@@ -31,8 +44,8 @@
   --s5: 24px;
   --s6: 32px;
 
-  --font-display: "Fredoka", "Nunito", ui-rounded, system-ui, sans-serif;
-  --font-body: "Nunito", ui-rounded, system-ui, sans-serif;
+  --font-display: "Tilt Warp", system-ui, sans-serif;
+  --font-body: "Onest", system-ui, sans-serif;
 
   --bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
@@ -41,8 +54,10 @@
 
   color-scheme: light;
   font-family: var(--font-body);
+  /* Tilt Warp ships one weight; a bold request would be smeared, not drawn. */
+  font-synthesis-weight: none;
   color: var(--ink);
-  background: var(--paper);
+  background: var(--ground);
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
 }
@@ -66,17 +81,17 @@ button {
 }
 
 :focus-visible {
-  outline: 3px solid var(--terracotta);
+  outline: 3px solid var(--ink);
   outline-offset: 3px;
 }
 
 .caps {
   font-family: var(--font-body);
   font-size: 11px;
-  font-weight: 900;
+  font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--ink-soft);
+  color: var(--ink-muted);
 }
 
 /* ---------- Stage ---------- */
@@ -89,9 +104,13 @@ button {
 
 .stage {
   position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 70% 60% at 50% 42%, #fdf8ef 0%, var(--paper) 55%, var(--paper-deep) 100%);
+  top: var(--plate-top);
+  right: var(--frame);
+  bottom: var(--plate-bottom);
+  left: var(--frame);
+  border-radius: var(--r-plate);
+  overflow: hidden;
+  background: var(--plate);
 }
 
 .stage canvas {
@@ -101,30 +120,19 @@ button {
   touch-action: none;
 }
 
-/* Soft warm edge vignette plus a faint dot grid, like printed paper. */
-.vignette {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse 85% 80% at 50% 45%, transparent 60%, rgba(120, 90, 60, 0.14) 100%),
-    radial-gradient(circle, rgba(59, 47, 42, 0.07) 1px, transparent 1.4px) 0 0 / 22px 22px;
-}
-
 /* ---------- Shared surfaces ---------- */
 
 .card {
-  background: var(--cream);
-  border: var(--outline);
+  background: var(--surface);
+  border: var(--border);
   border-radius: var(--r-lg);
-  box-shadow: var(--shadow);
 }
 
 .sticker {
-  background: var(--cream);
-  border: var(--outline);
+  background: var(--surface);
+  border: var(--border);
   border-radius: var(--r);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-float);
 }
 
 /* ---------- Top bar ---------- */
@@ -132,9 +140,9 @@ button {
 .topbar {
   position: absolute;
   z-index: 2;
-  top: var(--s5);
-  left: var(--s5);
-  right: var(--s5);
+  top: var(--frame);
+  left: var(--frame);
+  right: var(--frame);
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: start;
@@ -159,15 +167,13 @@ button {
   display: inline-flex;
   align-items: center;
   gap: var(--s2);
-  padding: 6px 16px 6px 8px;
-  transform: rotate(-2deg);
+  padding: 0 4px;
 }
 
 .brand__word {
   font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 24px;
-  letter-spacing: 0.01em;
+  font-weight: 400;
+  font-size: 28px;
   line-height: 1;
 }
 
@@ -175,37 +181,34 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 6px 12px;
-  border: 2px solid var(--ink);
+  min-height: 44px;
+  padding: 0 16px;
+  border: var(--border);
   border-radius: var(--r-pill);
-  background: var(--cream);
-  font-weight: 800;
-  font-size: 13px;
+  background: var(--surface);
+  font-weight: 600;
+  font-size: 14px;
   white-space: nowrap;
-  box-shadow: var(--shadow-sm);
-  transition:
-    transform var(--t-fast) var(--bounce),
-    box-shadow var(--t-fast) var(--bounce),
-    background var(--t-fast) var(--ease);
+  transition: background var(--t-fast) var(--ease);
 }
 
 .chip:hover {
-  background: #fff;
-  transform: translate(-1px, -1px);
-  box-shadow: 3px 3px 0 var(--ink);
+  background: var(--tint);
 }
 
 .chip:active {
-  transform: translate(2px, 2px);
-  box-shadow: 0 0 0 var(--ink);
+  background: var(--tint-strong);
 }
 
 .chip--accent {
-  background: var(--sage);
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
-.chip--accent:hover {
-  background: #8fc0a8;
+.chip--accent:hover,
+.chip--accent:active {
+  background: var(--accent-strong);
 }
 
 .spinner {
@@ -236,11 +239,11 @@ button {
 .badge {
   display: inline-block;
   padding: 3px 10px;
-  border: 2px solid var(--ink);
   border-radius: var(--r-pill);
-  background: var(--mustard);
+  background: var(--accent-tint);
+  color: var(--accent);
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 
@@ -266,11 +269,9 @@ button {
 
 .transport {
   position: absolute;
-  left: var(--s5);
-  right: var(--s5);
-  bottom: var(--s5);
-  max-width: 1180px;
-  margin: 0 auto;
+  left: var(--frame);
+  right: var(--frame);
+  bottom: var(--frame);
   padding: 16px 22px 12px;
   display: grid;
   gap: 6px;
@@ -287,44 +288,31 @@ button {
   place-items: center;
   width: 46px;
   height: 46px;
-  border: var(--outline);
-  border-radius: 14px;
-  background: var(--cream);
-  box-shadow: var(--shadow-sm);
-  transition:
-    transform var(--t-fast) var(--bounce),
-    box-shadow var(--t-fast) var(--bounce),
-    background var(--t-fast) var(--ease);
+  border: var(--border);
+  border-radius: 50%;
+  background: var(--surface);
+  transition: background var(--t-fast) var(--ease);
 }
 
 .btn:hover {
-  transform: translate(-1px, -1px);
-  box-shadow: 3px 3px 0 var(--ink);
-  background: #fff;
+  background: var(--tint);
 }
 
 .btn:active {
-  transform: translate(2px, 2px);
-  box-shadow: 0 0 0 var(--ink);
+  background: var(--tint-strong);
 }
 
 .btn--primary {
   width: 56px;
   height: 56px;
-  border-radius: 18px;
-  background: var(--terracotta);
-  color: var(--cream);
-  box-shadow: var(--shadow);
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--surface);
 }
 
-.btn--primary:hover {
-  background: #e98a70;
-  box-shadow: 5px 5px 0 var(--ink);
-}
-
+.btn--primary:hover,
 .btn--primary:active {
-  box-shadow: 0 0 0 var(--ink);
-  transform: translate(4px, 4px);
+  background: var(--ink-strong);
 }
 
 .btn--primary svg {
@@ -333,12 +321,14 @@ button {
 }
 
 .btn--on {
-  background: var(--plum);
-  color: var(--cream);
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
-.btn--on:hover {
-  background: #aa7aa6;
+.btn--on:hover,
+.btn--on:active {
+  background: var(--accent-strong);
 }
 
 /* ---------- Responsive ---------- */
@@ -346,9 +336,9 @@ button {
 @media (max-width: 899px) {
   :root {
     --s5: 12px;
+    --frame: 12px;
   }
   .topbar {
-    top: 12px;
     grid-template-columns: auto minmax(0, 1fr) auto;
     gap: 10px;
   }
@@ -359,14 +349,15 @@ button {
   .brand {
     grid-column: 1;
     grid-row: 1;
-    padding: 5px 12px 5px 6px;
+    align-self: center;
+    padding: 0;
   }
   .brand__word {
-    font-size: 20px;
+    font-size: 22px;
   }
   .chip {
-    padding: 5px 10px;
-    font-size: 12px;
+    padding: 0 12px;
+    font-size: 13px;
   }
   .transport {
     padding: 12px 14px 8px;
@@ -377,19 +368,16 @@ button {
     gap: 10px 12px;
   }
   .btn {
-    width: 42px;
-    height: 42px;
+    width: 44px;
+    height: 44px;
   }
   .btn--primary {
-    width: 50px;
-    height: 50px;
+    width: 52px;
+    height: 52px;
   }
 }
 
 @media (max-width: 599px) {
-  .brand {
-    padding: 5px 6px;
-  }
   .brand__word {
     display: none;
   }

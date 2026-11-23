@@ -15,8 +15,8 @@
 
 .warp__rate {
   font-size: 13px;
-  font-weight: 800;
-  color: var(--terracotta-deep);
+  font-weight: 600;
+  color: var(--accent);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -24,21 +24,19 @@
 .pills {
   position: relative;
   display: inline-flex;
-  padding: 4px;
-  background: var(--paper);
-  border: var(--outline);
+  padding: 3px;
+  background: var(--surface);
+  border: var(--border);
   border-radius: var(--r-pill);
 }
 
 .pills__indicator {
   position: absolute;
-  top: 4px;
-  bottom: 4px;
+  top: 3px;
+  bottom: 3px;
   left: 0;
   border-radius: var(--r-pill);
-  background: var(--sage);
-  border: 2px solid var(--ink);
-  box-shadow: var(--shadow-sm);
+  background: var(--accent);
   transition:
     transform 300ms var(--bounce),
     width 300ms var(--bounce);
@@ -48,20 +46,24 @@
   position: relative;
   z-index: 1;
   min-width: 44px;
-  padding: 6px 10px;
+  min-height: 44px;
+  padding: 0 10px;
   border: 0;
   background: none;
   border-radius: var(--r-pill);
-  font-weight: 900;
+  font-weight: 600;
   font-size: 13px;
   font-variant-numeric: tabular-nums;
-  color: var(--ink-soft);
+  color: var(--ink-muted);
   transition: color var(--t-fast) var(--ease);
 }
 
-.pills__pill:hover,
-.pills__pill[aria-checked="true"] {
+.pills__pill:hover {
   color: var(--ink);
+}
+
+.pills__pill[aria-checked="true"] {
+  color: var(--on-accent);
 }
 
 @media (max-width: 899px) {
@@ -79,6 +81,6 @@
   .pills__pill {
     flex: 1;
     min-width: 0;
-    padding: 6px 2px;
+    padding: 0 2px;
   }
 }

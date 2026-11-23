@@ -10,7 +10,7 @@
 .timeline__rail {
   --u: 0;
   position: relative;
-  height: 50px;
+  height: 62px;
   padding: 0 var(--pad);
   cursor: pointer;
   touch-action: none;
@@ -30,53 +30,42 @@
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 8px;
-  height: 14px;
-  border: var(--outline);
+  bottom: 12px;
+  height: 6px;
   border-radius: var(--r-pill);
-  background: var(--paper);
+  background: var(--surface-line);
   overflow: hidden;
 }
 
 .timeline__fill {
   position: absolute;
   inset: 0;
-  background: var(--terracotta);
+  background: var(--accent);
   transform-origin: left;
   transform: scaleX(var(--u));
 }
 
 .timeline__notch {
   position: absolute;
-  top: 2px;
-  bottom: 2px;
+  top: 0;
+  bottom: 0;
   width: 2px;
   margin-left: -1px;
-  border-radius: 2px;
-  background: rgba(59, 47, 42, 0.35);
+  background: color-mix(in srgb, var(--ink) 30%, transparent);
 }
 
 .timeline__thumb {
   position: absolute;
   left: calc(var(--u) * 100%);
-  bottom: 1px;
-  width: 28px;
-  height: 28px;
-  margin-left: -14px;
-  border: 3px solid var(--ink);
+  bottom: 3px;
+  width: 24px;
+  height: 24px;
+  margin-left: -12px;
+  border: 3px solid var(--accent);
   border-radius: 50%;
-  background: var(--cream);
-  box-shadow: 3px 3px 0 var(--ink);
+  background: var(--surface);
   pointer-events: none;
   transition: scale var(--t-fast) var(--bounce);
-}
-
-.timeline__thumb::after {
-  content: "";
-  position: absolute;
-  inset: 6px;
-  border-radius: 50%;
-  background: var(--terracotta);
 }
 
 .timeline__rail:hover .timeline__thumb,
@@ -90,16 +79,16 @@
   top: 0;
   left: var(--pad);
   right: var(--pad);
-  height: 50px;
+  height: 62px;
   pointer-events: none;
 }
 
 .flag {
   position: absolute;
-  bottom: 22px;
-  width: 24px;
-  height: 30px;
-  margin-left: -3px;
+  bottom: 18px;
+  width: 44px;
+  height: 44px;
+  margin-left: -22px;
   padding: 0;
   border: 0;
   background: none;
@@ -111,42 +100,35 @@
   /* pole */
   content: "";
   position: absolute;
-  left: 2px;
+  left: 21px;
   bottom: 0;
   width: 2.5px;
   height: 24px;
   border-radius: 2px;
-  background: var(--ink);
+  background: var(--accent);
 }
 
 .flag::after {
   /* pennant */
   content: "";
   position: absolute;
-  left: 3px;
-  top: 4px;
+  left: 22px;
+  top: 18px;
   width: 13px;
   height: 11px;
-  border: 2px solid var(--ink);
+  border: 2px solid var(--accent);
   border-left: 0;
   border-radius: 0 4px 4px 0;
-  background: var(--cream);
+  background: var(--surface);
   transition:
     transform var(--t-fast) var(--bounce),
     background var(--t-fast) var(--ease);
   transform-origin: left center;
 }
 
-.flag[data-passed="1"][data-color="0"]::after {
-  background: var(--terracotta);
-}
-
-.flag[data-passed="1"][data-color="1"]::after {
-  background: var(--mustard);
-}
-
-.flag[data-passed="1"][data-color="2"]::after {
-  background: var(--sage);
+.flag[data-passed="1"]::after {
+  border-color: var(--flag);
+  background: var(--flag);
 }
 
 .flag:hover::after,
@@ -157,15 +139,15 @@
 .flag__tip {
   position: absolute;
   bottom: 32px;
-  left: 3px;
+  left: 22px;
   translate: -50% 0;
   padding: 4px 10px;
-  border: 2px solid var(--ink);
-  border-radius: 10px;
-  background: var(--cream);
-  box-shadow: var(--shadow-sm);
+  border: var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  box-shadow: var(--shadow-float);
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 600;
   white-space: nowrap;
   opacity: 0;
   scale: 0.9;
@@ -193,17 +175,17 @@
 .flag.flag--cluster::after {
   width: 20px;
   height: 15px;
-  top: 2px;
+  top: 16px;
 }
 
 .flag__count {
   position: absolute;
   z-index: 1;
-  left: 3px;
-  top: 4px;
+  left: 22px;
+  top: 18px;
   width: 18px;
   font-size: 10px;
-  font-weight: 900;
+  font-weight: 700;
   line-height: 11px;
   text-align: center;
   font-variant-numeric: tabular-nums;
@@ -229,7 +211,8 @@
   max-height: 240px;
   overflow-y: auto;
   padding: 6px;
-  border-radius: 14px;
+  border-radius: var(--r);
+  box-shadow: var(--shadow-float);
   pointer-events: auto;
   animation: tip-in 160ms var(--bounce);
 }
@@ -239,9 +222,10 @@
   grid-template-columns: 12px 1fr;
   column-gap: 9px;
   align-items: center;
+  min-height: 44px;
   padding: 6px 10px 6px 8px;
   border: 0;
-  border-radius: 9px;
+  border-radius: var(--r-sm);
   background: none;
   color: var(--ink);
   font: inherit;
@@ -254,39 +238,32 @@
   grid-row: 1 / 3;
   width: 11px;
   height: 10px;
-  border: 2px solid var(--ink);
+  border: 2px solid var(--accent);
   border-left-width: 2.5px;
   border-radius: 0 3px 3px 0;
-  background: var(--cream);
+  background: var(--surface);
 }
 
-.flaglist__item[data-passed="1"][data-color="0"]::before {
-  background: var(--terracotta);
-}
-
-.flaglist__item[data-passed="1"][data-color="1"]::before {
-  background: var(--mustard);
-}
-
-.flaglist__item[data-passed="1"][data-color="2"]::before {
-  background: var(--sage);
+.flaglist__item[data-passed="1"]::before {
+  border-color: var(--flag);
+  background: var(--flag);
 }
 
 .flaglist__item:hover,
 .flaglist__item:focus-visible {
-  background: var(--paper);
+  background: var(--tint);
 }
 
 .flaglist__title {
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .flaglist__when {
   grid-column: 2;
   font-size: 11.5px;
-  font-weight: 600;
-  color: var(--ink-soft);
+  font-weight: 500;
+  color: var(--ink-muted);
 }
 
 /* Tick labels */
@@ -301,10 +278,10 @@
   top: 0;
   translate: -50% 0;
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--ink-soft);
+  color: var(--ink-muted);
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }

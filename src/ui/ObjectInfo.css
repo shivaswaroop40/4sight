@@ -12,13 +12,14 @@
   overflow: hidden;
   padding: 12px 14px;
   border-radius: var(--r);
+  box-shadow: var(--shadow-float);
   pointer-events: none;
   animation: tip-in 180ms var(--bounce);
 }
 
 .tip__name {
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 400;
   font-size: 17px;
 }
 
@@ -26,7 +27,7 @@
   margin: 4px 0 0;
   font-size: 13px;
   line-height: 1.45;
-  color: #4b3e37;
+  color: var(--ink-muted);
 }
 
 .tip__props {
@@ -35,7 +36,7 @@
   gap: 3px 12px;
   margin: 10px 0 0;
   padding-top: 8px;
-  border-top: 2px dashed var(--ink-faint);
+  border-top: var(--border);
   font-size: 12px;
 }
 
@@ -44,12 +45,12 @@
 }
 
 .tip__props dt {
-  font-weight: 800;
-  color: var(--ink-soft);
+  font-weight: 500;
+  color: var(--ink-muted);
 }
 
 .tip__props dd {
   margin: 0;
-  font-weight: 700;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }

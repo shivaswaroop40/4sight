@@ -25,7 +25,7 @@ Live site: https://shivaswaroop40.github.io/4sight/
 
 ## Status
 
-Core scaffold, time engine, and Pages deploy are live. The iPhone and Solar System experiences are in progress. The visual style is warm, beige, and cartoony, with toon-shaded 3D.
+Core scaffold, time engine, and Pages deploy are live. The iPhone and Solar System experiences are in progress. The interface is flat cream panels on a tangerine ground, with the toon-shaded 3D scene on a cream plate in the middle.
 
 **Start here:** [GETTING_STARTED.md](GETTING_STARTED.md). It has the exact git setup, per-developer agent prompts, and the timeline. Each dev can copy-paste their prompt into Claude Code and let Opus 5.5 rip.
 

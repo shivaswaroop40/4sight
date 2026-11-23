@@ -24,6 +24,15 @@ describe("freeBand", () => {
     expect(freeBand(DESKTOP, pieces)).toEqual({ top: 74 / 900, bottom: 702 / 900 });
   });
 
+  it("is the whole stage when the top bar and transport sit outside it, as around the framed plate", () => {
+    const plate = { top: 84, bottom: 614, left: 16, right: 1264 };
+    const pieces: HudPiece[] = [
+      { edge: "top", top: 16, bottom: 68, left: 16, right: 340 },
+      { edge: "bottom", top: 630, bottom: 784, left: 50, right: 1230 },
+    ];
+    expect(freeBand(plate, pieces)).toEqual({ top: 0, bottom: 1 });
+  });
+
   it("is the whole stage when nothing is declared", () => {
     expect(freeBand(PHONE, [])).toEqual({ top: 0, bottom: 1 });
   });
