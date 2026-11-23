@@ -1,12 +1,15 @@
 // src/ui/flagClusters.ts
 //
-// Event flags that would sit closer than a flag's width share one flag. A
-// cluster stands at its first event, and an event joins it while it is less
-// than `gapPx` from there, so no two flags on the track overlap however
-// dense the events. A cluster counts as passed once its last event has.
+// Event flags that would sit closer than a flag's tap target share one flag.
+// A cluster stands at its first event, and an event joins it while it is less
+// than FLAG_HIT_PX from there, so no two tap targets on the track overlap
+// however dense the events. A cluster counts as passed once its last event has.
 //
-//   clusterFlags([{ u: 0 }, { u: 0.01 }, { u: 0.5 }], 400, 20)
+//   clusterFlags([{ u: 0 }, { u: 0.01 }, { u: 0.5 }], 400)
 //   // [{ u: 0, end: 0.01, items: [{ u: 0 }, { u: 0.01 }] }, { u: 0.5, end: 0.5, items: [{ u: 0.5 }] }]
+
+/** A flag's tap target is this wide and tall; the stylesheet sizes `.flag` from it. */
+export const FLAG_HIT_PX = 44;
 
 export interface FlagCluster<T> {
   /** Where the flag stands: its first event. */
@@ -18,11 +21,11 @@ export interface FlagCluster<T> {
 }
 
 /** `widthPx` is the track's width. An unmeasured track (0) clusters nothing. */
-export function clusterFlags<T extends { u: number }>(markers: readonly T[], widthPx: number, gapPx: number): FlagCluster<T>[] {
+export function clusterFlags<T extends { u: number }>(markers: readonly T[], widthPx: number): FlagCluster<T>[] {
   const clusters: FlagCluster<T>[] = [];
   for (const m of [...markers].sort((a, b) => a.u - b.u)) {
     const last = clusters.at(-1);
-    if (last && widthPx > 0 && (m.u - last.u) * widthPx < gapPx) {
+    if (last && widthPx > 0 && (m.u - last.u) * widthPx < FLAG_HIT_PX) {
       last.items.push(m);
       last.end = m.u;
     } else {

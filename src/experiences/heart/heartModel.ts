@@ -8,7 +8,7 @@
 import * as THREE from "three";
 import { mergeVertices } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
-import { THEME, addOutline, makeToonMaterial } from "../../core/theme";
+import { LABEL_FONT, THEME, addOutline, makeToonMaterial } from "../../core/theme";
 import type { ChamberId, ConductionId, ValveId } from "./heartCycle";
 import {
   AV_Y,
@@ -425,10 +425,6 @@ export function chevronGeometry(size: number): THREE.ShapeGeometry {
 // ---------------------------------------------------------------------------
 // Text and paper, painted with canvas at mount.
 
-const FONT = "Fredoka, Nunito, ui-rounded, system-ui, sans-serif";
-/** A font string that resolves once the display web font has loaded. */
-export const DISPLAY_FONT_PROBE = "700 64px Fredoka";
-
 /**
  * A canvas texture that remembers how to paint itself. The web font may
  * arrive after mount, so callers repaint every text texture once it has.
@@ -457,16 +453,16 @@ export function repaint(texture: THREE.Texture): void {
   (texture.userData.repaint as (() => void) | undefined)?.();
 }
 
-/** Text on a transparent canvas; "\n" starts a new line. */
+/** Text on a transparent canvas; "\n" starts a new line. Display labels are set in Tilt Warp, body ones in Onest. */
 export function textTexture(
   text: string,
-  opts: { size?: number; color?: string; stroke?: string; weight?: number; pad?: number; pill?: string } = {},
+  opts: { size?: number; color?: string; stroke?: string; face?: "display" | "body"; pad?: number; pill?: string } = {},
 ): { texture: THREE.CanvasTexture; aspect: number } {
   const size = opts.size ?? 96;
   const pad = opts.pad ?? size * 0.3;
   const lines = text.split("\n");
   const lineHeight = size * 1.1;
-  const font = `${opts.weight ?? 700} ${size}px ${FONT}`;
+  const font = opts.face === "body" ? `600 ${size}px ${LABEL_FONT.body}` : `${size}px ${LABEL_FONT.display}`;
   const measure = document.createElement("canvas").getContext("2d")!;
   measure.font = font;
   const w = Math.ceil(Math.max(...lines.map((l) => measure.measureText(l).width)) + pad * 2);
@@ -517,7 +513,7 @@ export function burstTexture(text: string, fill: string): THREE.CanvasTexture {
     ctx.lineWidth = 14;
     ctx.strokeStyle = THEME.ink;
     ctx.stroke();
-    ctx.font = `700 130px ${FONT}`;
+    ctx.font = `130px ${LABEL_FONT.display}`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.lineWidth = 22;
@@ -569,12 +565,12 @@ export function ecgPaperTexture(): THREE.CanvasTexture {
       }
       ctx.fillStyle = THEME.inkSoft;
       ctx.textBaseline = "middle";
-      ctx.font = `700 46px ${FONT}`;
+      ctx.font = `700 46px ${LABEL_FONT.body}`;
       ctx.textAlign = "left";
       ctx.fillText("ECG", px(ECG_PLOT.left), py(0.78));
       ctx.textAlign = "right";
       ctx.fillText("one beat · 800 ms", px(ECG_PLOT.right), py(0.78));
-      ctx.font = `600 34px ${FONT}`;
+      ctx.font = `600 34px ${LABEL_FONT.body}`;
       ctx.textAlign = "left";
       ctx.fillText("0 ms", px(ECG_PLOT.left), py(-0.8));
       ctx.textAlign = "right";

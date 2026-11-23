@@ -8,7 +8,7 @@
 // to cut a chord into the sphere.
 
 import * as THREE from "three";
-import { THEME, addOutline, makeToonMaterial } from "../../core/theme";
+import { LABEL_FONT, THEME, addOutline, makeToonMaterial, labelFontsLoaded } from "../../core/theme";
 import type { Polygon } from "./outlines";
 import { arc, toVec, type LonLat } from "./sphere";
 
@@ -277,9 +277,9 @@ export function equatorRing(): THREE.Mesh {
 
 const LABEL_STYLES = {
   /** Ink italics with a cream halo, like sea names on an old map. */
-  ocean: { font: "italic 600 64px", spacing: "0px", fill: THEME.ink, halo: THEME.cream, height: 0.11 },
+  ocean: { font: `italic 600 64px ${LABEL_FONT.body}`, spacing: "0px", fill: THEME.ink, halo: THEME.cream, height: 0.11 },
   /** Chunky cream capitals with an ink edge, sitting on the land. */
-  land: { font: "700 72px", spacing: "10px", fill: THEME.cream, halo: THEME.ink, height: 0.13 },
+  land: { font: `72px ${LABEL_FONT.display}`, spacing: "10px", fill: THEME.cream, halo: THEME.ink, height: 0.13 },
 } as const;
 
 export function labelSprite(text: string, kind: keyof typeof LABEL_STYLES): THREE.Sprite {
@@ -292,7 +292,7 @@ export function labelSprite(text: string, kind: keyof typeof LABEL_STYLES): THRE
   const draw = () => {
     const ctx = canvas.getContext("2d")!;
     const setFont = () => {
-      ctx.font = `${style.font} Fredoka, Nunito, ui-rounded, system-ui, sans-serif`;
+      ctx.font = style.font;
       ctx.letterSpacing = style.spacing;
     };
     setFont();
@@ -314,6 +314,6 @@ export function labelSprite(text: string, kind: keyof typeof LABEL_STYLES): THRE
     sprite.scale.set((style.height * width) / canvas.height, style.height, 1);
   };
   draw();
-  document.fonts?.ready.then(draw);
+  labelFontsLoaded().then(draw);
   return sprite;
 }

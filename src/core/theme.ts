@@ -1,8 +1,8 @@
 // src/core/theme.ts
 //
-// The 4sight look, shared by every lane: a warm beige picture-book palette,
-// toon shading, and ink outlines. The CSS custom properties in src/index.css
-// use the same values.
+// The 3D look, shared by every lane: a warm beige picture-book palette, toon
+// shading, ink outlines, and the faces canvas labels are set in. The chrome
+// in src/index.css has its own palette and shares only the faces.
 //
 //   import { THEME, makeToonMaterial, addOutline, disposeObject } from "../../core/theme";
 //   const mesh = new THREE.Mesh(geometry, makeToonMaterial(THEME.terracotta));
@@ -31,6 +31,24 @@ export const THEME = {
 } as const;
 
 export type ThemeColor = keyof typeof THEME;
+
+/** Font stacks for canvas labels, the faces index.html loads. Tilt Warp has one weight: ask for it unweighted, or canvas smears a fake bold. */
+export const LABEL_FONT = {
+  display: '"Tilt Warp", system-ui, sans-serif',
+  body: "Onest, system-ui, sans-serif",
+} as const;
+
+const LABEL_FACES = [`64px ${LABEL_FONT.display}`, `600 64px ${LABEL_FONT.body}`, `700 64px ${LABEL_FONT.body}`];
+
+/** Resolves once the label faces have loaded or failed to. Canvas text drawn before then is measured in a fallback. */
+export function labelFontsLoaded(): Promise<void> {
+  const fonts = globalThis.document?.fonts;
+  if (!fonts) return Promise.resolve();
+  return Promise.all(LABEL_FACES.map((f) => fonts.load(f))).then(
+    () => {},
+    () => {},
+  );
+}
 
 let gradientMap: THREE.DataTexture | null = null;
 

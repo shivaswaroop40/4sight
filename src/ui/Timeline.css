@@ -86,9 +86,9 @@
 .flag {
   position: absolute;
   bottom: 18px;
-  width: 44px;
-  height: 44px;
-  margin-left: -22px;
+  width: var(--flag-hit);
+  height: var(--flag-hit);
+  margin-left: calc(var(--flag-hit) / -2);
   padding: 0;
   border: 0;
   background: none;
@@ -100,7 +100,7 @@
   /* pole */
   content: "";
   position: absolute;
-  left: 21px;
+  left: calc(50% - 1px);
   bottom: 0;
   width: 2.5px;
   height: 24px;
@@ -112,7 +112,7 @@
   /* pennant */
   content: "";
   position: absolute;
-  left: 22px;
+  left: 50%;
   top: 18px;
   width: 13px;
   height: 11px;
@@ -139,7 +139,7 @@
 .flag__tip {
   position: absolute;
   bottom: 32px;
-  left: 22px;
+  left: 50%;
   translate: -50% 0;
   padding: 4px 10px;
   border: var(--border);
@@ -181,7 +181,7 @@
 .flag__count {
   position: absolute;
   z-index: 1;
-  left: 22px;
+  left: 50%;
   top: 18px;
   width: 18px;
   font-size: 10px;

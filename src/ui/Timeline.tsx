@@ -11,13 +11,11 @@
 
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { FourDExperience, TimelineEvent, TimeTick } from "../core/types";
-import { clusterFlags, openClusterKey, type FlagCluster } from "./flagClusters";
+import { clusterFlags, FLAG_HIT_PX, openClusterKey, type FlagCluster } from "./flagClusters";
 import { controller, runtime } from "./runtime";
 import "./Timeline.css";
 
 const NUDGE = 0.01;
-/** Flags closer than this share one. Each flag's hit area is 44 px wide, so neighbours up to 44 px apart overlap at the edges. */
-const FLAG_GAP = 24;
 
 interface Marker {
   event: TimelineEvent;
@@ -40,7 +38,7 @@ export function Timeline({ experience }: { experience: FourDExperience }) {
     () => experience.events.map((e, i) => ({ event: e, u: experience.mapping.toParam(e.time), color: i % 3 })),
     [experience],
   );
-  const clusters = useMemo(() => clusterFlags(markers, trackWidth, FLAG_GAP), [markers, trackWidth]);
+  const clusters = useMemo(() => clusterFlags(markers, trackWidth), [markers, trackWidth]);
   if (openClusterKey(clusters, openId, markerKey) !== openId) setOpenId(null);
   const shown = useMemo(
     () => visibleTicks(ticks.map((t) => ({ u: t.u, label: endLabel(t.u, experience) ?? t.label })), width),
@@ -148,7 +146,13 @@ export function Timeline({ experience }: { experience: FourDExperience }) {
           <div className="timeline__thumb" />
         </div>
       </div>
-      <div className="timeline__flags" role="group" aria-label="Events" ref={flagsRef}>
+      <div
+        className="timeline__flags"
+        role="group"
+        aria-label="Events"
+        ref={flagsRef}
+        style={{ "--flag-hit": `${FLAG_HIT_PX}px` } as React.CSSProperties}
+      >
         {clusters.map((c) =>
           c.items.length === 1 ? (
             <EventFlag key={markerKey(c.items[0])} marker={c.items[0]} onPick={jump} />
