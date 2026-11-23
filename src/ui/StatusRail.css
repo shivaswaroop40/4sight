@@ -23,7 +23,6 @@
   padding: 6px 6px 6px 16px;
   font-size: 14px;
   font-weight: 600;
-  box-shadow: var(--shadow-float);
   animation: pop-in var(--t) var(--bounce);
 }
 
@@ -39,18 +38,19 @@
 .toast--ok svg {
   width: 18px;
   height: 18px;
+  color: var(--accent);
 }
 
 .toast__url {
   flex: 1 1 220px;
   min-width: 0;
   padding: 5px 10px;
-  border: 2px solid var(--ink);
+  border: var(--border);
   border-radius: var(--r-sm);
-  background: var(--surface);
+  background: var(--plate);
   font: inherit;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 500;
   color: var(--ink);
 }
 
@@ -89,6 +89,7 @@
   flex: none;
   width: 18px;
   height: 18px;
+  color: var(--accent);
 }
 
 .follow__label {
@@ -96,19 +97,19 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .follow__label b {
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .follow__hidden {
   flex: none;
   padding: 1px 8px;
-  border: 2px solid var(--ink);
+  border: var(--border);
   border-radius: var(--r-pill);
-  background: var(--surface);
+  background: var(--plate);
   font-size: 12px;
   color: var(--ink-muted);
 }
@@ -121,7 +122,6 @@
   max-width: calc(100vw - 24px);
   padding: 5px 6px 5px 16px;
   border-radius: var(--r-pill);
-  box-shadow: var(--shadow-float);
   animation: pop-in var(--t) var(--bounce);
 }
 
@@ -141,7 +141,7 @@
 .tourbar__dot {
   width: 10px;
   height: 10px;
-  border: 2px solid var(--ink);
+  border: 2px solid var(--ink-disabled);
   border-radius: 50%;
   background: var(--surface);
   transition:
@@ -150,11 +150,13 @@
 }
 
 .tourbar__dot[data-state="past"] {
-  background: var(--accent);
+  border-color: var(--flag);
+  background: var(--flag);
 }
 
 .tourbar__dot[data-state="here"],
 .tourbar__dot[data-state="heading"] {
+  border-color: var(--accent);
   background: var(--accent);
   scale: 1.35;
 }
@@ -231,6 +233,7 @@
   gap: 10px;
   padding: 20px 26px;
   text-align: center;
+  box-shadow: var(--shadow-float);
   animation: pop-in var(--t) var(--ease);
 }
 

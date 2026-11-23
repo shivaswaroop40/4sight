@@ -4,12 +4,15 @@
   --ground: #ff6a26;
   --ink: #0e1f1b;
   --ink-muted: #2a1406;
+  --ink-strong: color-mix(in srgb, var(--ink) 82%, var(--surface));
   --ink-disabled: color-mix(in srgb, var(--ink) 65%, var(--surface));
   --surface: #fff4e6;
   --surface-line: #dccdbe;
   --tint: color-mix(in srgb, var(--ground) 14%, var(--surface));
+  --tint-strong: color-mix(in srgb, var(--ground) 26%, var(--surface));
   --plate: #f7ede2;
   --accent: #006b63;
+  --accent-strong: color-mix(in srgb, var(--accent) 80%, var(--ink));
   --accent-tint: color-mix(in srgb, var(--accent) 12%, var(--surface));
   --on-accent: #ffffff;
   --flag: #00a99a;
@@ -23,9 +26,9 @@
   --border: 1px solid var(--surface-line);
   --shadow-float: 0 6px 20px color-mix(in srgb, var(--ink) 12%, transparent);
 
-  --r-sm: 12px;
-  --r: 16px;
-  --r-lg: 20px;
+  --r-sm: 10px;
+  --r: 14px;
+  --r-lg: 18px;
   --r-pill: 999px;
 
   --s1: 4px;
@@ -112,7 +115,6 @@ button {
   background: var(--surface);
   border: var(--border);
   border-radius: var(--r-lg);
-  box-shadow: var(--shadow-float);
 }
 
 .sticker {
@@ -154,15 +156,13 @@ button {
   display: inline-flex;
   align-items: center;
   gap: var(--s2);
-  padding: 6px 16px 6px 8px;
-  transform: rotate(-2deg);
+  padding: 0 4px;
 }
 
 .brand__word {
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: 24px;
-  letter-spacing: 0.01em;
+  font-size: 28px;
   line-height: 1;
 }
 
@@ -170,38 +170,33 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 6px 12px;
-  border: 2px solid var(--ink);
+  padding: 6px 14px;
+  border: var(--border);
   border-radius: var(--r-pill);
   background: var(--surface);
   font-weight: 600;
-  font-size: 13px;
+  font-size: 14px;
   white-space: nowrap;
-  box-shadow: var(--shadow-float);
-  transition:
-    transform var(--t-fast) var(--bounce),
-    box-shadow var(--t-fast) var(--bounce),
-    background var(--t-fast) var(--ease);
+  transition: background var(--t-fast) var(--ease);
 }
 
 .chip:hover {
   background: var(--tint);
-  transform: translate(-1px, -1px);
-  box-shadow: 3px 3px 0 var(--ink);
 }
 
 .chip:active {
-  transform: translate(2px, 2px);
-  box-shadow: 0 0 0 var(--ink);
+  background: var(--tint-strong);
 }
 
 .chip--accent {
+  border-color: var(--accent);
   background: var(--accent);
   color: var(--on-accent);
 }
 
-.chip--accent:hover {
-  background: color-mix(in srgb, var(--accent) 85%, var(--ink));
+.chip--accent:hover,
+.chip--accent:active {
+  background: var(--accent-strong);
 }
 
 .spinner {
@@ -232,11 +227,11 @@ button {
 .badge {
   display: inline-block;
   padding: 3px 10px;
-  border: 2px solid var(--ink);
   border-radius: var(--r-pill);
   background: var(--accent-tint);
+  color: var(--accent);
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 
@@ -284,43 +279,30 @@ button {
   width: 46px;
   height: 46px;
   border: var(--border);
-  border-radius: 14px;
+  border-radius: 50%;
   background: var(--surface);
-  box-shadow: var(--shadow-float);
-  transition:
-    transform var(--t-fast) var(--bounce),
-    box-shadow var(--t-fast) var(--bounce),
-    background var(--t-fast) var(--ease);
+  transition: background var(--t-fast) var(--ease);
 }
 
 .btn:hover {
-  transform: translate(-1px, -1px);
-  box-shadow: 3px 3px 0 var(--ink);
   background: var(--tint);
 }
 
 .btn:active {
-  transform: translate(2px, 2px);
-  box-shadow: 0 0 0 var(--ink);
+  background: var(--tint-strong);
 }
 
 .btn--primary {
   width: 56px;
   height: 56px;
-  border-radius: 18px;
+  border-color: var(--ink);
   background: var(--ink);
   color: var(--surface);
-  box-shadow: var(--shadow-float);
 }
 
-.btn--primary:hover {
-  background: color-mix(in srgb, var(--ink) 85%, var(--surface));
-  box-shadow: 5px 5px 0 var(--ink);
-}
-
+.btn--primary:hover,
 .btn--primary:active {
-  box-shadow: 0 0 0 var(--ink);
-  transform: translate(4px, 4px);
+  background: var(--ink-strong);
 }
 
 .btn--primary svg {
@@ -329,12 +311,14 @@ button {
 }
 
 .btn--on {
+  border-color: var(--accent);
   background: var(--accent);
   color: var(--on-accent);
 }
 
-.btn--on:hover {
-  background: color-mix(in srgb, var(--accent) 85%, var(--ink));
+.btn--on:hover,
+.btn--on:active {
+  background: var(--accent-strong);
 }
 
 /* ---------- Responsive ---------- */
@@ -355,10 +339,11 @@ button {
   .brand {
     grid-column: 1;
     grid-row: 1;
-    padding: 5px 12px 5px 6px;
+    align-self: center;
+    padding: 0;
   }
   .brand__word {
-    font-size: 20px;
+    font-size: 22px;
   }
   .chip {
     padding: 5px 10px;
@@ -383,9 +368,6 @@ button {
 }
 
 @media (max-width: 599px) {
-  .brand {
-    padding: 5px 6px;
-  }
   .brand__word {
     display: none;
   }

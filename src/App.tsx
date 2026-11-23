@@ -83,7 +83,7 @@ function App() {
 
       <header className="topbar">
         <div className="topbar__start">
-          <div className="brand sticker" data-hud-edge="top">
+          <div className="brand" data-hud-edge="top">
             <Mark />
             <span className="brand__word">4sight</span>
           </div>

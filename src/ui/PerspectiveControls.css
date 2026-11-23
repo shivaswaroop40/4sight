@@ -11,7 +11,6 @@
   background: var(--surface);
   border: var(--border);
   border-radius: var(--r-pill);
-  box-shadow: var(--shadow-float);
 }
 
 .views__label {
@@ -55,7 +54,6 @@
     padding: 0;
     background: none;
     border: 0;
-    box-shadow: none;
   }
   .views .chip {
     padding: 5px 8px;

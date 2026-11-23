@@ -41,7 +41,7 @@
 .readout__analogy {
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: 14px;
+  font-size: 15px;
   color: var(--ink-muted);
   white-space: nowrap;
   overflow: hidden;
@@ -50,7 +50,7 @@
 
 .readout__analogy b {
   font-weight: 400;
-  color: var(--ink);
+  color: var(--accent);
   font-variant-numeric: tabular-nums;
 }
 

@@ -37,8 +37,6 @@
   left: 0;
   border-radius: var(--r-pill);
   background: var(--accent);
-  border: 2px solid var(--ink);
-  box-shadow: var(--shadow-float);
   transition:
     transform 300ms var(--bounce),
     width 300ms var(--bounce);
@@ -52,7 +50,7 @@
   border: 0;
   background: none;
   border-radius: var(--r-pill);
-  font-weight: 700;
+  font-weight: 600;
   font-size: 13px;
   font-variant-numeric: tabular-nums;
   color: var(--ink-muted);
