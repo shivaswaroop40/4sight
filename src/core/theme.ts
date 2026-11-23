@@ -32,6 +32,24 @@ export const THEME = {
 
 export type ThemeColor = keyof typeof THEME;
 
+/** Font stacks for canvas labels, the faces index.html loads. Tilt Warp has one weight: ask for it unweighted, or canvas smears a fake bold. */
+export const LABEL_FONT = {
+  display: '"Tilt Warp", system-ui, sans-serif',
+  body: "Onest, system-ui, sans-serif",
+} as const;
+
+const LABEL_FACES = [`64px ${LABEL_FONT.display}`, `600 64px ${LABEL_FONT.body}`, `700 64px ${LABEL_FONT.body}`];
+
+/** Resolves once the label faces have loaded or failed to. Canvas text drawn before then is measured in a fallback. */
+export function labelFontsLoaded(): Promise<void> {
+  const fonts = globalThis.document?.fonts;
+  if (!fonts) return Promise.resolve();
+  return Promise.all(LABEL_FACES.map((f) => fonts.load(f))).then(
+    () => {},
+    () => {},
+  );
+}
+
 let gradientMap: THREE.DataTexture | null = null;
 
 /** A shared 4-step toon ramp. Never disposed: every toon material reuses it. */

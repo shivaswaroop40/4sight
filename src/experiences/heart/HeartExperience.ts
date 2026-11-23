@@ -10,7 +10,7 @@
 import * as THREE from "three";
 import { isFilterOn } from "../../core/filters";
 import { smoothstep, window as windowFn } from "../../core/interpolate";
-import { THEME, addWarmLights, disposeObject } from "../../core/theme";
+import { THEME, addWarmLights, disposeObject, labelFontsLoaded } from "../../core/theme";
 import { eventAt } from "../../core/Timeline";
 import type {
   CameraPreset,
@@ -75,7 +75,6 @@ import {
   glowTexture,
   repaint,
   textTexture,
-  DISPLAY_FONT_PROBE,
   type DeformUniforms,
   type HeartBody,
   type Pool,
@@ -256,12 +255,9 @@ class HeartExperience implements FourDExperience {
 
     this.buildEcg(root);
     this.buildBursts(heart);
-    document.fonts
-      ?.load(DISPLAY_FONT_PROBE)
-      .then(() => {
-        if (this.root === root) this.textures.forEach(repaint);
-      })
-      .catch(() => {});
+    labelFontsLoaded().then(() => {
+      if (this.root === root) this.textures.forEach(repaint);
+    });
 
     this.setTime(0);
   }
@@ -337,7 +333,7 @@ class HeartExperience implements FourDExperience {
     label("P", 45, ecgX(45), ecgY(45) + 0.24, 0.36, { color: THEME.plum });
     label("QRS", 190, ecgX(190) - 0.48, ecgY(190) - 0.12, 0.36, { color: THEME.plum });
     label("T", 470, ecgX(470), ecgY(470) + 0.24, 0.36, { color: THEME.plum });
-    label("AV delay", 125, ecgX(125), ECG_PLOT.baseline - 0.25, 0.26, { color: THEME.inkSoft, weight: 600 });
+    label("AV delay", 125, ecgX(125), ECG_PLOT.baseline - 0.25, 0.26, { color: THEME.inkSoft, face: "body" });
     label("lub", 210, ecgX(210), ECG_PLOT.baseline - 0.5, 0.3, { pill: THEME.mustard, size: 80 });
     label("dub", 540, ecgX(540), ECG_PLOT.baseline - 0.5, 0.3, { pill: THEME.mustard, size: 80 });
   }

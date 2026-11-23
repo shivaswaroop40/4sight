@@ -18,6 +18,7 @@
 // The mocks are shown only while no real experience is registered, so the
 // shell is always testable and the demo never shows them once a lane lands.
 
+import { labelFontsLoaded } from "../core/theme";
 import { byTimescale, YEAR_SECONDS } from "../core/timescale";
 import type { ExperienceId, FourDExperience } from "../core/types";
 
@@ -115,8 +116,18 @@ export function entryFor(id: ExperienceId): ExperienceEntry | undefined {
   return experiences.find((e) => e.id === id);
 }
 
-/** The browser's module map already shares one download per chunk, so picking an experience twice fetches it once. */
-export function loadExperience(id: ExperienceId): Promise<FourDExperience> {
+/** A stalled font host delays an experience by at most this long; its labels repaint when the faces do arrive. */
+const LABEL_FONT_WAIT_MS = 2000;
+
+/**
+ * The browser's module map already shares one download per chunk, so picking
+ * an experience twice fetches it once. Waits for the label fonts too: canvas
+ * labels are sized at mount, so a fallback drawn first leaves them misfit.
+ */
+export async function loadExperience(id: ExperienceId): Promise<FourDExperience> {
   const entry = entryFor(id);
-  return entry ? entry.load() : Promise.reject(new Error(`No experience "${id}"`));
+  if (!entry) throw new Error(`No experience "${id}"`);
+  const fonts = Promise.race([labelFontsLoaded(), new Promise((resolve) => setTimeout(resolve, LABEL_FONT_WAIT_MS))]);
+  const [experience] = await Promise.all([entry.load(), fonts]);
+  return experience;
 }
